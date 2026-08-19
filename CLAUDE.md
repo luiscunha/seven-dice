@@ -5,7 +5,7 @@ exatamente **7**, até o tabuleiro ficar vazio.
 
 ## Documentos de referência
 
-Vivem fora deste repo, em `../documentation/`:
+Versionados neste repo, em `documentation/`:
 
 | Ficheiro | O que decide |
 |---|---|

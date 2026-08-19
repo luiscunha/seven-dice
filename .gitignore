@@ -1,20 +1,89 @@
+# ─── Dependências ────────────────────────────────────────────────────────────
 node_modules/
+.pnpm-store/
+.pnpm/
+
+# O lockfile é versionado de propósito: sem ele, `--frozen-lockfile` no CI não
+# significa nada e duas máquinas podem resolver versões diferentes.
+!pnpm-lock.yaml
+
+# ─── Segredos ────────────────────────────────────────────────────────────────
+# Antes de qualquer outra coisa: um segredo commitado não se apaga do histórico
+# com um commit a seguir.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ─── Build e saída ───────────────────────────────────────────────────────────
 dist/
-coverage/
+build/
+out/
+.output/
 *.tsbuildinfo
 
-# Saída do pipeline offline (level packs gerados entram no repo só quando curados)
+# Saída do pipeline offline. Os level packs curados entram no repo
+# explicitamente; os candidatos descartados não (spec §7.5).
 packages/tools/out/
 
-# Editores
+# ─── Caches de ferramentas ───────────────────────────────────────────────────
+.cache/
+.turbo/
+.eslintcache
+.vite/
+vite.config.*.timestamp-*
+vitest.config.*.timestamp-*
+
+# ─── Testes ──────────────────────────────────────────────────────────────────
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+
+# ─── Mobile (fase 9, Capacitor) ──────────────────────────────────────────────
+# Plataformas nativas geradas: reproduzem-se com `npx cap add`.
+packages/mobile/ios/App/Pods/
+packages/mobile/ios/App/build/
+packages/mobile/ios/App/Podfile.lock
+packages/mobile/android/.gradle/
+packages/mobile/android/build/
+packages/mobile/android/app/build/
+packages/mobile/android/local.properties
+
+# Assinatura e credenciais de loja. Nunca no repo.
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Editores ────────────────────────────────────────────────────────────────
 .vs/
 .idea/
 .vscode/*
 !.vscode/extensions.json
-.DS_Store
-Thumbs.db
+!.vscode/settings.json
+*.swp
+*~
 
-# Logs
-*.log
-npm-debug.log*
-pnpm-debug.log*
+# Permissões locais do Claude Code são pessoais; .claude/settings.json é da
+# equipa e fica versionado.
+.claude/settings.local.json
+
+# ─── Sistema operativo ───────────────────────────────────────────────────────
+.DS_Store
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini
