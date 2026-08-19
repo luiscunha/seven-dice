@@ -8,7 +8,7 @@
  * Superfície pública (spec §10):
  *   Fase 1  types, board, groups (validade), moves     ← implementado
  *   Fase 2  groups (enumeração)                       ← implementado
- *   Fase 3  solver
+ *   Fase 3  solver                                   ← implementado
  *   Fase 4  rng, generator, level
  *   Fase 5  metrics
  */
@@ -41,3 +41,11 @@ export {
 } from "./groups";
 
 export { InvalidMoveError, applyMove } from "./moves";
+
+export type { Limits, Verdict } from "./solver";
+export {
+  DEFAULT_LIMITS,
+  findSolution,
+  isGreedySafe,
+  isSolvable,
+} from "./solver";
