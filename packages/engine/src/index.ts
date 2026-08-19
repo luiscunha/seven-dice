@@ -9,7 +9,7 @@
  *   Fase 1  types, board, groups (validade), moves     ← implementado
  *   Fase 2  groups (enumeração)                       ← implementado
  *   Fase 3  solver                                   ← implementado
- *   Fase 4  rng, generator, level
+ *   Fase 4  rng, compositions, generator, level        ← implementado
  *   Fase 5  metrics
  */
 
@@ -49,3 +49,26 @@ export {
   isGreedySafe,
   isSolvable,
 } from "./solver";
+
+export type { Composition } from "./compositions";
+export { COMPOSITIONS, UNIFORM_WEIGHTS } from "./compositions";
+
+export type { Rng } from "./rng";
+export {
+  deriveSeed,
+  mulberry32,
+  pick,
+  randInt,
+  shuffled,
+  weightedIndex,
+} from "./rng";
+
+export type {
+  GeneratedLevel,
+  GenerationStats,
+  GeneratorParams,
+} from "./generator";
+export { generate } from "./generator";
+
+export type { Level, LevelMetrics, LevelPack } from "./level";
+export { toLevel } from "./level";
