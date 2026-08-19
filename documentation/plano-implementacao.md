@@ -539,9 +539,102 @@ todas as coordenadas do motor `[E 2.2]`.
 
 ---
 
-## Fase 5 — Métricas e pipeline · `L` · **M3**
+## Fase 5 — Métricas e pipeline · `L` · **M3** · ✅ **CONCLUÍDA**
 
 > Prova: **dá para classificar dificuldade.** `[E 10, fase 5]`
+>
+> Branch `fase-5-metricas-e-pipeline`.
+
+### A questão em aberto de `[E 6.4]`, resolvida
+
+A spec dizia que colocar o joker num passo tardio da construção reversa — cedo
+na solução do jogador — "tende a criar dependências mais fortes", e mandava
+**confirmar com as métricas, não assumir**. Confirmou-se, e dá o contrário.
+
+Taxa de sobrevivência média, tabuleiros de 24 peças, n=120 por cenário:
+
+| Cenário | Sobrevivência |
+|---|---|
+| Sem joker | 0.830 |
+| `jokerProgress` 0.00 — gasto na última jogada | 0.214 |
+| `jokerProgress` 0.30 | **0.196** |
+| `jokerProgress` 0.60 | 0.215 |
+| `jokerProgress` 0.85 — gasto nas primeiras jogadas | 0.311 |
+
+Replicado em seeds independentes (n=300): 0.30 dá 0.226 ± 0.006, 0.85 dá
+0.329 ± 0.017 — cerca de seis erros-padrão, e o dobro do desvio padrão, portanto
+também muito menos consistente.
+
+A leitura é intuitiva depois de vista: **o que aperta não é onde o joker nasce, é
+quanto tempo tem de sobreviver.** Um joker que tem de ser guardado até tarde
+obriga o jogador a acertar durante o tabuleiro inteiro; um gasto nas primeiras
+jogadas é uma decisão que se toma e acaba.
+
+O que o plano queria — que a taxa *desça* `[M 8]` — confirma-se com força: 0.83
+sem joker contra 0.20 com. **O joker é mesmo um estrangulamento, não uma ajuda.**
+Por omissão, `jokerProgress` passa a 0.3.
+
+### A tabela do plano §7 não fecha — e foi a medição que o mostrou
+
+`[M 7]` põe a fase média em 50–70% de sobrevivência **e** manda introduzir aí o
+joker. As duas exigências não podem valer no mesmo tabuleiro: um joker leva a
+sobrevivência de 0.83 para 0.20.
+
+Quem resolve é o próprio plano, mais abaixo em `[M 7]`: o joker "aparece
+esporadicamente — não em todos os tabuleiros", e "os níveis que o incluem são
+construídos à volta dele". São portanto **duas bandas, não uma** — o grosso da
+fase média sem joker na faixa que a tabela pede, e uma minoria `meio-joker`, mais
+apertada, que é o estrangulamento.
+
+É exatamente o que a fase 5 existe para fazer: `[M 5]` diz que a dificuldade se
+mede depois, e `[M 7]` avisa que a tabela é "o ponto de partida, não o resultado".
+
+### O achado maior: o piso de justiça e o joker são incompatíveis
+
+`[M 6.2]` exige que **as primeiras 2–3 jogadas sejam seguras qualquer que seja a
+escolha**. `[M 2.6]` desenha o joker precisamente para que gastá-lo no grupo
+errado mate o tabuleiro sem aviso. As duas coisas não podem valer ao mesmo tempo.
+
+Não é uma questão de grau. Medido sobre 40 níveis com joker: **os 40** tinham uma
+jogada fatal logo à primeira, e nos 40 essa jogada envolvia o joker. Sem joker,
+só 3 dos 40 tinham qualquer jogada fatal à primeira.
+
+O efeito no pipeline foi total: a banda `meio-joker` aceitou **0 candidatos em
+8128**, com 4748 rejeitados pelo piso de justiça.
+
+**Quem desempata é o próprio plano.** A mitigação que `[M 2.6]` dá para "joker mal
+usado mata o tabuleiro sem aviso" é *tutorial dedicado, undo ilimitado, nunca
+antes da fase média* — e nunca o piso de justiça. O joker é, por desenho, a única
+armadilha que o jogo **ensina** em vez de esconder.
+
+O piso ganhou portanto uma opção `skipJokerMoves`, usada só na banda com joker.
+Com ela, o piso continua a garantir tudo o resto: qualquer sequência de jogadas
+**sem** joker mantém o tabuleiro resolúvel. A banda passou de 0 em 8128 para 8 em
+64 — 12.5% de aceitação, em 10 segundos.
+
+### Outro defeito, este só de eficiência
+
+A banda do tutorial só usa pares, portanto só consegue somar contagens **pares** —
+e o pipeline pedia-lhe tamanhos entre 10 e 14 sem olhar a isso. Resultado: 82 em
+210 candidatos morriam antes de sair da geração. O tamanho passa a ser ajustado
+para um que as composições da banda consigam mesmo somar, usando a mesma análise
+de alcançabilidade da fase 4, agora exposta pela engine.
+
+### Defeito de desenho encontrado e corrigido: o piso de justiça
+
+A primeira versão chamava `isSolvable` em **todos** os estados visitados até à
+profundidade 3. Numa banda de 30 peças isso pôs o pipeline a levar mais de vinte
+minutos numa só banda — na prática, a não correr.
+
+Basta correr o solver na **fronteira final**, detetando becos sem saída a cada
+nível. Não é atalho: um estado insolúvel acima da fronteira ou não tem sucessores
+— e aí é beco, já apanhado — ou tem, e todos são insolúveis também, porque a
+insolubilidade herda-se para a frente. Esses estão na fronteira.
+
+O piso ganhou também limites próprios (`LIMITES_PISO`, 20 000 estados):
+`DEFAULT_LIMITS` é generoso demais para uma verificação que corre milhares de
+vezes, e aqui um `"inconclusive"` custa pouco, porque descartar um candidato
+duvidoso é a direção segura.
 
 ### Entregáveis
 
@@ -580,11 +673,81 @@ todas as coordenadas do motor `[E 2.2]`.
 - Piso de justiça: um tabuleiro construído para falhar à profundidade 2 é
   rejeitado.
 
-### Critério de aceitação
+### Decisões tomadas na execução
 
-Um level pack de ≥ 200 níveis exportado no formato de `[E 8]`, classificado pelas
-cinco fases de `[M 7]`, com todos os níveis a passar ida-e-volta e piso de
-justiça.
+- **Amostragem por reservatório nos playouts.** O branching factor precisa da
+  contagem de grupos e o playout precisa de uma escolha uniforme; um único
+  varrimento dá as duas sem materializar `[...findAllGroups(b)]`. Com milhares de
+  playouts a percorrer dezenas de estados, é a diferença entre criar e não criar
+  centenas de milhares de arrays `[E 11]`.
+- **`firstFatalDepth` é `number | null`.** Num tabuleiro greedy-safe não há
+  profundidade fatal, e zero seria mentira.
+- **`--import tsx` no worker, não só no processo principal.** Um `Worker` do Node
+  arranca sem herdar o loader de quem o criou. Sob `pnpm sete` o tsx chegaria por
+  acaso; sob o Vitest não, porque aí quem transforma o TypeScript é o Vite e o
+  worker corre em Node puro. Pedir o loader explicitamente é o que torna este
+  código testável em vez de só executável à mão.
+- **Fatias intercaladas, não contíguas.** Seeds vizinhas produzem tabuleiros de
+  tamanhos parecidos; blocos contíguos deixariam um worker com todos os grandes.
+- **A saída é reordenada por seed antes de sair do pool.** É o que torna o
+  resultado independente do escalonamento, e está coberto por um teste que compara
+  1 worker contra 4.
+
+### O outro achado: tamanho não é alavanca de dificuldade — o joker é
+
+Sobrevivência mediana por tamanho, sem joker, 100 níveis por ponto:
+
+| Peças | Sobrevivência |
+|---|---|
+| 12 | 1.000 |
+| 21 | 0.957 |
+| 35 | 0.797 |
+| 49 | 0.690 |
+
+**Quadruplicar o tabuleiro tira 0.31 à sobrevivência. Um joker num tabuleiro de
+12 peças tira 0.77** — de 1.000 para 0.233.
+
+Isto reordena a curva de `[M 7]`, que trata o tamanho como um dos dois eixos de
+progressão e o joker como tempero ocasional. Medido, o tamanho é o eixo de
+*esforço e duração* — que é como `[M 7]` também o descreve — mas quase não é eixo
+de exigência. Quem carrega a exigência é o joker.
+
+Consequência prática imediata: a banda `denso` de `[M 7]` — "curtos e muito
+densos, 10–15 peças, sobrevivência <10%" — aceitou **0 candidatos em 8128** sem
+joker, com mediana observada de 1.00. Um tabuleiro pequeno não tem por onde
+correr mal. Com joker, a mesma banda dá 30 aceites em 192 candidatos, em 7
+segundos.
+
+### Critério de aceitação — verificado
+
+**240 níveis exportados em 8 bandas, 30 por banda, 0 falhas na reverificação
+independente** (`sete verify`, que reaplica a solução de cada nível sem confiar
+em nada do que está no ficheiro).
+
+| Banda | Aceitação | Sobrevivência observada (p10 / mediana / p90) | Tempo |
+|---|---|---|---|
+| tutorial | 15.6% | 0.31 / 0.74 / 1.00 | 7s |
+| inicio | 3.1% | 0.15 / 0.50 / 0.90 | 60s |
+| meio | 3.1% | 0.23 / 0.58 / 0.88 | 135s |
+| meio-joker | 15.6% | 0.05 / 0.15 / 0.31 | 35s |
+| avancado | 0.7% | 0.51 / 0.89 / 1.00 | 567s |
+| perito | 0.4% | 0.30 / 0.74 / 0.98 | 1395s |
+| denso | 15.6% | 0.11 / 0.22 / 0.36 | 7s |
+| tempo | 15.6% | 0.31 / 0.77 / 1.00 | 8s |
+
+### O que fica por calibrar
+
+`avancado` e `perito` conseguem-se, mas a 0.7% e 0.4% de aceitação — vinte e três
+minutos para trinta níveis de perito. A causa é a mesma do achado acima: as duas
+bandas pedem sobrevivência baixa **sem** joker, e sem joker a única alavanca é o
+enviesamento das composições, que é fraca. Duas saídas, ambas por medir:
+
+1. Levar o joker às bandas altas, como `meio-joker` já faz. É o que os dados
+   apontam, e `[M 7]` não o proíbe — só diz que o joker entra na fase média.
+2. Enviesar as composições muito mais agressivamente para faces de 3 a 6. O peso
+   atual (`facesAltas`) é suave demais para o efeito que se quer.
+
+Fica registado como trabalho da fase 6, com dados, em vez de suposição.
 
 ---
 

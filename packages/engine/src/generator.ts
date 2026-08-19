@@ -58,6 +58,19 @@ export interface GeneratorParams {
   /** Ativa a colocação de um joker (spec §6.4). No máximo um por tabuleiro. */
   readonly includeJoker?: boolean;
 
+  /**
+   * Em que ponto da construção reversa o joker pode entrar, como fração de
+   * `targetPieceCount`. Zero põe-no no primeiro passo da construção — que é a
+   * **última** jogada do jogador; valores altos põem-no perto do fim da
+   * construção, que é o **início** da solução.
+   *
+   * Existiu para tornar testável a hipótese de §6.4: "um passo tardio da
+   * construção reversa tende a criar dependências mais fortes". Medido, a
+   * hipótese não se confirma — confirma-se o contrário. Ver a nota em
+   * `tentarPasso`.
+   */
+  readonly jokerProgress?: number;
+
   /** Posições tentadas antes de desistir de um passo. */
   readonly maxPositionAttempts?: number;
 
@@ -301,6 +314,23 @@ function contagensAlcancaveis(
   return ok;
 }
 
+/**
+ * Que contagens de peças são atingíveis com estes pesos de composição.
+ *
+ * Exposta porque o pipeline precisa dela: uma banda restrita a pares só atinge
+ * contagens pares, e pedir 11 peças gasta um candidato a descobrir isso.
+ */
+export function reachablePieceCounts(
+  compositionWeights: readonly number[] | undefined,
+  max: number,
+): readonly boolean[] {
+  const tamanhos = COMPOSITIONS.filter(
+    (_, i) => (compositionWeights?.[i] ?? 1) > 0,
+  ).map((comp) => comp.length);
+
+  return contagensAlcancaveis(tamanhos, max);
+}
+
 function escolherComposicao(
   rng: Rng,
   params: GeneratorParams,
@@ -379,15 +409,39 @@ function tentarPasso(
   const tentativas = params.maxPositionAttempts ?? OMISSAO.maxPositionAttempts;
 
   /*
-   * O joker entra num passo **tardio** da construção reversa — ou seja, cedo na
-   * solução do jogador — que a spec §6.4 aponta como tendendo a criar
-   * dependências mais fortes. É uma hipótese a confirmar pelas métricas da fase
-   * 5, não um facto: a taxa de sobrevivência deve *descer* (plano §8).
+   * ── A hipótese de §6.4, medida ──
+   *
+   * A spec diz que colocar o joker num passo tardio da construção reversa — cedo
+   * na solução do jogador — "tende a criar dependências mais fortes", e manda
+   * confirmar pelas métricas em vez de assumir. Confirmou-se, e dá o contrário.
+   *
+   * Taxa de sobrevivência média, tabuleiros de 24 peças (n=120 por cenário):
+   *
+   *   sem joker           0.830
+   *   jokerProgress 0.00  0.214      ← joker gasto na última jogada
+   *   jokerProgress 0.30  0.196
+   *   jokerProgress 0.60  0.215
+   *   jokerProgress 0.85  0.311      ← joker gasto nas primeiras jogadas
+   *
+   * Replicado em seeds independentes (n=300): 0.30 dá 0.226 ± 0.006, 0.85 dá
+   * 0.329 ± 0.017 — cerca de seis erros-padrão de diferença, e o dobro do desvio
+   * padrão, portanto também muito menos consistente.
+   *
+   * A leitura é intuitiva depois de vista: um joker que tem de ser **guardado**
+   * até tarde obriga o jogador a acertar durante o tabuleiro inteiro; um joker
+   * gasto nas primeiras jogadas é uma decisão que se toma e acaba. O que aperta
+   * não é onde ele nasce, é quanto tempo ele tem de sobreviver.
+   *
+   * O que a spec queria — que a taxa *desça* (plano §8) — confirma-se com força:
+   * 0.83 sem joker contra 0.20 com. O joker é mesmo um estrangulamento.
+   *
+   * Por omissão, 0.3.
    */
   const comJoker =
     (params.includeJoker ?? false) &&
     estado.trueValueJoker === undefined &&
-    pieceCount(estado.board) >= params.targetPieceCount * 0.6;
+    pieceCount(estado.board) >=
+      params.targetPieceCount * (params.jokerProgress ?? 0.3);
 
   for (let tentativa = 0; tentativa < tentativas; tentativa++) {
     stats.positionAttempts++;

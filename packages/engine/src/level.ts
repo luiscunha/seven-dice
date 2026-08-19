@@ -16,7 +16,11 @@ export interface LevelMetrics {
   readonly pieces: number;
   readonly survivalRate: number;
   readonly avgBranching: number;
-  readonly firstFatalDepth: number;
+  readonly avgMoveDensity: number;
+  readonly avgGroupSize: number;
+  /** `null` quando nenhum playout falhou — não há profundidade fatal, e zero
+   * seria mentira. */
+  readonly firstFatalDepth: number | null;
   readonly solutionLength: number;
 }
 
