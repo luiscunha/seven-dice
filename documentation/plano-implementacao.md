@@ -392,12 +392,41 @@ do que nenhuma, porque parece cobertura.
 
 ---
 
-## Fase 4 — Gerador · `L` · **M2 · MARCO REAL**
+## Fase 4 — Gerador · `L` · **M2 · MARCO REAL** · ✅ **CONCLUÍDA**
 
 > Prova: **os níveis são sempre resolúveis.** `[E 10, fase 4]`
+>
+> Branch `fase-4-gerador`. 132 testes, `pnpm check` verde.
 
 É a fase que justifica todas as anteriores. A partir daqui a ideia está provada;
 tudo o resto é construção.
+
+### A decisão que fez a fase: células marcadas
+
+Inserir desloca o que já lá estava — dentro de uma coluna empurra para cima, uma
+coluna nova empurra as outras para a direita. Manter coordenadas atualizadas ao
+longo de várias inserções é exatamente a contabilidade que produz o erro que
+`[E 6.3]` existe para apanhar.
+
+A construção faz-se por isso sobre um tabuleiro de células **marcadas** — cada
+célula sabe se foi inserida neste passo — e as coordenadas do grupo derivam-se no
+fim, varrendo o resultado. Os deslocamentos passam a ser tratados pelo `splice`,
+e não há coordenadas para manter. A posição do joker segue a mesma regra: só se
+sabe no fim, porque os passos seguintes o empurraram.
+
+### Defeito encontrado e corrigido: alcançabilidade
+
+A primeira versão filtrava as composições por "cabe no que falta" e "não deixa
+exatamente 1 peça". Não chega. Com só composições de 5+ peças e um alvo de 30, a
+sequência 7+7+7+7 deixa 2 peças por colocar e nenhuma composição cabe — e recuar
+não resolve de forma fiável, porque a escolha seguinte volta a ser aleatória.
+
+É o problema da moeda. Resolve-se uma vez por chamada com programação dinâmica
+sobre os tamanhos disponíveis, e depois consulta-se em tempo constante. Um alvo
+inatingível passa a falhar de imediato em vez de gastar reinícios a descobri-lo.
+
+Depois da correção: **zero recuos, zero reinícios, zero falhas** em 3500 gerações
+por sete perfis.
 
 ### Entregáveis
 
@@ -450,11 +479,63 @@ O teste mais valioso do projeto `[E 9.2]`:
 - Com joker: `soma das fixas + trueValue ≡ 0 (mod 7)` `[M 2.6]`.
 - Determinismo: a mesma seed produz exatamente o mesmo `Level`.
 
-### Critério de aceitação
+### Critério de aceitação — verificado
 
-**Alguns milhares de tabuleiros em CI, ida-e-volta a 100%.** Sem exceções, sem
-tolerância, sem "falha em 1 em 10 000". Uma única falha aqui significa níveis
-impossíveis em produção — pára-se e corrige-se antes de avançar.
+**Ida-e-volta a 100%.** 2000 níveis com joker mais 200 por cada um de dez perfis
+de parâmetros — pequeno, médio, grande, colunas altas, colunas largas, fundo
+enviesado, com joker, só grupos grandes, só pares, pirâmide. Cada solução
+aplicada passo a passo, validando cada jogada, terminando em tabuleiro vazio.
+Nenhuma falha.
+
+Cinco mutações, quatro apanhadas:
+
+| Mutação | Apanhada por |
+|---|---|
+| Coluna nova não fica marcada como inserida | 17 testes |
+| Solução não invertida | 10 testes |
+| `trueValue` do joker guarda 0 | os 2 testes de aritmética do joker |
+| Sem a análise de alcançabilidade | *só grupos grandes* |
+| **Sem a verificação de ida-e-volta de `[E 6.3]`** | **nenhum** |
+
+### O achado que interessa: a inversão é estrutural
+
+O gerador foi instrumentado para responder a uma pergunta concreta — a
+verificação de `[E 6.3]` chega alguma vez a apanhar alguma coisa que
+`isValidGroup` já não tivesse apanhado?
+
+**Em 3500 gerações por sete perfis, nunca.** `rejectedRoundTrip` ficou-se por
+zero em todos. Quem faz o trabalho é a conexão, que rejeita entre um quarto e
+metade das tentativas.
+
+E não é acaso. Com a representação marcada, remover exatamente as células
+inseridas devolve a cada coluna a sua sequência original — a gravidade preserva a
+ordem `[E 4.2]` — e as colunas novas, feitas só de células inseridas, desaparecem
+no colapso. A spec diz que "gravidade e colapso não são inversíveis por
+construção"; com esta representação, passam a ser.
+
+Confirmou-se pelo lado avesso: com um bug deliberado na inserção, **300 de 300
+gerações falham** em vez de emitirem níveis corrompidos — mas quem as apanha é o
+`isValidGroup`, porque um grupo a que falta uma célula deixa de somar 7.
+
+**A verificação fica na mesma**, e não por deferência à spec. O que ela protege
+não é o gerador — é `applyMove`. No dia em que as células bloqueadoras entrarem
+`[M 3.4]`, a gravidade passa a ter dois casos de paragem, o colapso fica ambíguo,
+e a inversão deixa de ser estrutural. O plano diz, por palavras suas, que é aí
+que nascem os níveis impossíveis. Custa um `applyMove` por passo aceite e já cá
+está nesse dia.
+
+### Discrepâncias no exemplo de `[E 8]`
+
+O exemplo de formato de nível na spec tem duas gralhas, sem consequência para o
+código mas a corrigir se o documento for reeditado:
+
+- `"joker": { "at": [3, 3] }` — a coluna 3 do tabuleiro do exemplo é `[4,3,0]`,
+  com três células, portanto o joker está na linha 2, não na 3.
+- `"solution": [[192, 193], [256, 257]]` — 256 é `packed(4, 0)`, e o tabuleiro do
+  exemplo só tem quatro colunas (0 a 3).
+
+A implementação usa `[coluna, linha]` com a linha contada a partir da base, como
+todas as coordenadas do motor `[E 2.2]`.
 
 ---
 
