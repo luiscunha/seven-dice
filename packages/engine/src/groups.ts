@@ -1,14 +1,13 @@
 /**
- * Validade de um grupo (spec §3.1).
+ * Grupos: validade (spec §3.1) e enumeração (spec §3.2).
  *
- * A *enumeração* de grupos (spec §3.2) é da fase 2 e vive noutro sítio — aqui só
- * se responde a "este conjunto de células é uma jogada legal?". `applyMove`
- * depende desta resposta, e o gerador depende de `isConnected` para validar a
- * inversão (spec §6.3).
+ * Duas perguntas distintas. "Este conjunto de células é uma jogada legal?" é
+ * `isValidGroup`, de que `applyMove` depende. "Quais são todas as jogadas?" é
+ * `findAllGroups`, de que dependem o solver, o gerador e os playouts.
  */
 
-import type { Board, Group, Packed } from "./types";
-import { JOKER, TARGET } from "./types";
+import type { Board, Cell, Group, Packed } from "./types";
+import { JOKER, TARGET, packed } from "./types";
 import { cellAt, neighbours } from "./board";
 
 /** Soma das faces **fixas** do grupo. O joker conta 0 (spec §3.2). */
@@ -96,4 +95,191 @@ export function isValidGroup(b: Board, g: Group): boolean {
   if (!isConnected(b, g)) return false;
 
   return jokers === 0 ? fixas === TARGET : fixas >= 1 && fixas <= TARGET - 1;
+}
+
+/* ─── Enumeração (spec §3.2) ─────────────────────────────────────────────────
+ *
+ * O problema é enumerar **subgrafos conexos** com soma ≤ 7, cada um exatamente
+ * uma vez. A abordagem ingénua — DFS a partir de cada célula — gera o mesmo
+ * grupo várias vezes, uma por ordem de visita. Duplicados não são só desperdício:
+ * corrompem o branching factor (plano §5.2) e inflacionam a contagem de estados
+ * (plano §5.3), que são as métricas de que a classificação de dificuldade depende.
+ *
+ * A solução é a **enumeração por célula mínima**: para cada célula `raiz`,
+ * enumeram-se apenas os grupos em que ela é a de menor índice.
+ *
+ * Duas estruturas fazem o trabalho:
+ *
+ * - `ext` — as células por onde o grupo ainda pode crescer. A cada passo
+ *   escolhe-se uma e passa-se adiante **só o que vem depois dela**. É isto que
+ *   garante que cada conjunto é construído por uma única ordem.
+ * - `proibidas` — `grupo ∪ vizinhança(grupo)`. Um vizinho de `w` que já era
+ *   vizinho do grupo não volta a entrar: o ramo que o inclui é gerado no passo
+ *   em que ele próprio foi escolhido. Sem isto, um triângulo produz `{a,b,c}`
+ *   duas vezes.
+ */
+
+/**
+ * Um grupo em construção é válido pelas mesmas regras de §3.1, mas a conexão e a
+ * forma canónica são garantidas por construção — só falta verificar a soma.
+ */
+const somaValida = (fixas: number, temJoker: boolean): boolean =>
+  temJoker ? fixas >= 1 && fixas <= TARGET - 1 : fixas === TARGET;
+
+/**
+ * Poda. A soma das fixas só cresce, portanto um ramo que já a tenha em 7 não
+ * pode dar mais nenhum grupo válido — nem sem joker (passaria de 7) nem com
+ * joker (que exige fixas ≤ 6).
+ *
+ * É daqui que vem o limite de 7 células: o mínimo de uma face é 1.
+ */
+const podar = (fixas: number): boolean => fixas >= TARGET;
+
+function* expandir(
+  b: Board,
+  grupo: readonly Packed[],
+  fixas: number,
+  temJoker: boolean,
+  ext: readonly Packed[],
+  raiz: Packed,
+  proibidas: ReadonlySet<Packed>,
+): Generator<Group> {
+  if (somaValida(fixas, temJoker)) {
+    // `grupo` está por ordem de expansão; o `Group` canónico é ordenado (§3.3).
+    yield [...grupo].sort((x, y) => x - y);
+  }
+
+  if (podar(fixas)) return;
+
+  for (let i = 0; i < ext.length; i++) {
+    const w = ext[i] as Packed;
+    const cell = cellAt(b, w) as Cell;
+
+    const novas: Packed[] = [];
+    for (const u of neighbours(b, w)) {
+      if (u > raiz && !proibidas.has(u)) novas.push(u);
+    }
+
+    yield* expandir(
+      b,
+      [...grupo, w],
+      cell === JOKER ? fixas : fixas + cell,
+      temJoker || cell === JOKER,
+      [...ext.slice(i + 1), ...novas],
+      raiz,
+      novas.length === 0 ? proibidas : new Set([...proibidas, ...novas]),
+    );
+  }
+}
+
+/**
+ * Todos os grupos válidos do tabuleiro, cada um **exatamente uma vez**, em forma
+ * canónica.
+ *
+ * É um **generator** de propósito: quase todos os consumidores param cedo —
+ * escolher uma jogada ao acaso num playout, procurar a primeira solução — e
+ * materializar o array completo seria desperdício. Quem precisa de todos faz
+ * `[...findAllGroups(b)]`.
+ */
+export function* findAllGroups(b: Board): Generator<Group> {
+  for (let c = 0; c < b.length; c++) {
+    const col = b[c];
+    if (col === undefined) continue;
+
+    for (let r = 0; r < col.length; r++) {
+      const raiz = packed(c, r);
+      const cell = col[r] as Cell;
+
+      const ext: Packed[] = [];
+      const proibidas = new Set<Packed>([raiz]);
+      for (const u of neighbours(b, raiz)) {
+        proibidas.add(u);
+        if (u > raiz) ext.push(u);
+      }
+
+      yield* expandir(
+        b,
+        [raiz],
+        cell === JOKER ? 0 : cell,
+        cell === JOKER,
+        ext,
+        raiz,
+        proibidas,
+      );
+    }
+  }
+}
+
+/**
+ * Existe pelo menos uma jogada?
+ *
+ * Implementação própria, e não `findAllGroups(b).next()`, porque este é o
+ * caminho mais quente de todo o pipeline: é chamado a cada passo de cada playout
+ * (spec §3.3). Percorre a mesma árvore, mas não constrói nem ordena grupo
+ * nenhum — só precisa de saber que existe — e evita a delegação `yield*`, que é
+ * proporcional à profundidade a cada emissão.
+ *
+ * A duplicação de estrutura em relação a `expandir` é deliberada e está guardada
+ * por um teste de equivalência.
+ */
+function procurar(
+  b: Board,
+  fixas: number,
+  temJoker: boolean,
+  ext: readonly Packed[],
+  raiz: Packed,
+  proibidas: ReadonlySet<Packed>,
+): boolean {
+  if (somaValida(fixas, temJoker)) return true;
+  if (podar(fixas)) return false;
+
+  for (let i = 0; i < ext.length; i++) {
+    const w = ext[i] as Packed;
+    const cell = cellAt(b, w) as Cell;
+
+    const novas: Packed[] = [];
+    for (const u of neighbours(b, w)) {
+      if (u > raiz && !proibidas.has(u)) novas.push(u);
+    }
+
+    const achou = procurar(
+      b,
+      cell === JOKER ? fixas : fixas + cell,
+      temJoker || cell === JOKER,
+      [...ext.slice(i + 1), ...novas],
+      raiz,
+      novas.length === 0 ? proibidas : new Set([...proibidas, ...novas]),
+    );
+
+    if (achou) return true;
+  }
+
+  return false;
+}
+
+export function hasAnyGroup(b: Board): boolean {
+  for (let c = 0; c < b.length; c++) {
+    const col = b[c];
+    if (col === undefined) continue;
+
+    for (let r = 0; r < col.length; r++) {
+      const raiz = packed(c, r);
+      const cell = col[r] as Cell;
+
+      const ext: Packed[] = [];
+      const proibidas = new Set<Packed>([raiz]);
+      for (const u of neighbours(b, raiz)) {
+        proibidas.add(u);
+        if (u > raiz) ext.push(u);
+      }
+
+      if (
+        procurar(b, cell === JOKER ? 0 : cell, cell === JOKER, ext, raiz, proibidas)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
