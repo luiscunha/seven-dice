@@ -207,14 +207,34 @@ reordenasse peças passaria despercebida até a fase 4 produzir níveis impossí
 
 ---
 
-## Fase 2 — Deteção de grupos · `M`
+## Fase 2 — Deteção de grupos · `M` · ✅ **CONCLUÍDA**
 
 > Prova: **a deteção é completa e sem duplicados.** `[E 10, fase 2]`
+>
+> Branch `fase-2-deteccao-de-grupos`. 82 testes, `pnpm check` verde.
 
 ### Entregáveis
 
-`engine/src/groups.ts` — `findAllGroups` (generator), `isValidGroup`,
-`hasAnyGroup`.
+`engine/src/groups.ts` — `findAllGroups` (generator) e `hasAnyGroup`, a juntar à
+validade da fase 1. `engine/test/groups.enumeration.test.ts`.
+
+### Decisões tomadas na execução
+
+- **Duas estruturas, não uma.** A enumeração por célula mínima precisa de `ext`
+  (por onde o grupo ainda pode crescer, passando adiante só o que vem *depois* da
+  célula escolhida) **e** de `proibidas` (`grupo ∪ vizinhança(grupo)`). A segunda
+  é fácil de omitir e o efeito é subtil: sem ela um triângulo de adjacências
+  produz o mesmo grupo duas vezes, o que num tabuleiro retangular quase não se
+  nota e corrompe silenciosamente o branching factor `[M 5.2]`.
+- **`hasAnyGroup` tem mesmo implementação própria** `[E 3.3]`, e a justificação
+  acabou por ser mais forte do que "evitar o generator": percorrendo a mesma
+  árvore só para responder *existe?*, não constrói nem ordena grupo nenhum, e
+  evita a delegação `yield*`, cujo custo é proporcional à profundidade a cada
+  emissão. A duplicação de estrutura está guardada por um teste de equivalência
+  com `findAllGroups`.
+- **A poda é uma só condição.** `fixas >= 7` corta os dois casos: sem joker
+  passaria de 7, com joker violaria `fixas <= 6`. É também de onde vem o limite
+  de 7 células, sem precisar de o impor.
 
 ### Notas de implementação
 
@@ -244,10 +264,25 @@ Os quatro primeiros testes de propriedade de `[E 9.2]`, mais:
   Lenta, mas é a única forma honesta de provar completude.
 - Nenhum grupo excede 7 células.
 
-### Critério de aceitação
+### Critério de aceitação — verificado
 
-Sobre 1000 tabuleiros aleatórios: zero duplicados, zero grupos inválidos, e
-paridade total com a implementação de referência.
+Paridade total com a implementação de referência sobre 600 tabuleiros gerados
+(300 sem joker, 300 com), zero duplicados, zero grupos inválidos, nenhum grupo
+acima de 7 células.
+
+Cinco mutações deliberadas, todas apanhadas:
+
+| Mutação | Apanhada por |
+|---|---|
+| Sem a guarda `proibidas` | 8 testes, incluindo *não devolve duplicados* |
+| Extensão inteira em vez de "só o que vem depois" | 10 testes |
+| Sem o filtro `u > raiz` | paridade + duplicados |
+| Poda a cortar em 6 em vez de 7 | paridade + *grupo de 7 peças* |
+| `hasAnyGroup` a não descer na árvore | *concorda com findAllGroups* |
+
+Há também uma rede contra regressões exponenciais: um 6x6 denso de 1s e 2s tem de
+enumerar em menos de 200 ms — três ordens de grandeza acima do que `[E 3.2]`
+estima, portanto não mede velocidade, só apanha uma explosão.
 
 ---
 
