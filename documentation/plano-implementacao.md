@@ -286,14 +286,41 @@ estima, portanto não mede velocidade, só apanha uma explosão.
 
 ---
 
-## Fase 3 — Solver · `M` · **M1**
+## Fase 3 — Solver · `M` · **M1** · ✅ **CONCLUÍDA**
 
 > Prova: **dá para responder "tem solução?"** `[E 10, fase 3]`
+>
+> Branch `fase-3-solver`. 110 testes, `pnpm check` verde.
 
 ### Entregáveis
 
 `engine/src/solver.ts` — `isSolvable`, `findSolution`, `isGreedySafe`, tipos
-`Verdict` e `Limits`.
+`Verdict` e `Limits`. `engine/test/solver.test.ts`.
+
+### Conflito resolvido na spec: o orçamento de tempo
+
+`[E 5.2]` exige "número máximo de estados visitados **e** orçamento de tempo".
+`[E 1.1]` diz que a engine não tem relógio. E há um problema maior do que a
+contradição literal: **um limite de tempo torna o veredicto dependente da
+máquina.** Um candidato aceite no portátil rápido seria descartado no lento, e a
+mesma seed deixaria de produzir o mesmo nível — que é exatamente a propriedade
+que `[E 7.1]` existe para garantir, e de que dependem o puzzle diário e os
+leaderboards.
+
+Resolução: `maxStates` é obrigatório e **determinístico**; o orçamento de tempo é
+opcional e vem **em par com o relógio injetado**, de modo que não se pode pedir
+sem o fornecer. O pipeline offline não o usa. É para consumidores interativos —
+uma dica pedida a meio de um nível — onde um teto de latência vale mais do que a
+reprodutibilidade.
+
+### Decisões tomadas na execução
+
+- **`isGreedySafe` é iterativo, os outros dois recursivos.** Não é gosto: a
+  pesquisa de solução é profunda e limitada a `peças/2 ≈ 25` `[E 5.2]`, enquanto
+  o grafo de estados alcançáveis é largo. Uma pilha explícita evita depender do
+  stack para uma travessia cuja forma não se controla.
+- **O relógio consulta-se a cada 1024 estados.** Consultá-lo a cada estado
+  custaria mais do que o problema que resolve.
 
 ### Notas de implementação
 
@@ -321,10 +348,47 @@ estima, portanto não mede velocidade, só apanha uma explosão.
 - "Um tabuleiro greedy-safe nunca bloqueia em 10 000 playouts" `[E 9.2]` fica em
   `skip` com referência explícita — fecha na Fase 5, quando existirem playouts.
 
-### Critério de aceitação
+### Critério de aceitação — verificado
 
-O solver responde corretamente em todos os exemplos manuais e nunca lança nem
-excede o orçamento de tempo declarado.
+O tabuleiro-âncora dos testes é `[[1,2,4],[6,5,3]]`, que é o jogo inteiro em seis
+peças: as faces 1 a 6, soma 21, cuja única partição é `{1,6}`, `{2,5}`, `{3,4}` —
+os três pares horizontais. Mas a coluna da esquerda, `1+2+4`, também soma 7 e é
+conexa; quem a jogar fica com `{6,5,3}`, soma 14 e sem nenhum subconjunto a somar
+7. **É solúvel mas não greedy-safe** — a distinção que separa os corpora dos dois
+modos `[M 6.1]`, num exemplo que cabe num comentário.
+
+Cinco mutações, quatro apanhadas:
+
+| Mutação | Apanhada por |
+|---|---|
+| `isGreedySafe` ignora o beco sem saída | 4 testes |
+| `isGreedySafe` só segue um sucessor | *nunca bloqueia, escolha-se o que escolher* |
+| `esgotado` confunde-se com `no` | os 2 testes de limites |
+| `findSolution` sem backtracking | 6 testes |
+| **Memoizar estados abortados por limite** | **nenhum — ver abaixo** |
+
+A quinta não é um teste fraco, é uma garantia que não existe: depois de
+`esgotado`, nenhum veredicto pode ser `"no"`, portanto uma entrada a mais no memo
+não muda resposta nenhuma enquanto o memo viver só durante a chamada. A linha
+fica na mesma, agora com um comentário que diz exatamente isso — porque partilhar
+o memo entre chamadas é a otimização óbvia a tentar na fase 5, e é aí que passa a
+ser uma garantia a sério.
+
+### Nota sobre a qualidade dos testes de propriedade
+
+`arbBoard` cru quase não exercitava o solver: em 200 tabuleiros, 178 eram
+insolúveis (a soma tem 1/7 de hipóteses de ser múltipla de 7) e **nenhum** era
+solúvel-mas-não-seguro, que é o caso interessante. Acrescentou-se
+`arbBoardSomavel`, condicionado à soma:
+
+| Arbitrário | greedy-safe | solúvel mas não | insolúvel |
+|---|---|---|---|
+| `arbBoard` | 22 | **0** | 178 |
+| `arbBoardSomavel` | 159 | **8** | 33 |
+
+Os testes que dependem de uma condição passaram a **contar quantas vezes ela se
+verificou e a falhar se for zero**. Uma propriedade vacuamente verdadeira é pior
+do que nenhuma, porque parece cobertura.
 
 ---
 
