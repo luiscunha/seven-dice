@@ -10,7 +10,7 @@
  *   Fase 2  groups (enumeração)                       ← implementado
  *   Fase 3  solver                                   ← implementado
  *   Fase 4  rng, compositions, generator, level        ← implementado
- *   Fase 5  metrics
+ *   Fase 5  metrics                                  ← implementado
  */
 
 export type { Board, Cell, Column, Group, Packed } from "./types";
@@ -68,7 +68,15 @@ export type {
   GenerationStats,
   GeneratorParams,
 } from "./generator";
-export { generate } from "./generator";
+export { generate, reachablePieceCounts } from "./generator";
 
 export type { Level, LevelMetrics, LevelPack } from "./level";
 export { toLevel } from "./level";
+
+export type { OpcoesPiso, SurvivalResult } from "./metrics";
+export {
+  LIMITES_PISO,
+  fairnessFloor,
+  measureSurvival,
+  runPlayout,
+} from "./metrics";

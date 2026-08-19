@@ -25,7 +25,8 @@ out/
 
 # Saída do pipeline offline. Os level packs curados entram no repo
 # explicitamente; os candidatos descartados não (spec §7.5).
-packages/tools/out/
+# Level packs curados entram no repo; a saída bruta do pipeline não.
+# packages/tools/out/ contém o pack publicado, versionado de propósito.
 
 # ─── Caches de ferramentas ───────────────────────────────────────────────────
 .cache/
