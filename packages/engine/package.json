@@ -1,0 +1,11 @@
+{
+  "name": "@sete/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Motor puro do jogo Sete: Board, moves, solver, generator, metrics. Sem DOM, sem Node, sem dependências.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": false
+}

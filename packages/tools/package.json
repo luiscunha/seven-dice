@@ -1,0 +1,13 @@
+{
+  "name": "@sete/tools",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "CLI Node: pipeline de geração e medição offline, e renderer de consola para playtest.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@sete/engine": "workspace:*"
+  }
+}

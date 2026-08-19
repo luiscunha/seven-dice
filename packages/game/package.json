@@ -1,0 +1,13 @@
+{
+  "name": "@sete/game",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "UI web e camada de sessão (modo, pontuação, relógio). Consome a engine e level packs estáticos.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@sete/engine": "workspace:*"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "seven-dice",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sete — puzzle de faces de dado. Elimina grupos conexos cuja soma seja 7.",
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p packages/engine/tsconfig.json && tsc --noEmit -p packages/tools/tsconfig.json && tsc --noEmit -p packages/game/tsconfig.json && tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "pnpm lint && pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^22.19.1",
+    "eslint": "^9.39.1",
+    "fast-check": "^4.4.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+
+    "strict": true,
+
+    /*
+     * A engine representa o tabuleiro como listas de comprimento variável
+     * (spec §2.1), portanto `board[c][r]` é legitimamente `undefined` fora da
+     * silhueta. Esta flag obriga o compilador a exigir a verificação — é a
+     * defesa contra a classe de bugs de índice que a representação por colunas
+     * foi escolhida para evitar.
+     */
+    "noUncheckedIndexedAccess": true,
+
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    /*
+     * Não há passo de build no monorepo: os pacotes consomem-se por código-fonte
+     * (`exports` aponta para `src/index.ts`) e o bundler/vitest trata do resto.
+     * O `tsc` serve só para verificação de tipos.
+     */
+    "noEmit": true
+  }
+}

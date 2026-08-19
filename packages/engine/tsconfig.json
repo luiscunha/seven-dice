@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    /*
+     * Sem "DOM" e com `types: []`, a engine não consegue *ver* `document`,
+     * `window` nem `process`. É a versão compile-time da regra "a engine não
+     * importa nada" (spec §1.3) — mais forte que lint, porque não se silencia
+     * com um comentário.
+     */
+    "lib": ["ES2022"],
+    "types": []
+  },
+  "include": ["src", "test"]
+}
