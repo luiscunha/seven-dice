@@ -15,6 +15,8 @@
 **Stack:** TypeScript em toda a linha. Node ≥ 20, pnpm workspaces.
 **Documentação:** versionada no próprio repo, em `documentation/`, para que
 qualquer máquina que clone tenha as specs — e não só esta.
+**Estado corrente:** `estado-atual.md` — onde estamos, o que está por decidir, e
+as quatro conclusões medidas que contrariam os documentos de origem.
 
 ### 0.1 A tese que este plano protege
 
