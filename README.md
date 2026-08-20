@@ -31,7 +31,7 @@ Node ≥ 20, pnpm 11. O `pnpm check` corre lint, typecheck e testes.
 ```
 packages/engine   motor puro — sem Node, sem DOM, sem Math.random(), zero dependências
 packages/tools    pipeline offline, gerador de packs e renderer de consola
-packages/game     UI web (por construir)
+packages/game     camada de sessão (feita) e UI web (por construir)
 ```
 
 ## Comandos

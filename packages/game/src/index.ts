@@ -3,6 +3,80 @@
  *
  * Tudo o que a engine deliberadamente não sabe vive aqui: modo, relógio,
  * pontuação, combos, undo, progressão (spec §1.1, §4.3).
+ *
+ * A camada de sessão não lê o relógio do sistema nem toca no DOM. O tempo entra
+ * por parâmetro e o armazenamento por interface — é o que a torna testável como
+ * função pura, e o que vai deixar a fase 9 trocar `localStorage` por
+ * armazenamento nativo sem lhe mexer.
  */
 
-export {};
+export type {
+  GameState,
+  HintResult,
+  HintSource,
+  TapRejection,
+} from "./session/GameSession";
+export {
+  clearSelection,
+  commit,
+  hint,
+  isFinished,
+  isPending,
+  jokerInSelection,
+  jokerRequiredValue,
+  restart,
+  selectionHasJoker,
+  selectionSum,
+  startGame,
+  tap,
+  undo,
+} from "./session/GameSession";
+
+export type { PuzzleConfig, PuzzleState, Seal } from "./session/PuzzleSession";
+export {
+  DEFAULT_PUZZLE_CONFIG,
+  restartPuzzle,
+  seal,
+  startPuzzle,
+  undoPuzzle,
+  usePuzzleHint,
+} from "./session/PuzzleSession";
+
+export type {
+  TimeAttackConfig,
+  TimeAttackConfigs,
+  TimeAttackState,
+  TimeAttackTap,
+} from "./session/TimeAttackSession";
+export {
+  DEFAULT_TIME_ATTACK,
+  JokerInTimeAttackError,
+  boardReward,
+  isOver,
+  nextBoard,
+  remainingMs,
+  startTimeAttack,
+  tapTimeAttack,
+} from "./session/TimeAttackSession";
+
+export type { ComboConfig, ComboEvent, ComboState } from "./session/combos";
+export {
+  DEFAULT_COMBO_CONFIG,
+  breakCombo,
+  registerMove,
+  startCombo,
+} from "./session/combos";
+
+export type { ScoringConfig } from "./session/scoring";
+export { DEFAULT_SCORING, comboMultiplier, moveScore } from "./session/scoring";
+
+export type { LevelProgress, Profile, ProfileStorage } from "./session/progress";
+export {
+  PROFILE_KEY,
+  PROFILE_VERSION,
+  emptyProfile,
+  load,
+  recordLevel,
+  recordTimeAttack,
+  save,
+} from "./session/progress";
