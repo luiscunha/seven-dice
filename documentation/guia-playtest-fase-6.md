@@ -46,6 +46,7 @@ transforma a tarde em dados.
 |---|---|
 | `b2` | toca na peça — coluna por letra, linha **a partir da base** |
 | `b2 c2 c3` | toca em várias de uma vez |
+| `x` | elimina a seleção pendente — só é preciso com joker |
 | `z` | desfaz: primeiro a última peça tocada, depois a última jogada |
 | `c` | limpa a seleção |
 | `r` | reinicia |
@@ -99,13 +100,20 @@ contra a planear.
 
 ### 5. O joker — 3 níveis de `meio-joker` ou `denso`
 
-O joker aparece como `*`. Lembra-te de plano §2.6: **o valor dele está
-globalmente determinado** — soma o tabuleiro todo e tira o módulo 7 e sabes
-quanto vale.
+O joker aparece como `*`. O valor obrigatório dele está no cabeçalho, como
+`joker = 3`, recalculado a cada jogada.
 
-Duas perguntas:
+> **Isto mudou depois da primeira tarde de playtest.** A pergunta original era
+> "descobriste sozinho quanto vale?", e a resposta medida foi **não** — o valor
+> passou a estar à vista por isso. A pergunta que resta é a outra.
 
-- Descobriste isso sozinho, ou só depois de o ler?
+A seleção com joker **não elimina sozinha**: fica pendente e fecha-se com `x`.
+Sem isso o joker gastava-se com a primeira peça que lhe encostasse, ao valor que
+essa peça deixasse.
+
+A pergunta:
+
+- Sabendo o valor, decidir **em que grupo o gastas** é interessante?
 - Gastá-lo mal mata o tabuleiro várias jogadas depois. Isso lê-se como
   profundidade ou como armadilha?
 

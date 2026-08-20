@@ -1,0 +1,11 @@
+{"quando":"2026-08-20T11:02:34.807Z","nivel":"tutorial-000003","banda":"tutorial","pecas":14,"sobrevivencia":1,"terminado":true,"selo":"perfeito","jogadas":7,"undos":0,"reinicios":0,"dicas":0,"dicasCalculadas":0}
+{"quando":"2026-08-20T11:07:12.847Z","nivel":"tutorial-000003","banda":"tutorial","pecas":14,"sobrevivencia":1,"terminado":false,"selo":null,"jogadas":0,"undos":0,"reinicios":0,"dicas":0,"dicasCalculadas":0}
+{"quando":"2026-08-20T11:09:25.543Z","nivel":"inicio-000034","banda":"inicio","pecas":24,"sobrevivencia":0.673,"terminado":true,"selo":"limpo","jogadas":9,"undos":0,"reinicios":0,"dicas":1,"dicasCalculadas":0}
+{"quando":"2026-08-20T11:11:53.262Z","nivel":"inicio-000134","banda":"inicio","pecas":20,"sobrevivencia":0.964,"terminado":true,"selo":"perfeito","jogadas":7,"undos":0,"reinicios":0,"dicas":0,"dicasCalculadas":0}
+{"quando":"2026-08-20T11:18:46.274Z","nivel":"inicio-000296","banda":"inicio","pecas":18,"sobrevivencia":0.625,"terminado":true,"selo":"perfeito","jogadas":7,"undos":0,"reinicios":0,"dicas":0,"dicasCalculadas":0}
+{"quando":"2026-08-20T11:21:11.442Z","nivel":"inicio-000256","banda":"inicio","pecas":24,"sobrevivencia":0.708,"terminado":true,"selo":"perfeito","jogadas":9,"undos":0,"reinicios":0,"dicas":0,"dicasCalculadas":0}
+{"quando":"2026-08-20T11:25:14.602Z","nivel":"meio-000015","banda":"meio","pecas":28,"sobrevivencia":0.476,"terminado":true,"selo":"perfeito","jogadas":10,"undos":0,"reinicios":0,"dicas":0,"dicasCalculadas":0}
+{"quando":"2026-08-20T11:39:41.508Z","nivel":"perito-000014","banda":"perito","pecas":37,"sobrevivencia":0.083,"terminado":true,"selo":"perfeito","jogadas":13,"undos":0,"reinicios":0,"dicas":0,"dicasCalculadas":0}
+{"quando":"2026-08-20T12:08:41.411Z","nivel":"meio-joker-000013","banda":"meio-joker","pecas":27,"sobrevivencia":0.079,"terminado":false,"selo":null,"jogadas":3,"undos":5,"reinicios":3,"dicas":1,"dicasCalculadas":1}
+{"quando":"2026-08-20T12:32:50.764Z","nivel":"meio-joker-000013","banda":"meio-joker","pecas":27,"sobrevivencia":0.079,"terminado":false,"selo":null,"jogadas":2,"undos":0,"reinicios":0,"dicas":0,"dicasCalculadas":0}
+{"quando":"2026-08-20T12:36:22.818Z","nivel":"meio-joker-000013","banda":"meio-joker","pecas":27,"sobrevivencia":0.079,"terminado":true,"selo":"perfeito","jogadas":9,"undos":0,"reinicios":0,"dicas":0,"dicasCalculadas":0}

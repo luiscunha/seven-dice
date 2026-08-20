@@ -20,11 +20,14 @@ import {
 import {
   desfazer,
   dica,
+  eliminar,
   iniciar,
   reiniciar,
+  selecaoPendente,
   selo,
   terminado,
   tocar,
+  valorDoJoker,
 } from "../src/session";
 import { avaliar } from "../src/candidate";
 import { bandById } from "../src/bands";
@@ -157,12 +160,122 @@ describe("seleção tocar-a-acumular", () => {
   });
 
   it("com joker o teto das fixas é 6, e diz-se porquê", () => {
-    let s = iniciar(nivel([[0, 6], [1]]));
+    let s = iniciar(nivel([[0, 1, 6], [1]]));
 
     s = tocar(s, packed(0, 0)); // joker
-    s = tocar(s, packed(0, 1)); // +6 → fixas 6, válido? 1<=6<=6 sim
+    s = tocar(s, packed(0, 1)); // +1 → fixas 1
+    s = tocar(s, packed(0, 2)); // +6 → fixas 7, acima do teto de 6
 
-    expect(s.jogadas).toBe(1);
+    expect(s.selecao).toHaveLength(2);
+    expect(s.mensagem).toContain("6");
+  });
+
+  /*
+   * O joker não dispara sozinho — encontrado a jogar `meio-joker-000013`.
+   *
+   * Como `isValidGroup` aceita qualquer soma fixa entre 1 e 6, a eliminação
+   * automática gastava o joker com a primeira peça que lhe encostasse, ao valor
+   * que essa peça deixasse. O valor dele está globalmente determinado (plano
+   * §2.6), portanto isso não é uma jogada alternativa: é matar o tabuleiro.
+   */
+  describe("seleção com joker (plano §2.6)", () => {
+    it("fica pendente em vez de eliminar, e avisa que o valor está errado", () => {
+      let s = iniciar(nivel([[0, 2], [2]]));
+
+      s = tocar(s, packed(0, 0)); // joker
+      s = tocar(s, packed(0, 1)); // +2 → fixas 2, já seria grupo válido
+
+      expect(s.jogadas).toBe(0);
+      expect(s.selecao).toHaveLength(2);
+      expect(s.mensagem).toContain("5"); // 7 − 2, o que o joker tomaria
+      expect(s.mensagem).toContain("tem de valer 3");
+      expect(selecaoPendente(s)).toBe(true);
+    });
+
+    it("no valor obrigatório, a mensagem confirma em vez de sugerir mais peças", () => {
+      let s = iniciar(nivel([[0, 2], [2]]));
+
+      s = tocar(s, packed(0, 0)); // joker
+      s = tocar(s, packed(0, 1)); // +2
+      s = tocar(s, packed(1, 0)); // +2 → fixas 4, joker a 3
+
+      expect(s.jogadas).toBe(0);
+      expect(s.selecao).toHaveLength(3);
+      expect(s.mensagem).toContain("valor certo");
+      // O conselho que empurrava para o erro não pode reaparecer aqui.
+      expect(s.mensagem).not.toContain("junta");
+    });
+
+    it("`x` elimina a seleção pendente", () => {
+      let s = iniciar(nivel([[0, 2], [2]]));
+
+      s = tocar(s, packed(0, 0));
+      s = tocar(s, packed(0, 1));
+      s = tocar(s, packed(1, 0));
+      s = eliminar(s);
+
+      expect(s.jogadas).toBe(1);
+      expect(s.selecao).toEqual([]);
+      expect(terminado(s)).toBe(true); // as três peças eram o tabuleiro todo
+    });
+
+    it("`x` recusa uma seleção que ainda não faz grupo", () => {
+      let s = iniciar(nivel([[0, 2], [2]]));
+
+      s = tocar(s, packed(0, 0)); // só o joker — nunca forma grupo sozinho
+      s = eliminar(s);
+
+      expect(s.jogadas).toBe(0);
+      expect(s.mensagem).toContain("ainda não");
+    });
+
+    it("sem joker o disparo automático mantém-se", () => {
+      let s = iniciar(nivel(TABULEIRO));
+
+      s = tocar(s, packed(0, 0));
+      s = tocar(s, packed(0, 1));
+      s = tocar(s, packed(1, 0));
+
+      expect(s.jogadas).toBe(1);
+      expect(selecaoPendente(s)).toBe(false);
+    });
+  });
+
+  /*
+   * A conta do plano §2.6, que o playtest da fase 6 mostrou não ser descoberta a
+   * jogar: soma das fixas + joker ≡ 0 (mod 7), com o joker entre 1 e 6.
+   */
+  describe("valor obrigatório do joker", () => {
+    it("é o que fecha o total em múltiplo de 7", () => {
+      expect(valorDoJoker([[0, 2], [2]])).toBe(3); // fixas 4 → 7 − 4
+      expect(valorDoJoker([[0, 6], [1], [2]])).toBe(5); // fixas 9 → 7 − 2
+    });
+
+    it("não existe sem joker no tabuleiro", () => {
+      expect(valorDoJoker([[1, 2], [4]])).toBeUndefined();
+    });
+
+    it("não existe quando as fixas já são múltiplas de 7 — nada fecha", () => {
+      expect(valorDoJoker([[0, 3], [4]])).toBeUndefined();
+    });
+
+    it("não muda com as jogadas, porque cada uma tira exatamente 7", () => {
+      // fixas 2+2+3+4+5 = 16 → 16 mod 7 = 2 → o joker vale 5
+      const b: Board = [
+        [0, 2],
+        [2, 3],
+        [4, 5],
+      ];
+      let s = iniciar(nivel(b));
+      expect(valorDoJoker(s.board)).toBe(5);
+
+      s = tocar(s, packed(0, 1)); // 2
+      s = tocar(s, packed(1, 1)); // +3
+      s = tocar(s, packed(1, 0)); // +2 = 7, em L e sem joker → dispara
+
+      expect(s.jogadas).toBe(1);
+      expect(valorDoJoker(s.board)).toBe(5);
+    });
   });
 
   it("explica quando a soma é 7 mas as peças não estão ligadas", () => {

@@ -753,12 +753,12 @@ Fica registado como trabalho da fase 6, com dados, em vez de suposição.
 
 ---
 
-## Fase 6 — Renderer de consola · `S` · **M4 · GATE DE DESIGN** · 🔨 ferramenta pronta
+## Fase 6 — Renderer de consola · `S` · **M4 · GATE DE DESIGN** · ✅ **CONCLUÍDA — VERDE**
 
 > Prova: **dá para jogar e sentir a mecânica.** `[E 10, fase 6]`
 >
-> Branch `fase-6-renderer-de-consola`. A ferramenta está feita e testada; **o gate
-> só fecha com uma tarde de jogo humano.** Ver `guia-playtest-fase-6.md`.
+> Branch `fase-6-renderer-de-consola`. Gate fechado a 2026-08-20 com
+> **35/35 previsões certas** em oito sessões. Ver "A decisão" no fim da fase.
 
 São poucas horas de trabalho antes de existir uma única linha de UI, e respondem
 à pergunta que nenhuma métrica responde.
@@ -863,20 +863,82 @@ de uma face é 1 e o alvo é exatamente 7, a soma só cresce — uma peça que p
 É pequeno, mas é o género de coisa que se descobre a jogar e não a especificar, e
 teria ido parar à UI se esta fase não existisse.
 
-### Critério de aceitação — **por fechar**
+### O defeito de interação que só o joker expunha
 
-**Dezenas de tabuleiros jogados numa tarde, e uma decisão escrita** sobre o risco
-nº 1. É um gate humano, não automatizável — a ferramenta mede, quem decide é o
-jogador.
+Encontrado a jogar `meio-joker-000013`, e é o achado com mais consequência para a
+fase 8.
 
-O protocolo está em `guia-playtest-fase-6.md`: prever o resultado de cada jogada
-antes de a fazer, e registar a taxa de acerto. As três saídas possíveis:
+A eliminação automática ao formar grupo válido — o modelo de `[M 3.1]` — é
+**incompatível com o joker**. Como `isValidGroup` aceita qualquer soma fixa entre
+1 e 6, a seleção fica válida logo à primeira peça encostada ao joker, e o joker
+gasta-se com o valor que essa peça deixar. Tocar `a0 b0 c0` para lhe dar os 3 que
+tem de valer eliminava `a0 b0` com ele a 5.
 
-| Decisão | Significado |
-|---|---|
-| **Verde** | A previsão acerta. A mecânica fica; segue a fase 7. |
-| **Amarelo** | Só acerta com o modo de dois passos ligado. A mecânica fica, mas animar gravidade e colapso em separado passa a **requisito** da fase 8. |
-| **Vermelho** | Falha mesmo com ajuda. A regra de reorganização muda e o plano volta à fase 1. |
+O tabuleiro não bloqueia nessa jogada: fica insolúvel em silêncio e só falha no
+fim. Três reinícios seguidos sem perceber porquê, num nível resolvido à primeira
+depois da correção.
+
+Não é um defeito da consola — é do **modelo de interação**, e a UI da fase 8
+herda-o inteiro se o repetir. A seleção com joker passa a exigir confirmação
+explícita (`x`), e sem joker o disparo automático mantém-se: as faces são >= 1 e o
+alvo é exato, logo um grupo válido nunca é prefixo de outro. Só com joker é que
+várias seleções diferentes são todas válidas — e é só aí que existe uma decisão a
+proteger.
+
+### O valor do joker não se descobre a jogar
+
+`[M 2.6]` supõe que a dedução — soma das fixas, módulo 7, o que falta para 7 — é
+"descobrível com o tutorial certo". Medido: não é descoberta **sem** ele. A
+pergunta do jogador, ao quarto nível com joker, foi literalmente *"o joker tem um
+valor fixo?"*.
+
+O renderer passou a mostrar `joker = N` no cabeçalho, recalculado a cada jogada.
+Isso resolve a consola, mas para o jogo é a confirmação de que **o tutorial
+dedicado de `[M 2.6]` deixa de ser opcional**.
+
+Consequência para o protocolo: com o valor à vista, a pergunta do playtest do
+joker deixa de ser "consegues deduzir quanto vale" — está respondida — e passa a
+ser "sabendo o valor, decidir em que grupo o gastas é interessante?".
+
+### A decisão — **VERDE**
+
+Oito sessões a 2026-08-20, registadas em `playtest.jsonl`:
+
+| Nível | Peças | Sobrevivência | Previsões | Selo |
+|---|---|---|---|---|
+| `tutorial-000003` | 14 | 1.00 | *(aquecimento)* | perfeito |
+| `inicio-000034` | 24 | 0.673 | — | limpo |
+| `inicio-000134` | 20 | 0.964 | — | perfeito |
+| `inicio-000296` | 18 | 0.625 | **6/6** | perfeito |
+| `inicio-000256` | 24 | 0.708 | **8/8** | perfeito |
+| `meio-000015` | 28 | 0.476 | **9/9** | perfeito |
+| `perito-000014` | 37 | 0.083 | **12/12** | perfeito |
+| `meio-joker-000013` | 27 | 0.079 | *(joker)* | perfeito |
+
+**35/35 previsões certas, zero undos, zero reinícios, zero bloqueios** — incluindo
+silhuetas e grupos de 5 a 7 peças a 0.083 de sobrevivência, onde uma em cada doze
+sequências aleatórias sobrevive.
+
+O risco nº 1 de `[M 8]` **não se materializou**: o colapso de colunas é
+antecipável. A regra de reorganização fica como está, e com ela tudo o que se
+construiu a partir da fase 1.
+
+O passo 3 do protocolo — repetir com o modo de dois passos — tornou-se
+desnecessário: existia para separar Verde de Amarelo, e a taxa já estava no máximo
+sem ajuda nenhuma. **Animar gravidade e colapso em separado continua recomendado
+em `[M 8]`, mas não é requisito.**
+
+O que *não* fica provado, e convém não confundir: o número de jogadas de uma
+resolução não mede nada. Como cada jogada remove exatamente 7, qualquer tabuleiro
+limpo leva sempre `soma/7` jogadas. O sinal está em chegar ao fim, e em chegar sem
+desfazer.
+
+### Critério de aceitação — verificado
+
+- ✅ **Tabuleiros jogados e decisão escrita** sobre o risco nº 1 — é esta secção.
+- ✅ Registo mecânico por sessão em `playtest.jsonl`, versionado como prova.
+- ✅ Dois defeitos de interação apanhados antes de existir UI — a seleção atolada
+  acima de 7, e o joker gasto ao valor errado pela eliminação automática.
 
 ---
 

@@ -16,6 +16,7 @@ import {
   findSolution,
   isValidGroup,
   toGroup,
+  totalSum,
   JOKER,
   TARGET,
 } from "@sete/engine";
@@ -82,6 +83,39 @@ export const selecaoTemJoker = (
 ): boolean => selecao.some((p) => cellAt(b, p) === JOKER);
 
 /**
+ * O valor que o joker **tem** de tomar para o tabuleiro ainda poder fechar
+ * (plano §2.6).
+ *
+ * Cada jogada remove exatamente 7, portanto o total tem de ser múltiplo de 7. As
+ * faces fixas somam `S`, e como `totalSum` conta o joker a 0, `S` é o total
+ * visível. Só um valor entre 1 e 6 completa: `7 − (S mod 7)`.
+ *
+ * O joker é flexível em **posição**, não em valor — a decisão do jogador é em
+ * que grupo o gasta. Gastá-lo a outro valor não bloqueia de imediato: o
+ * tabuleiro morre em silêncio e só falha no fim, que é exatamente o que torna
+ * esta conta indispensável na interface.
+ *
+ * `undefined` quando não há joker, ou quando `S` já é múltiplo de 7 — aí nenhum
+ * valor serve e o tabuleiro já não fecha.
+ */
+export function valorDoJoker(b: Board): number | undefined {
+  const temJoker = b.some((col) => col.some((c) => c === JOKER));
+  if (!temJoker) return undefined;
+
+  const resto = totalSum(b) % TARGET;
+  return resto === 0 ? undefined : TARGET - resto;
+}
+
+/**
+ * A seleção já faz um grupo válido e está à espera de confirmação.
+ *
+ * Só acontece com joker — ver a nota em `tocar`. Serve para o renderer não
+ * apresentar um convite como se fosse um erro.
+ */
+export const selecaoPendente = (s: Sessao): boolean =>
+  s.selecao.length > 0 && isValidGroup(s.board, toGroup(s.selecao));
+
+/**
  * Tocar numa célula acumula-a na seleção; tocar outra vez retira-a.
  *
  * Ao atingir um grupo válido, elimina automaticamente — é o modelo de interação
@@ -130,6 +164,44 @@ export function tocar(s: Sessao, p: Packed): Sessao {
   const grupo = toGroup(selecao);
 
   if (isValidGroup(s.board, grupo)) {
+    /*
+     * Com joker na seleção, eliminar automaticamente **rouba a decisão ao
+     * jogador**. `isValidGroup` aceita qualquer soma fixa entre 1 e 6, portanto
+     * a seleção fica válida logo à primeira peça encostada ao joker, e o joker
+     * gasta-se com o valor que essa peça deixar. Só que o valor dele está
+     * globalmente determinado (plano §2.6) — a escolha é *em que grupo* o gasta,
+     * e era exatamente essa que desaparecia.
+     *
+     * Encontrado a jogar `meio-joker-000013`: tocar `a0 b0 c0`, para dar ao
+     * joker os 3 que ele tem de valer, eliminava `a0 b0` com o joker a 5. O
+     * tabuleiro ficava insolúvel sem nada o anunciar, várias jogadas antes de
+     * se perceber porquê.
+     *
+     * Sem joker o problema não existe: as faces são >= 1 e o alvo é exato, logo
+     * um grupo válido nunca é prefixo de outro. Aí o disparo automático fica.
+     */
+    if (jokerNovo) {
+      /*
+       * A mensagem tem de dizer o que fazer, não só o que se passa. Dizer
+       * "junta mais peças" quando o joker já está no valor obrigatório empurra
+       * o jogador para o erro exato que esta pendência existe para evitar.
+       */
+      const atual = TARGET - somaNova;
+      const obrigatorio = valorDoJoker(s.board);
+
+      return {
+        ...s,
+        selecao,
+        mensagem:
+          obrigatorio === undefined
+            ? `o joker fica a ${atual} — 'x' elimina`
+            : atual === obrigatorio
+              ? `o joker fica a ${atual}, que é o valor certo — 'x' elimina`
+              : `o joker ficaria a ${atual}, mas tem de valer ${obrigatorio}` +
+                ` — junta ou tira peças`,
+      };
+    }
+
     return {
       ...s,
       board: applyMove(s.board, grupo),
@@ -150,6 +222,33 @@ export function tocar(s: Sessao, p: Packed): Sessao {
       : "";
 
   return { ...s, selecao, mensagem };
+}
+
+/**
+ * Fecha à mão a seleção pendente.
+ *
+ * Só é preciso quando há joker — ver a nota em `tocar`. Sem joker nenhuma
+ * seleção válida chega a ficar pendente, portanto isto nunca lhe pega.
+ */
+export function eliminar(s: Sessao): Sessao {
+  if (s.selecao.length === 0) {
+    return { ...s, mensagem: "não há seleção para eliminar" };
+  }
+
+  const grupo = toGroup(s.selecao);
+
+  if (!isValidGroup(s.board, grupo)) {
+    return { ...s, mensagem: "a seleção ainda não faz um grupo válido" };
+  }
+
+  return {
+    ...s,
+    board: applyMove(s.board, grupo),
+    historico: [...s.historico, s.board],
+    selecao: [],
+    jogadas: s.jogadas + 1,
+    mensagem: "",
+  };
 }
 
 export const limparSelecao = (s: Sessao): Sessao => ({

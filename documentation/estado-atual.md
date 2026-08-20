@@ -5,7 +5,7 @@
 > `plano-implementacao.md` — complementa-o com o que **não** se lê no código nem
 > no histórico do git.
 >
-> Última atualização: 2026-08-20, no fim da Fase 6.
+> Última atualização: 2026-08-20, com o gate da Fase 6 fechado a **Verde**.
 
 ---
 
@@ -19,7 +19,7 @@ pnpm check
 ```
 
 Node ≥ 20, pnpm 11.22.0 (fixado em `packageManager`). O `pnpm check` corre
-lint + typecheck + testes: **188 testes, ~40 s**. Se demorar muito mais do que
+lint + typecheck + testes: **197 testes, ~20 s**. Se demorar muito mais do que
 isso, ver "Armadilhas" no fim.
 
 Leituras, por esta ordem:
@@ -47,9 +47,9 @@ contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 | 3 | Solver | ✅ |
 | 4 | Gerador | ✅ |
 | 5 | Métricas e pipeline | ✅ |
-| 6 | Renderer de consola | 🔨 **ferramenta pronta, gate por fechar** |
-| 7 | Camada de sessão | por começar |
-| 8 | UI web | por começar, **depende do gate da fase 6** |
+| 6 | Renderer de consola | ✅ **gate fechado a Verde** |
+| 7 | Camada de sessão | por começar ← **é aqui que se avança** |
+| 8 | UI web | por começar, desbloqueada |
 | 9 | Empacotamento | por começar |
 
 O motor está completo e é puro: `packages/engine/src/` não importa nada de Node,
@@ -61,34 +61,54 @@ Existe um pack verificado em `packages/tools/out/level-pack.json`: **240 níveis
 
 ---
 
-## A única coisa por decidir
+## O gate da Fase 6 — fechado a Verde
 
-A Fase 6 não tem ✅ e isso é deliberado. O critério de aceitação dela é humano:
+O critério era humano, e é o risco nº 1 do plano §8:
 
 > Num tabuleiro de 4x4, consegues planear 2–3 jogadas à frente?
 
-É o risco nº 1 do plano §8 — se o colapso de colunas não for previsível, o
-puzzle vira sorte e a regra de reorganização tem de mudar, o que invalida tudo o
-que está construído a partir da Fase 1. Por isso a pergunta faz-se **antes** de
-existir UI.
+Consegue-se. Oito sessões, registadas em `playtest.jsonl`:
 
-A ferramenta está feita e testada. Falta jogar:
+| Nível | Peças | Sobrevivência | Previsões | Selo |
+|---|---|---|---|---|
+| `inicio-000296` | 18 | 0.625 | **6/6** | perfeito |
+| `inicio-000256` | 24 | 0.708 | **8/8** | perfeito |
+| `meio-000015` | 28 | 0.476 | **9/9** | perfeito |
+| `perito-000014` | 37 | 0.083 | **12/12** | perfeito |
+| `meio-joker-000013` | 27 | 0.079 | *(joker)* | perfeito |
 
-```bash
-pnpm sete play --band tutorial --log playtest.jsonl
-```
+**35/35, zero undos, zero bloqueios**, incluindo silhuetas e grupos de 5 a 7 peças
+onde uma em cada doze sequências aleatórias sobrevive. A regra de reorganização
+fica, e com ela tudo o que está construído a partir da Fase 1.
 
-O protocolo está em `guia-playtest-fase-6.md` — prever o resultado de cada jogada
-antes de a fazer, e contar a taxa de acerto. O resultado é uma de três palavras:
+O passo 3 do protocolo — repetir com o modo de dois passos — não chegou a ser
+preciso: existia para separar Verde de Amarelo, e a taxa já estava no máximo sem
+ajuda. Animar gravidade e colapso em separado continua **recomendado** na Fase 8,
+mas não é requisito.
 
-- **Verde** — a previsão acerta. A mecânica fica; segue a Fase 7.
-- **Amarelo** — só acerta com o modo de dois passos (`s`). A mecânica fica, mas
-  animar gravidade e colapso em separado passa a **requisito** da Fase 8.
-- **Vermelho** — falha mesmo com ajuda. A regra muda e o plano volta à Fase 1.
+Cuidado com uma leitura fácil: o número de jogadas de uma resolução não mede nada.
+Como cada jogada remove exatamente 7, qualquer tabuleiro limpo leva sempre
+`soma/7` jogadas. O sinal está em chegar ao fim sem desfazer.
 
-A Fase 7 (camada de sessão) é lógica pura e não assume nada sobre a regra de
-reorganização — pode avançar com o gate aberto. A Fase 8 **não deve**, porque é
-aí que o investimento se torna irrecuperável.
+### Os dois achados que mudam a Fase 8
+
+**A eliminação automática é incompatível com o joker.** O modelo de interação do
+plano §3.1 — tocar-a-acumular, elimina ao chegar a 7 — gasta o joker com a
+primeira peça que lhe encostem, ao valor que essa peça deixar, porque
+`isValidGroup` aceita qualquer soma fixa entre 1 e 6. O tabuleiro fica insolúvel
+em silêncio e só falha no fim. A consola passou a exigir confirmação (`x`) quando
+há joker na seleção; **a UI da Fase 8 herda o problema inteiro se repetir o
+modelo**.
+
+**O valor do joker não se descobre a jogar.** O plano §2.6 supõe que a dedução é
+descobrível com o tutorial certo; medido, não é descoberta sem ele. A consola
+mostra `joker = N` no cabeçalho, recalculado a cada jogada. Para o jogo, o
+tutorial dedicado do §2.6 deixa de ser opcional.
+
+## O que se segue
+
+A **Fase 7** — camada de sessão. É lógica pura, sem UI: relógio, pontuação,
+combos, selos e progressão, tudo o que a engine deliberadamente não sabe.
 
 ---
 
@@ -213,9 +233,9 @@ decisão.
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 188 testes
+pnpm check                                    # lint + typecheck + 197 testes
 pnpm sete bands                               # as bandas e os seus critérios
-pnpm sete play --band tutorial --log p.jsonl  # jogar (o gate da fase 6)
+pnpm sete play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm sete verify                              # revalida o pack todo
 pnpm sete build --count 30 --runs 1000        # reconstrói o pack (~15 min)
 ```
