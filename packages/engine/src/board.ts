@@ -4,7 +4,7 @@
  */
 
 import type { Board, Cell, Packed } from "./types";
-import { JOKER, MAX_ROWS, colOf, packed, rowOf } from "./types";
+import { JOKER, MAX_ROWS, TARGET, colOf, packed, rowOf } from "./types";
 
 export const width = (b: Board): number => b.length;
 
@@ -68,6 +68,32 @@ export function jokerAt(b: Board): Packed | undefined {
     }
   }
   return undefined;
+}
+
+/**
+ * O valor que o joker **tem** de tomar para o tabuleiro ainda poder ficar vazio
+ * (spec §2.6).
+ *
+ * Cada jogada remove exatamente `TARGET`, portanto a soma total tem de ser
+ * múltipla de `TARGET`. As faces fixas somam `S` — e como `totalSum` conta o
+ * joker a 0, `S` é a soma visível. Só um valor entre 1 e `TARGET - 1` completa:
+ * `TARGET - (S mod TARGET)`.
+ *
+ * O joker é flexível em **posição**, não em valor. A decisão do jogador é em que
+ * grupo o gasta; gastá-lo a outro valor não bloqueia de imediato, deixa o
+ * tabuleiro insolúvel em silêncio para só falhar no fim.
+ *
+ * `undefined` quando não há joker, ou quando `S` já é múltiplo de `TARGET` — aí
+ * nenhum valor serve e o tabuleiro já não fecha.
+ *
+ * Isto é uma consulta sobre o tabuleiro, não conhecimento de modo (spec §1.1):
+ * vale o mesmo no jogo, no renderer de consola e no pipeline.
+ */
+export function jokerValue(b: Board): number | undefined {
+  if (jokerAt(b) === undefined) return undefined;
+
+  const resto = totalSum(b) % TARGET;
+  return resto === 0 ? undefined : TARGET - resto;
 }
 
 /**

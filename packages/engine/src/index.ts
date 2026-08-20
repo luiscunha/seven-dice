@@ -24,6 +24,7 @@ export {
   height,
   isEmpty,
   jokerAt,
+  jokerValue,
   neighbours,
   pieceCount,
   totalSum,

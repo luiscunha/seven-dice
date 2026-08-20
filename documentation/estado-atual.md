@@ -19,7 +19,7 @@ pnpm check
 ```
 
 Node ≥ 20, pnpm 11.22.0 (fixado em `packageManager`). O `pnpm check` corre
-lint + typecheck + testes: **200 testes, ~20 s**. Se demorar muito mais do que
+lint + typecheck + testes: **249 testes, ~15 s**. Se demorar muito mais do que
 isso, ver "Armadilhas" no fim.
 
 Leituras, por esta ordem:
@@ -48,8 +48,8 @@ contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 | 4 | Gerador | ✅ |
 | 5 | Métricas e pipeline | ✅ |
 | 6 | Renderer de consola | ✅ **gate fechado a Verde** |
-| 7 | Camada de sessão | por começar ← **é aqui que se avança** |
-| 8 | UI web | por começar, desbloqueada |
+| 7 | Camada de sessão | ✅ |
+| 8 | UI web | por começar ← **é aqui que se avança** |
 | 9 | Empacotamento | por começar |
 
 O motor está completo e é puro: `packages/engine/src/` não importa nada de Node,
@@ -107,8 +107,22 @@ tutorial dedicado do §2.6 deixa de ser opcional.
 
 ## O que se segue
 
-A **Fase 7** — camada de sessão. É lógica pura, sem UI: relógio, pontuação,
-combos, selos e progressão, tudo o que a engine deliberadamente não sabe.
+A **Fase 8** — UI web. A Fase 7 está feita: `packages/game/src/session/` tem
+`GameSession`, os dois modos, combos, pontuação e perfil, sem uma linha de DOM e
+sem uma leitura do relógio do sistema.
+
+Três coisas que a UI vai consumir e convém não redescobrir:
+
+- **`tap` não elimina automaticamente quando há joker na seleção** — `commit`
+  fecha-a. Repetir o disparo automático na UI reintroduz o defeito da Fase 6.
+- **`jokerInSelection`** devolve o par *valor que o joker toma* / *valor que tem
+  de valer*. É o que permite avisar antes de o jogador matar o tabuleiro.
+- **`isPending`** distingue um convite de um erro. Na consola isso foi a
+  diferença entre `▸` e `⚠`, e foi o que destravou o jogador.
+
+O tempo entra por parâmetro e o armazenamento por interface (`ProfileStorage`,
+que o `localStorage` satisfaz tal como está) — a Fase 9 troca-o por armazenamento
+nativo sem tocar na sessão.
 
 ---
 
@@ -266,7 +280,7 @@ Duas ressalvas honestas:
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 200 testes
+pnpm check                                    # lint + typecheck + 249 testes
 pnpm sete bands                               # as bandas e os seus critérios
 pnpm sete play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm sete verify                              # revalida o pack todo

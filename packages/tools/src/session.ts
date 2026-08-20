@@ -15,8 +15,8 @@ import {
   findAllGroups,
   findSolution,
   isValidGroup,
+  jokerValue,
   toGroup,
-  totalSum,
   JOKER,
   TARGET,
 } from "@sete/engine";
@@ -83,28 +83,13 @@ export const selecaoTemJoker = (
 ): boolean => selecao.some((p) => cellAt(b, p) === JOKER);
 
 /**
- * O valor que o joker **tem** de tomar para o tabuleiro ainda poder fechar
- * (plano §2.6).
+ * O valor obrigatório do joker (spec §2.6).
  *
- * Cada jogada remove exatamente 7, portanto o total tem de ser múltiplo de 7. As
- * faces fixas somam `S`, e como `totalSum` conta o joker a 0, `S` é o total
- * visível. Só um valor entre 1 e 6 completa: `7 − (S mod 7)`.
- *
- * O joker é flexível em **posição**, não em valor — a decisão do jogador é em
- * que grupo o gasta. Gastá-lo a outro valor não bloqueia de imediato: o
- * tabuleiro morre em silêncio e só falha no fim, que é exatamente o que torna
- * esta conta indispensável na interface.
- *
- * `undefined` quando não há joker, ou quando `S` já é múltiplo de 7 — aí nenhum
- * valor serve e o tabuleiro já não fecha.
+ * Vive na engine — é uma consulta sobre o tabuleiro, e tem dois consumidores: o
+ * renderer de consola e a `GameSession`. Reexporta-se aqui com o nome português
+ * do resto deste módulo.
  */
-export function valorDoJoker(b: Board): number | undefined {
-  const temJoker = b.some((col) => col.some((c) => c === JOKER));
-  if (!temJoker) return undefined;
-
-  const resto = totalSum(b) % TARGET;
-  return resto === 0 ? undefined : TARGET - resto;
-}
+export const valorDoJoker = jokerValue;
 
 /**
  * A seleção já faz um grupo válido e está à espera de confirmação.

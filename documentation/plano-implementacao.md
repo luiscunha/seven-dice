@@ -983,9 +983,11 @@ desfazer.
 
 ---
 
-## Fase 7 — Camada de sessão · `M`
+## Fase 7 — Camada de sessão · `M` · ✅ **CONCLUÍDA**
 
 Ainda sem UI. Tudo o que o motor deliberadamente não sabe `[E 1.1]` vive aqui.
+
+> Branch `fase-7-camada-de-sessao`.
 
 ### Entregáveis
 
@@ -998,6 +1000,67 @@ game/src/session/
   scoring.ts
   progress.ts           persistência local do perfil
 ```
+
+### Decisões tomadas na execução
+
+**`jokerValue` subiu para a engine.** O valor obrigatório do joker era da fase 6
+e vivia em `tools/src/session.ts`. Com a `GameSession` passou a ter dois
+consumidores, e duplicá-lo era criar exatamente a classe de divergência que esta
+arquitetura existe para impedir. É uma consulta sobre o tabuleiro — não conhece
+modo, não tem estado, não usa aleatoriedade — portanto cabe em `board.ts` sem
+tocar em nenhuma das cinco regras invioláveis. O `tools` reexporta-o com o nome
+português do módulo dele.
+
+**O tempo é guardado como instante-limite, não como saldo.** `deadlineAt` em vez
+de `remainingMs`. Assim o relógio anda sozinho e ninguém tem de o decrementar: o
+que resta é sempre `deadline − agora`, e ganhar tempo é somar ao prazo. Sem isto
+haveria um temporizador a mutar estado, que é precisamente o que torna um modo
+com relógio difícil de testar.
+
+**A pendência do joker subiu da consola para a sessão.** O defeito da fase 6 não
+era do renderer — era do modelo de interação de `[M 3.1]`, e a UI da fase 8 ia
+herdá-lo inteiro. `tap` não elimina automaticamente quando há joker na seleção;
+`commit` fecha-a. `jokerInSelection` devolve o par *valor que toma* / *valor
+obrigatório*, que é o que permite à UI avisar antes de o jogador matar o
+tabuleiro.
+
+**A dica compara chaves canónicas, não valida o grupo guardado.** Um jogador que
+se desviou pode chegar a um estado onde o passo guardado por acaso continua a ser
+um grupo válido — e a dica mandá-lo-ia para uma solução que já não existe. A
+verificação exata é replicar os primeiros `moves` passos guardados sobre o
+tabuleiro inicial e comparar `boardKey`. Custa `O(moves)` e só corre quando o
+jogador pede dica.
+
+**Nada de `Date.now()`, nada de `localStorage` direto.** O tempo entra por
+parâmetro e o armazenamento por interface (`ProfileStorage`, que `localStorage`
+satisfaz tal como está). Os testes correm sem DOM, e a fase 9 troca por
+armazenamento nativo sem lhe mexer.
+
+**O perfil é versionado e a leitura nunca falha.** JSON inválido, versão
+desconhecida, campos de outro tipo — tudo dá perfil vazio, e os níveis
+corrompidos são descartados um a um em vez de deitarem fora o ficheiro todo.
+Perder progresso é mau; não abrir o jogo é pior, e um perfil é exatamente o
+género de coisa que chega corrompida do disco de um telefone.
+
+### Notas sobre os selos e a economia
+
+O undo **conta** para o selo mas não é limitado: o jogador usa-o à vontade e o
+que perde é o mérito, não a possibilidade. É a assimetria de `[M 3.3]` — limitar
+o undo lê-se como taxa sobre o erro; limitar a dica lê-se como justo. Reiniciar
+devolve as dicas, porque o nível recomeça inteiro e o custo também.
+
+Uma dica que não encontra grupo nenhum não se cobra.
+
+### Critério de aceitação — verificado
+
+- ✅ **Undo restaura o estado exato**, comparado por `boardKey`.
+- ✅ **O selo "Limpo" perde-se ao primeiro undo ou reinício; "Perfeito" à
+  primeira dica.**
+- ✅ **Relógio determinístico sob clock injetado** — `startTimeAttack(level, now)`
+  com o mesmo `now` dá estados iguais, e não há uma única leitura do relógio do
+  sistema no pacote.
+- ✅ 49 testes novos; **249 no total**. Mutação: retirar a verificação de dicas do
+  selo e devolver o disparo automático ao joker são apanhados por 4 testes.
 
 ### Notas de implementação
 
