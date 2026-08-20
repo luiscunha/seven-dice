@@ -46,6 +46,7 @@ transforma a tarde em dados.
 |---|---|
 | `b2` | toca na peça — coluna por letra, linha **a partir da base** |
 | `b2 c2 c3` | toca em várias de uma vez |
+| `a1=5` | no joker, escolhe o valor que ele toma nesta jogada |
 | `z` | desfaz: primeiro a última peça tocada, depois a última jogada |
 | `c` | limpa a seleção |
 | `r` | reinicia |
@@ -99,14 +100,14 @@ contra a planear.
 
 ### 5. O joker — 3 níveis de `meio-joker` ou `denso`
 
-O joker aparece como `*` e **comporta-se como qualquer outra peça**: acumula-se
-até a soma fechar e elimina sozinho.
+O joker aparece como `*`, e **é o jogador que escolhe quanto ele vale**. Na
+consola escreve-se `a1=5`; na UI abre-se um seletor com as seis faces em cima da
+peça. Escolhido o valor, acumula-se e elimina como qualquer outro grupo.
 
-> **Isto mudou duas vezes desde a primeira tarde de playtest.** Primeiro passou a
-> exigir confirmação, porque a eliminação automática o gastava com a primeira
-> peça encostada. Depois percebeu-se que o problema era outro: o teto estava em
-> 6, quando devia estar em `7 − valor do joker`. Com o teto certo, não há
-> ambiguidade nenhuma a resolver — e não há maneira de o gastar mal.
+> **Isto mudou três vezes desde a primeira tarde de playtest**, e a terceira foi
+> a lição: forçar o joker ao valor certo dispensava botões e tutoriais, mas
+> levava a sobrevivência da banda `denso` de 0,141 para 0,957. Toda a
+> dificuldade dela vinha de se poder gastar o joker mal.
 
 A pergunta:
 

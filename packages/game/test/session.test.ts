@@ -17,6 +17,7 @@ import {
   hint,
   isFinished,
   remainingToTarget,
+  selectionTotal,
   restart,
   startGame,
   tap,
@@ -134,48 +135,100 @@ describe("GameSession", () => {
    * A versão anterior punha o teto em 6, que é o que o motor aceita, e por isso
    * a seleção ficava válida logo à primeira peça encostada ao joker.
    */
-  describe("seleção com joker", () => {
-    // fixas 2 + 2 = 4 → o joker vale 3, logo o alvo das fixas é 4.
+  /*
+   * O joker é a única peça cujo valor o jogador escolhe (`[M 2.6]`), e é dessa
+   * escolha que vem a dificuldade das bandas com joker: **só um valor esvazia o
+   * tabuleiro, e o jogo deixa escolher qualquer um**. Escolher mal não bloqueia
+   * na hora — o tabuleiro fica insolúvel em silêncio e só falha no fim.
+   *
+   * Escolher no momento do toque é o que dispensa um botão de confirmação: com o
+   * valor fixado, a seleção volta a ter alvo exato e elimina sozinha.
+   */
+  describe("o joker", () => {
+    // fixas 2 + 2 = 4; com o joker a 3, o total fecha em 7.
     const JOKER_BOARD: Board = [[0, 2], [2]];
 
-    it("não elimina antes de as fixas atingirem o alvo", () => {
-      let s = startGame(level(JOKER_BOARD));
+    it("não entra na seleção sem valor escolhido", () => {
+      const s = tap(startGame(level(JOKER_BOARD)), packed(0, 0));
 
-      s = tap(s, packed(0, 0)); // joker
-      s = tap(s, packed(0, 1)); // +2 → fixas 2, alvo 4
-
-      expect(s.moves).toBe(0);
-      expect(s.selection).toHaveLength(2);
-      expect(remainingToTarget(s)).toBe(2);
+      expect(s.selection).toEqual([]);
+      expect(s.rejection).toBe("joker-needs-value");
     });
 
-    it("elimina sozinho quando o alvo é atingido", () => {
+    it("com valor escolhido, conta como uma peça normal", () => {
+      const s = tap(startGame(level(JOKER_BOARD)), packed(0, 0), 3);
+
+      expect(s.selection).toHaveLength(1);
+      expect(s.jokerAs).toBe(3);
+      expect(selectionTotal(s)).toBe(3);
+      expect(remainingToTarget(s)).toBe(4);
+    });
+
+    it("elimina sozinho ao chegar a 7, sem confirmação", () => {
       let s = startGame(level(JOKER_BOARD));
 
-      s = tap(s, packed(0, 0));
-      s = tap(s, packed(0, 1));
-      s = tap(s, packed(1, 0)); // +2 → fixas 4 = alvo
+      s = tap(s, packed(0, 0), 3);
+      s = tap(s, packed(0, 1)); // +2
+      expect(s.moves).toBe(0);
+
+      s = tap(s, packed(1, 0)); // +2 → 3+2+2 = 7
 
       expect(s.moves).toBe(1);
       expect(isFinished(s)).toBe(true);
     });
 
-    it("recusa a peça que passaria do alvo do joker", () => {
-      // fixas 1 + 6 = 7 → o joker vale 7 − 0... 7 mod 7 = 0, portanto não há
-      // valor possível. Usa-se um tabuleiro com alvo baixo: fixas 5 + 6 = 11,
-      // 11 mod 7 = 4, joker = 3, alvo das fixas = 4.
-      let s = startGame(level([[0, 5], [6]] as Board));
+    /*
+     * A propriedade que sustenta a dificuldade: **o valor errado é jogável**. Se
+     * o jogo o recusasse, a banda `denso` passava de 14% de sobrevivência para
+     * 96% — medido — e deixava de haver decisão nenhuma.
+     */
+    it("deixa escolher o valor errado, e a jogada acontece", () => {
+      let s = startGame(level(JOKER_BOARD));
 
-      s = tap(s, packed(0, 0)); // joker
-      s = tap(s, packed(0, 1)); // +5 → passa do alvo 4
+      s = tap(s, packed(0, 0), 5); // devia ser 3
+      s = tap(s, packed(0, 1)); // +2 → 5+2 = 7
 
-      expect(s.selection).toHaveLength(1);
-      expect(s.rejection).toBe("joker-cap");
+      expect(s.moves).toBe(1);
+      // O tabuleiro esvaziou-se cedo de mais: sobra um 2 sem parceiro possível.
+      expect(isFinished(s)).toBe(false);
     });
 
-    it("o alvo sem joker continua a ser 7", () => {
-      const s = startGame(level(BOARD));
-      expect(remainingToTarget(s)).toBe(7);
+    it("tocar outra vez no joker troca o valor sem desfazer a seleção", () => {
+      let s = startGame(level(JOKER_BOARD));
+
+      s = tap(s, packed(0, 0), 5);
+      s = tap(s, packed(0, 0), 3);
+
+      expect(s.selection).toHaveLength(1);
+      expect(s.jokerAs).toBe(3);
+    });
+
+    it("recusa a peça que passaria de 7", () => {
+      let s = startGame(level([[0, 5], [6]] as Board));
+
+      s = tap(s, packed(0, 0), 6);
+      s = tap(s, packed(0, 1)); // +5 → 11
+
+      expect(s.selection).toHaveLength(1);
+      expect(s.rejection).toBe("over-target");
+    });
+
+    it("o valor escolhido não sobrevive à jogada nem ao desfazer", () => {
+      let s = startGame(level(JOKER_BOARD));
+
+      s = tap(s, packed(0, 0), 3);
+      expect(s.jokerAs).toBe(3);
+
+      s = undo(s);
+      expect(s.jokerAs).toBeUndefined();
+      expect(s.selection).toEqual([]);
+    });
+
+    it("limpar a seleção também limpa o valor", () => {
+      let s = tap(startGame(level(JOKER_BOARD)), packed(0, 0), 4);
+      s = clearSelection(s);
+
+      expect(s.jokerAs).toBeUndefined();
     });
   });
 

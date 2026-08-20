@@ -45,29 +45,11 @@
   flex: 1;
 }
 
-/*
- * O valor obrigatório do joker está **sempre** à vista, não só durante a
- * seleção. É a conta que o playtest da Fase 6 provou não se descobrir a jogar.
- */
-.joker-valor {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--surface-alt);
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.joker-valor b {
-  font-size: 15px;
-}
-
 /* ─── Tabuleiro ───────────────────────────────────────────────────────────── */
 
 .palco {
+  /* Contexto de posicionamento do seletor do joker, que ancora à peça. */
+  position: relative;
   display: grid;
   place-items: center;
   min-height: 0;
@@ -291,4 +273,90 @@
   color: var(--ink-muted);
   font-size: 14px;
   font-variant-numeric: tabular-nums;
+}
+
+/* ─── O seletor do joker ──────────────────────────────────────────────────── */
+
+/*
+ * Abre colado à peça, porque é aí que os olhos estão. A alternativa — um botão
+ * de confirmação noutro sítio do ecrã — obrigava o jogador a sair do tabuleiro
+ * para fechar uma decisão que é sobre o tabuleiro.
+ */
+.joker-picker {
+  position: absolute;
+  z-index: 10;
+  padding: 10px 12px 12px;
+  border-radius: var(--raio);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--sombra);
+}
+
+.joker-picker-titulo {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.joker-picker-grelha {
+  display: grid;
+  grid-template-columns: repeat(6, auto);
+  gap: 6px;
+}
+
+.joker-opcao {
+  display: grid;
+  place-items: center;
+  padding: 3px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--t-ui) linear;
+}
+
+.joker-opcao:hover {
+  background: var(--surface-alt);
+}
+
+.joker-opcao[aria-current="true"] {
+  background: var(--surface-alt);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.joker-opcao .peca {
+  position: static;
+  transform: none;
+  cursor: pointer;
+}
+
+/* Em ecrãs estreitos as seis faces não cabem numa linha. */
+@media (max-width: 420px) {
+  .joker-picker-grelha {
+    grid-template-columns: repeat(3, auto);
+  }
+}
+
+/*
+ * O joker com valor escolhido mostra-o. Sem isto o jogador escolhe 5, junta
+ * peças, e a meio já não se lembra do que escolheu — que é justamente a decisão
+ * de que o nível depende.
+ */
+.peca.joker-escolhido::before {
+  content: attr(data-joker-as);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--lado-real) * 0.44);
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.peca.joker-escolhido .glifo {
+  opacity: 0.25;
+  transform: translate(28%, -28%) scale(0.42);
 }

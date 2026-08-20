@@ -25,12 +25,8 @@ Não se rediscute. Fica aqui para não se voltar a discutir por engano.
 
 E uma precisão sobre o plano §3.1, que a Fase 8 resolveu:
 
-> A eliminação automática mantém-se **sempre**. O que muda com joker é o alvo:
-> as faces fixas têm de somar `7 − valor do joker`, não 7.
-
-Ver §5.2. O plano dizia "ao atingir 7" a pensar num tabuleiro sem joker; com
-joker o alvo é outro, e é isso — e não a eliminação automática — que estava
-errado.
+> A eliminação automática mantém-se **sempre**, joker incluído. O que o joker
+> precisa é que o seu valor seja escolhido **no momento do toque** — ver §5.2.
 
 ---
 
@@ -44,7 +40,7 @@ errado.
 | Formato | **Desktop primeiro**, com dimensionamento fluido |
 | Âmbito | Núcleo jogável **e** meta-jogo |
 | Pontuação | Também na campanha, mas **só no fim** e sem combos |
-| Aprendizagem | **Os níveis ensinam.** Sem tutorial guiado, nem para o joker |
+| Aprendizagem | **Os níveis ensinam.** Sem tutorial guiado, exceto o joker |
 | Campanha | **Lista por banda**, sequencial. Sem mapa com percurso |
 
 ### 2.1 A direção de arte, e o que ela proíbe
@@ -305,37 +301,47 @@ para isso.
 - A dica é um botão **separado e com contador visível** — é o recurso escasso, e
   tem de se ver que é.
 
-### 5.2 O joker não precisa de tratamento especial
+### 5.2 O joker: escolher o valor ao tocar
 
-O valor do joker está globalmente determinado (spec §2.6): só um número entre 1 e
-6 permite esvaziar o tabuleiro. Logo **também só existe uma soma correta para as
-faces fixas de um grupo com joker** — `7 − valor`.
+O joker é a única peça cujo valor o jogador decide, e **só um valor esvazia o
+tabuleiro** (spec §2.6). O jogo deixa escolher qualquer um, e escolher mal não
+bloqueia na hora: o tabuleiro fica insolúvel em silêncio e só falha no fim.
 
-Pondo o teto aí, o joker comporta-se como qualquer outra peça: acumula-se até ao
-alvo e elimina sozinho. Não há botão, não é preciso mostrar o valor, e não há
-tutorial a dar.
+**É daí que vem toda a dificuldade das bandas com joker**, e é por isso que essa
+liberdade se mantém. Medido: um joker em 12 peças custa −0,77 de sobrevivência, e
+num tabuleiro típico da banda `denso` **77% das sequências acabam bloqueadas**.
+
+Tocar no joker abre a escolha das seis faces, colada à peça:
 
 ```
-seleção: ✳ + 1
-faltam 3
+        ┌─────────────────────┐
+        │    O JOKER VALE     │
+        │  ⚀ ⚁ ⚂ ⚃ ⚄ ⚅  │
+        └─────────────────────┘
+               [ ✳ ]
 ```
 
-**Porque é que isto não é óbvio.** `isValidGroup` aceita, com joker, qualquer soma
-fixa entre 1 e 6 — é a condição do motor, e a primeira versão desta UI leu-a como
-se fosse o teto da seleção. Com o teto em 6, a seleção fica válida logo à primeira
-peça encostada ao joker, e a eliminação automática gasta-o com o valor que essa
-peça deixar. A correção inicial foi um botão de confirmação; **era a solução
-errada para o problema certo**.
+Escolhido o valor, o joker passa a mostrá-lo e comporta-se como uma peça normal:
+acumula-se até 7 e elimina sozinho.
 
-Com o teto no valor obrigatório, a ambiguidade desaparece por construção: juntar
-mais peças só aumenta a soma, portanto nunca há duas seleções válidas diferentes.
+**Porque é que a escolha é no toque, e não uma confirmação no fim.** Esta fase
+tentou três desenhos antes deste, e vale a pena registar porquê:
 
-**O que se perde**, e é uma escolha e não um descuido: a jogada que mata o
-tabuleiro em silêncio, que o plano §2.6 desenhou de propósito. Já era
-incompatível com o piso de justiça — tanto que as bandas com joker o excluem da
-verificação — e contraria a direção limpa e intuitiva desta fase. A decisão que
-torna o joker interessante mantém-se intacta: continua a ser preciso descobrir
-**qual** grupo atinge o alvo, e há vários candidatos.
+| Tentativa | Problema |
+|---|---|
+| Eliminar ao primeiro grupo válido | O joker gastava-se com a primeira peça encostada, ao valor que ela deixasse. O jogador nunca chegava a escolher |
+| Botão de confirmação no rodapé | Resolvia a ambiguidade, mas obrigava a sair do tabuleiro para fechar uma decisão sobre o tabuleiro — e a razão do botão não se lia |
+| Teto em `7 − valor obrigatório` | Sem ambiguidade e sem botão, mas **removia a possibilidade de errar**: a banda `denso` passou de 0,141 para 0,957 de sobrevivência |
+
+Escolher no toque resolve as três de uma vez. A ambiguidade morre na origem —
+com o valor fixado, `✳5 + 2` é a única leitura possível — e a liberdade de errar
+mantém-se intacta.
+
+**As seis opções aparecem sempre.** Esconder as que não dão em nada seria dar a
+resposta, e a resposta é o puzzle.
+
+**O valor obrigatório nunca é mostrado.** Descobri-lo — somar o tabuleiro, tirar
+o módulo 7 — é a decisão que o joker oferece.
 
 ### 5.3 Modo tempo
 
@@ -346,15 +352,18 @@ loop de reforço do plano §6.3 só funciona se o jogador ligar a jogada ao pré
 Sem botão de undo. Não é restrição escondida: os níveis deste modo são
 greedy-safe e não há como bloquear, portanto não há nada que desfazer.
 
-### 5.4 O tutorial do joker deixou de ser preciso
+### 5.4 Tutorial do joker, obrigatório
 
-O plano §2.6 exige um tutorial dedicado, e o playtest da Fase 6 confirmou que a
-regra do valor não se descobre a jogar. Ambos partiam do princípio de que o
-jogador tem de **saber** o valor para não o gastar mal.
+O plano §2.6 exige-o, e continua a fazer falta: o jogador tem de perceber que
+**existe um valor certo e um errado**, e que o errado não falha à vista.
 
-Com o teto em `7 − valor` (§5.2) já não há como o gastar mal, portanto não há o
-que ensinar. O joker aparece, encaixa como as outras peças, e a única diferença
-que o jogador nota é que não tem pintas.
+O que o tutorial ensina é a **regra** — a soma do tabuleiro é múltipla de 7,
+portanto o joker vale o que falta — e nunca a resposta de um nível concreto. E
+deixa errar num tabuleiro pequeno, onde a consequência chega em duas jogadas em
+vez de dez.
+
+O seletor de valor (§5.2) já ensina metade sozinho: ver seis faces e escolher uma
+explica o que o joker é sem uma linha de texto.
 
 ### 5.5 A pontuação da campanha, e a armadilha que ela tem
 

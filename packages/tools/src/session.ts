@@ -38,6 +38,9 @@ export interface Sessao {
   /** Quantas dicas exigiram recalcular por o jogador ter saído da solução guardada. */
   readonly dicasCalculadas: number;
 
+  /** Valor que o jogador deu ao joker nesta seleção. */
+  readonly jokerAs?: number | undefined;
+
   readonly mensagem: string;
 }
 
@@ -51,6 +54,7 @@ export const iniciar = (level: Level): Sessao => ({
   reinicios: 0,
   dicas: 0,
   dicasCalculadas: 0,
+  jokerAs: undefined,
   mensagem: "",
 });
 
@@ -92,96 +96,96 @@ export const selecaoTemJoker = (
 export const valorDoJoker = jokerValue;
 
 /**
- * A soma que as faces fixas têm de atingir.
+ * Soma da seleção, contando o joker pelo valor que o jogador lhe deu.
  *
- * Sem joker é 7. **Com joker é `7 − valor do joker`**: como o valor está
- * globalmente determinado (plano §2.6), também está determinada a soma correta
- * das fixas — e a partir daí o joker acumula-se e elimina como qualquer outro
- * grupo.
+ * O valor do joker está globalmente determinado (plano §2.6) — só um esvazia o
+ * tabuleiro — mas o jogo **deixa escolher qualquer um**, e escolher mal não
+ * bloqueia na hora. É daí que vem a dificuldade das bandas com joker.
  */
-export function alvoDaSelecao(b: Board, temJoker: boolean): number {
-  if (!temJoker) return TARGET;
-  const obrigatorio = jokerValue(b);
-  return obrigatorio === undefined ? TARGET - 1 : TARGET - obrigatorio;
-}
+export const somaTotal = (s: Sessao): number =>
+  somaDaSelecao(s.board, s.selecao) + (s.jokerAs ?? 0);
 
 /**
- * Tocar numa célula acumula-a na seleção; tocar outra vez retira-a.
+ * Tocar numa célula acumula-a na seleção; tocar outra vez retira-a. Ao chegar a
+ * 7, elimina.
  *
- * Ao atingir um grupo válido, elimina automaticamente — é o modelo de interação
- * que o plano §3.1 fixa para a UI, e é aqui que se experimenta antes de o
- * construir a sério.
+ * **No joker, `jokerAs` é obrigatório** — na consola escreve-se `a1=5`. Escolher
+ * o valor no momento do toque é o que dispensa uma tecla de confirmação: com o
+ * valor fixado, a seleção volta a ter alvo exato.
  */
-export function tocar(s: Sessao, p: Packed): Sessao {
+export function tocar(s: Sessao, p: Packed, jokerAs?: number): Sessao {
   if (terminado(s)) return { ...s, mensagem: "o tabuleiro já está limpo" };
 
-  if (cellAt(s.board, p) === undefined) {
+  const cell = cellAt(s.board, p);
+  if (cell === undefined) {
     return { ...s, mensagem: "não há peça nessa coordenada" };
   }
 
-  const ja = s.selecao.includes(p);
+  const ehJoker = cell === JOKER;
 
-  if (ja) {
+  if (ehJoker && (jokerAs === undefined || jokerAs < 1 || jokerAs > TARGET - 1)) {
+    return {
+      ...s,
+      mensagem: "o joker precisa de valor — escreve por exemplo a1=5",
+    };
+  }
+
+  if (s.selecao.includes(p)) {
+    if (ehJoker) return { ...s, jokerAs, mensagem: "" };
     return { ...s, selecao: s.selecao.filter((q) => q !== p), mensagem: "" };
   }
 
   const selecao = [...s.selecao, p];
+  const escolhido = ehJoker ? jokerAs : s.jokerAs;
 
   /*
    * Uma peça que faça a soma passar de 7 é **recusada**, em vez de aceite e
-   * deixada a atolar a seleção.
-   *
-   * Não é indulgência: como o mínimo de uma face é 1 e o alvo é exatamente 7, a
-   * soma só cresce, portanto uma seleção acima de 7 nunca mais pode dar grupo
-   * válido. Aceitá-la só deixaria o jogador num estado morto do qual tem de sair
-   * a desfazer à mão — foi o que aconteceu ao primeiro teste desta ferramenta,
-   * e é precisamente o género de coisa que esta fase existe para apanhar antes
-   * de estar numa UI.
+   * deixada a atolar a seleção. Como as faces são >= 1 e o alvo é exato, a soma
+   * só cresce: acima de 7 a seleção nunca mais dá grupo válido.
    */
-  const somaNova = somaDaSelecao(s.board, selecao);
-  const jokerNovo = selecaoTemJoker(s.board, selecao);
-  const teto = alvoDaSelecao(s.board, jokerNovo);
+  const total = somaDaSelecao(s.board, selecao) + (escolhido ?? 0);
 
-  if (somaNova > teto) {
-    return {
-      ...s,
-      mensagem: `passava de ${teto} — essa peça daria ${somaNova}`,
-    };
+  if (total > TARGET) {
+    return { ...s, mensagem: `passava de 7 — essa peça daria ${total}` };
   }
 
   const grupo = toGroup(selecao);
+  const base = { ...s, selecao, jokerAs: escolhido };
 
-  if (somaNova === teto && isValidGroup(s.board, grupo)) {
+  if (total === TARGET && isValidGroup(s.board, grupo)) {
     return {
-      ...s,
+      ...base,
       board: applyMove(s.board, grupo),
       historico: [...s.historico, s.board],
       selecao: [],
+      jokerAs: undefined,
       jogadas: s.jogadas + 1,
       mensagem: "",
     };
   }
 
-  /*
-   * Chegou ao alvo mas não é grupo válido: só pode ser falta de conexão. Dizê-lo
-   * em vez de deixar o jogador a adivinhar qual das três condições de §3.1
-   * falhou.
-   */
   const mensagem =
-    somaNova === teto ? `soma ${teto}, mas as peças não estão todas ligadas` : "";
+    total === TARGET ? "soma 7, mas as peças não estão todas ligadas" : "";
 
-  return { ...s, selecao, mensagem };
+  return { ...base, mensagem };
 }
 
 export const limparSelecao = (s: Sessao): Sessao => ({
   ...s,
   selecao: [],
+  jokerAs: undefined,
   mensagem: "",
 });
 
 export function desfazer(s: Sessao): Sessao {
   if (s.selecao.length > 0) {
-    return { ...s, selecao: s.selecao.slice(0, -1), mensagem: "" };
+    const selecao = s.selecao.slice(0, -1);
+    return {
+      ...s,
+      selecao,
+      jokerAs: selecaoTemJoker(s.board, selecao) ? s.jokerAs : undefined,
+      mensagem: "",
+    };
   }
 
   const anterior = s.historico[s.historico.length - 1];
@@ -194,6 +198,7 @@ export function desfazer(s: Sessao): Sessao {
     board: anterior,
     historico: s.historico.slice(0, -1),
     selecao: [],
+    jokerAs: undefined,
     jogadas: s.jogadas - 1,
     undos: s.undos + 1,
     mensagem: "",
@@ -205,6 +210,7 @@ export const reiniciar = (s: Sessao): Sessao => ({
   board: s.level.board,
   historico: [],
   selecao: [],
+  jokerAs: undefined,
   jogadas: 0,
   reinicios: s.reinicios + 1,
   mensagem: "",

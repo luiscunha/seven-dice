@@ -19,7 +19,7 @@ pnpm check
 ```
 
 Node ≥ 20, pnpm 11.22.0 (fixado em `packageManager`). O `pnpm check` corre
-lint + typecheck + testes: **249 testes, ~15 s**. Se demorar muito mais do que
+lint + typecheck + testes: **269 testes, ~20 s**. Se demorar muito mais do que
 isso, ver "Armadilhas" no fim.
 
 Leituras, por esta ordem:
@@ -49,7 +49,7 @@ contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 | 5 | Métricas e pipeline | ✅ |
 | 6 | Renderer de consola | ✅ **gate fechado a Verde** |
 | 7 | Camada de sessão | ✅ |
-| 8 | UI web | por começar ← **é aqui que se avança** |
+| 8 | UI web | 🔨 **em curso** — tabuleiro jogável, falta meta-jogo e modo tempo |
 | 9 | Empacotamento | por começar |
 
 O motor está completo e é puro: `packages/engine/src/` não importa nada de Node,
@@ -92,45 +92,67 @@ Como cada jogada remove exatamente 7, qualquer tabuleiro limpo leva sempre
 
 ### Os dois achados que mudam a Fase 8
 
-**O teto da seleção com joker é `7 − valor do joker`, não 6.**
+**O valor do joker escolhe-se ao tocar nele.**
 
 O modelo de interação do plano §3.1 — tocar-a-acumular, elimina ao chegar a 7 —
-parecia incompatível com o joker: `isValidGroup` aceita qualquer soma fixa entre
-1 e 6, portanto a seleção ficava válida à primeira peça encostada e o joker
-gastava-se ao valor que essa peça deixasse. A primeira correção foi um botão de
-confirmação.
+não encaixa no joker sem ajuda: como ele preenche o que faltar, a seleção fica
+válida logo à primeira peça encostada, e o joker gasta-se ao valor que essa peça
+deixar. A Fase 8 tentou três desenhos:
 
-**Era a solução errada para o problema certo.** Como o valor do joker está
-globalmente determinado (§2.6), também está determinada a soma correta das fixas.
-Pondo o teto aí, o joker acumula-se e elimina como qualquer outro grupo: sem
-botão, sem mostrar o valor, e sem maneira de o gastar mal — porque juntar mais
-peças só aumenta a soma, e nunca há duas seleções válidas diferentes.
+| Tentativa | Porque falhou |
+|---|---|
+| Disparo automático | O jogador nunca chegava a escolher o valor |
+| Botão de confirmação | Obrigava a sair do tabuleiro; a razão do botão não se lia |
+| Teto em `7 − valor obrigatório` | Removia a possibilidade de errar — ver abaixo |
 
-O que se perde é a jogada que mata o tabuleiro em silêncio, que o §2.6 desenhou
-de propósito. Perde-se por escolha: já era incompatível com o piso de justiça
-(ver "contrariou os documentos" nº 2), e a decisão que torna o joker interessante
-mantém-se — continua a ser preciso descobrir **qual** grupo atinge o alvo.
+**A terceira foi a mais instrutiva, e a mais perigosa.** Impedir o valor errado
+parecia uma simplificação elegante: sem botão, sem números, sem tutorial. Mas
+medido depois, exaustivamente, num tabuleiro de 12 peças da banda `denso`:
 
-Consequência: **o tutorial dedicado ao joker do §2.6 deixa de ser necessário.**
+| Conjunto de jogadas | Sequências | Bloqueiam |
+|---|---|---|
+| Com o joker livre | 1175 | **77,0%** |
+| Com o joker forçado ao valor certo | 279 | **3,2%** |
+
+E na banda inteira, a sobrevivência passava de 0,141 para **0,957**. Toda a
+dificuldade das bandas com joker vinha da possibilidade de o gastar mal — é a
+medição nº 3 acima, lida ao contrário.
+
+**A solução é escolher o valor no momento do toque.** Um seletor com as seis
+faces abre em cima da peça; escolhido o valor, o joker comporta-se como uma peça
+normal e elimina sozinho ao chegar a 7. A ambiguidade morre na origem, não é
+preciso botão, e **a liberdade de errar mantém-se intacta**.
+
+O valor obrigatório nunca aparece no ecrã: descobri-lo é o puzzle. E o tutorial
+dedicado do §2.6 continua a fazer falta — ensina a regra, não a resposta.
+
+**Lição de método:** a segunda medição do gate da Fase 6 — "o valor do joker não
+se descobre a jogar" — foi tirada com um defeito presente e está contaminada.
+Quando uma conclusão de playtest vier de uma sessão onde algo estava partido,
+remede-se antes de a tratar como facto.
 
 ## O que se segue
 
-A **Fase 8** — UI web. A Fase 7 está feita: `packages/game/src/session/` tem
-`GameSession`, os dois modos, combos, pontuação e perfil, sem uma linha de DOM e
-sem uma leitura do relógio do sistema.
+A **Fase 8**, a meio. O tabuleiro joga-se ponta a ponta — seleção, animação em
+três tempos, undo, reinício, dicas, joker e fim de nível com selo. Falta a lista
+de níveis, o tutorial do joker, o modo tempo e o meta-jogo.
 
-Três coisas que a UI vai consumir e convém não redescobrir:
+```bash
+pnpm dev     # localhost:5173
+```
 
-- **`tap` não elimina automaticamente quando há joker na seleção** — `commit`
-  fecha-a. Repetir o disparo automático na UI reintroduz o defeito da Fase 6.
-- **`jokerInSelection`** devolve o par *valor que o joker toma* / *valor que tem
-  de valer*. É o que permite avisar antes de o jogador matar o tabuleiro.
-- **`isPending`** distingue um convite de um erro. Na consola isso foi a
-  diferença entre `▸` e `⚠`, e foi o que destravou o jogador.
+Enquanto não há lista, escolhe-se por query: `?banda=denso&nivel=20`.
 
-O tempo entra por parâmetro e o armazenamento por interface (`ProfileStorage`,
-que o `localStorage` satisfaz tal como está) — a Fase 9 troca-o por armazenamento
-nativo sem tocar na sessão.
+Duas coisas por resolver, que vieram de jogar e ainda não têm decisão:
+
+- **A dificuldade chega sempre aos ~78% do jogo**, em todas as bandas. No
+  `perito` são 15 jogadas com a primeira fatal à décima segunda. Não é afinável:
+  em 250 candidatos, o melhor está nos 65%. A ramificação de 33 grupos por jogada
+  não deixa errar cedo. Ver "O que fica por decidir".
+- **Os tabuleiros nunca enchem a base.** O preenchimento é 65–73% em todas as
+  bandas, e nunca sai um 7×7 cheio. O gerador já sabe fazê-lo — o parâmetro
+  `silhouetteProfile` existe desde a Fase 4 e **nenhuma banda o usa**. Com um
+  perfil plano, 120 candidatos dão até 100% de preenchimento.
 
 ---
 
@@ -316,7 +338,7 @@ Duas ressalvas honestas:
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 249 testes
+pnpm check                                    # lint + typecheck + 269 testes
 pnpm septet bands                               # as bandas e os seus critérios
 pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm septet verify                              # revalida o pack todo

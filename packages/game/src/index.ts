@@ -12,11 +12,13 @@
 
 export type {
   GameState,
+  JokerValue,
   HintResult,
   HintSource,
   TapRejection,
 } from "./session/GameSession";
 export {
+  JOKER_VALUES,
   clearSelection,
   hint,
   isFinished,
@@ -25,6 +27,7 @@ export {
   selectionSum,
   startGame,
   remainingToTarget,
+  selectionTotal,
   tap,
   undo,
 } from "./session/GameSession";

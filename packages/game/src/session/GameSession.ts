@@ -20,7 +20,6 @@ import {
   findSolution,
   isEmpty,
   isValidGroup,
-  jokerValue,
   toGroup,
 } from "@septet/engine";
 
@@ -30,7 +29,7 @@ export type TapRejection =
   | "no-piece"
   | "board-finished"
   | "over-target"
-  | "joker-cap";
+  | "joker-needs-value";
 
 export type HintSource = "stored" | "computed" | "none";
 
@@ -46,6 +45,12 @@ export interface GameState {
   readonly undos: number;
   readonly restarts: number;
   readonly hints: number;
+
+  /**
+   * O valor que o jogador deu ao joker nesta seleção. `undefined` enquanto o
+   * joker não estiver selecionado.
+   */
+  readonly jokerAs?: JokerValue;
 
   /** `undefined` quando o último toque foi aceite. */
   readonly rejection?: TapRejection;
@@ -80,51 +85,72 @@ export const selectionHasJoker = (
 ): boolean => selection.some((p) => cellAt(b, p) === JOKER);
 
 /**
- * A soma que as faces fixas da seleção têm de atingir.
+ * O valor que o joker toma **nesta jogada**, escolhido pelo jogador.
  *
- * Sem joker é `TARGET`, como sempre. **Com joker é `TARGET − valor do joker`** —
- * e é daí que vem toda a simplicidade do resto.
+ * É o coração do desenho de `[M 2.6]`: só um valor esvazia o tabuleiro, mas o
+ * jogo deixa escolher qualquer um — e escolher mal não bloqueia na hora. O
+ * tabuleiro fica insolúvel em silêncio e só falha no fim.
  *
- * O valor do joker está globalmente determinado (spec §2.6): só um número entre
- * 1 e 6 permite esvaziar o tabuleiro. Logo também só existe uma soma correta
- * para as fixas de um grupo com joker, e a partir daí o joker comporta-se como
- * qualquer outra peça — acumula-se até ao alvo e elimina.
+ * É daí que vem toda a dificuldade das bandas com joker. Medido: um joker em 12
+ * peças custa −0,77 de sobrevivência, e num tabuleiro típico da banda `denso`
+ * 77% das sequências acabam bloqueadas.
  *
- * `TARGET − 1` é o recuo para o caso em que já não há valor possível, que só
- * acontece num tabuleiro que já não fecha.
+ * **Escolher o valor ao tocar resolve a ambiguidade na origem.** Com o valor
+ * fixado, a seleção volta a ter um alvo exato — 7 — e elimina sozinha como
+ * qualquer outra, sem botão de confirmação. A alternativa era deixar o joker
+ * indefinido e perguntar no fim, e aí `✳ + 2` e `✳ + 2 + 2` eram ambas
+ * legítimas, sem o jogo poder adivinhar qual o jogador queria.
  */
-function targetFor(board: Board, hasJoker: boolean): number {
-  if (!hasJoker) return TARGET;
+export type JokerValue = 1 | 2 | 3 | 4 | 5 | 6;
 
-  const required = jokerValue(board);
-  return required === undefined ? TARGET - 1 : TARGET - required;
-}
+export const JOKER_VALUES: readonly JokerValue[] = [1, 2, 3, 4, 5, 6];
 
 /**
- * Tocar acumula; tocar outra vez retira. Ao atingir o alvo, elimina.
+ * Soma da seleção, **contando o joker pelo valor escolhido**.
  *
- * **Uma peça que faça a soma passar do alvo é recusada**, não aceite. Como as
- * faces são >= 1 e o alvo é exato, a soma só cresce: uma seleção acima do alvo
- * nunca mais dá grupo válido, e aceitá-la só deixaria o jogador a desfazer à mão.
- *
- * Isto vale **também com joker**, e é o que torna o joker gerível sem explicação
- * nenhuma. A primeira versão desta camada punha o teto em 6 — a condição que o
- * motor aceita — e aí a seleção ficava válida logo à primeira peça encostada ao
- * joker, obrigando a um botão de confirmação para o jogador poder juntar mais.
- * Com o teto no valor certo esse problema desaparece: nunca há duas seleções
- * válidas diferentes, porque juntar mais peças só aumenta a soma.
- *
- * O que se perde é a jogada que mata o tabuleiro em silêncio, que o plano §2.6
- * desenhou de propósito. Perde-se por escolha: essa jogada já era incompatível
- * com o piso de justiça — tanto que as bandas com joker o excluem — e a decisão
- * que torna o joker interessante mantém-se intacta, porque continua a ser preciso
- * descobrir **qual** grupo atinge o alvo.
+ * Sem valor escolhido o joker conta 0 — mas isso só acontece antes de ele entrar
+ * na seleção, porque tocar-lhe exige escolher.
  */
-export function tap(s: GameState, p: Packed): GameState {
-  if (isFinished(s)) return { ...s, rejection: "board-finished" };
-  if (cellAt(s.board, p) === undefined) return { ...s, rejection: "no-piece" };
+export function selectionTotal(s: GameState): number {
+  return selectionSum(s.board, s.selection) + (s.jokerAs ?? 0);
+}
 
+/** Quanto falta para a seleção fechar. */
+export const remainingToTarget = (s: GameState): number =>
+  TARGET - selectionTotal(s);
+
+/**
+ * Tocar acumula; tocar outra vez retira.
+ *
+ * **No joker, `jokerAs` é obrigatório** — é o valor que ele toma nesta jogada, e
+ * a interface pergunta-o no momento do toque. Tocar-lhe outra vez volta a
+ * perguntar, o que permite mudar de ideias sem desfazer a seleção toda.
+ *
+ * **Uma peça que faça a soma passar de 7 é recusada**, não aceite: as faces são
+ * >= 1 e a soma só cresce, portanto uma seleção acima de 7 nunca mais dá grupo
+ * válido, e aceitá-la só deixaria o jogador a desfazer à mão.
+ */
+export function tap(
+  s: GameState,
+  p: Packed,
+  jokerAs?: JokerValue,
+): GameState {
+  if (isFinished(s)) return { ...s, rejection: "board-finished" };
+
+  const cell = cellAt(s.board, p);
+  if (cell === undefined) return { ...s, rejection: "no-piece" };
+
+  const isJoker = cell === JOKER;
+
+  if (isJoker && jokerAs === undefined) {
+    return { ...s, rejection: "joker-needs-value" };
+  }
+
+  // Tocar outra vez numa peça normal retira-a. No joker, um toque novo troca o
+  // valor — retirá-lo faz-se a desfazer.
   if (s.selection.includes(p)) {
+    if (isJoker) return omitRejection(omitJoker(s, jokerAs));
+
     return omitRejection({
       ...s,
       selection: s.selection.filter((q) => q !== p),
@@ -132,31 +158,25 @@ export function tap(s: GameState, p: Packed): GameState {
   }
 
   const selection = [...s.selection, p];
-  const sum = selectionSum(s.board, selection);
-  const hasJoker = selectionHasJoker(s.board, selection);
-  const alvo = targetFor(s.board, hasJoker);
+  const escolhido = isJoker ? jokerAs : s.jokerAs;
+  const total = selectionSum(s.board, selection) + (escolhido ?? 0);
 
-  if (sum > alvo) {
-    return { ...s, rejection: hasJoker ? "joker-cap" : "over-target" };
+  if (total > TARGET) {
+    return { ...s, rejection: "over-target" };
   }
 
+  const seguinte = omitJoker({ ...s, selection }, escolhido);
   const group = toGroup(selection);
 
-  if (sum === alvo && isValidGroup(s.board, group)) {
-    return applyGroup(s, group);
+  if (total === TARGET && isValidGroup(s.board, group)) {
+    return applyGroup(seguinte, group);
   }
 
-  return omitRejection({ ...s, selection });
-}
-
-/** A soma que falta para a seleção atual fechar. Zero quando está no alvo. */
-export function remainingToTarget(s: GameState): number {
-  const hasJoker = selectionHasJoker(s.board, s.selection);
-  return targetFor(s.board, hasJoker) - selectionSum(s.board, s.selection);
+  return omitRejection(seguinte);
 }
 
 export const clearSelection = (s: GameState): GameState =>
-  omitRejection({ ...s, selection: [] });
+  omitRejection(semJoker({ ...s, selection: [] }));
 
 /**
  * Desfaz: primeiro a última peça tocada, depois a última jogada.
@@ -167,32 +187,41 @@ export const clearSelection = (s: GameState): GameState =>
  */
 export function undo(s: GameState): GameState {
   if (s.selection.length > 0) {
-    return omitRejection({ ...s, selection: s.selection.slice(0, -1) });
+    const selection = s.selection.slice(0, -1);
+    const aindaTemJoker = selectionHasJoker(s.board, selection);
+
+    return omitRejection(
+      aindaTemJoker ? { ...s, selection } : semJoker({ ...s, selection }),
+    );
   }
 
   const previous = s.history[s.history.length - 1];
   if (previous === undefined) return s;
 
-  return omitRejection({
-    ...s,
-    board: previous,
-    history: s.history.slice(0, -1),
-    selection: [],
-    moves: s.moves - 1,
-    undos: s.undos + 1,
-  });
+  return omitRejection(
+    semJoker({
+      ...s,
+      board: previous,
+      history: s.history.slice(0, -1),
+      selection: [],
+      moves: s.moves - 1,
+      undos: s.undos + 1,
+    }),
+  );
 }
 
 /** Reinício instantâneo, mesmo tabuleiro (plano §6.2). */
 export const restart = (s: GameState): GameState =>
-  omitRejection({
-    ...s,
-    board: s.level.board,
-    history: [],
-    selection: [],
-    moves: 0,
-    restarts: s.restarts + 1,
-  });
+  omitRejection(
+    semJoker({
+      ...s,
+      board: s.level.board,
+      history: [],
+      selection: [],
+      moves: 0,
+      restarts: s.restarts + 1,
+    }),
+  );
 
 export interface HintResult {
   readonly state: GameState;
@@ -252,20 +281,34 @@ function onStoredPath(s: GameState): boolean {
 }
 
 function applyGroup(s: GameState, group: Group): GameState {
-  return omitRejection({
-    ...s,
-    board: applyMove(s.board, group),
-    history: [...s.history, s.board],
-    selection: [],
-    moves: s.moves + 1,
-  });
+  return omitRejection(
+    semJoker({
+      ...s,
+      board: applyMove(s.board, group),
+      history: [...s.history, s.board],
+      selection: [],
+      moves: s.moves + 1,
+    }),
+  );
 }
 
-/**
+/*
  * `exactOptionalPropertyTypes` não deixa atribuir `undefined` a uma propriedade
- * opcional, e espalhar `rejection: undefined` seria isso. Retira-se a chave.
+ * opcional, e espalhar `rejection: undefined` seria isso. Retiram-se as chaves.
  */
+
 function omitRejection(s: GameState & { rejection?: TapRejection }): GameState {
   const { rejection: _ignored, ...rest } = s;
   return rest;
+}
+
+/** Um joker escolhido só vale para a seleção em curso. */
+function semJoker(s: GameState): GameState {
+  const { jokerAs: _ignored, ...rest } = s;
+  return rest;
+}
+
+/** Guarda o valor escolhido, ou tira a chave quando não há joker na seleção. */
+function omitJoker(s: GameState, valor: JokerValue | undefined): GameState {
+  return valor === undefined ? semJoker(s) : { ...s, jokerAs: valor };
 }

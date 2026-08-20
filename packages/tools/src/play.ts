@@ -49,6 +49,7 @@ const escrever = (s: string): void => {
 const AJUDA = `
   b2          toca na peça (coluna por letra, linha a partir da base)
   b2 c2 c3    toca em várias de uma vez
+  a1=5        no joker, escolhe o valor que ele toma nesta jogada
   z           desfaz — a última peça tocada, ou a última jogada
   c           limpa a seleção
   r           reinicia o nível

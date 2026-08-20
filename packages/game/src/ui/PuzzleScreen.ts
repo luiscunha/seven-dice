@@ -24,14 +24,16 @@ import {
   undoPuzzle,
   usePuzzleHint,
 } from "../session/PuzzleSession";
+import type { JokerValue } from "../session/GameSession";
 import {
   isFinished,
   remainingToTarget,
-  selectionSum,
+  selectionTotal,
   tap,
 } from "../session/GameSession";
 import { moveScore } from "../session/scoring";
 import { BoardView } from "./BoardView";
+import { JokerPicker } from "./JokerPicker";
 
 const SELO_TEXTO: Readonly<Record<string, string>> = {
   perfect: "Perfeito",
@@ -51,10 +53,12 @@ export interface OpcoesPuzzleScreen {
 export class PuzzleScreen {
   private readonly raiz: HTMLElement;
   private readonly view: BoardView;
+  private readonly picker: JokerPicker;
   private readonly opcoes: OpcoesPuzzleScreen;
 
   private estado: PuzzleState;
   private pontos = 0;
+  private jokerPendente: Packed | undefined;
 
   private readonly elTitulo: HTMLElement;
   private readonly elMeta: HTMLElement;
@@ -123,6 +127,9 @@ export class PuzzleScreen {
     this.raiz.append(topo, palco, rodape);
 
     this.view = new BoardView(palco, { aoTocar: (p) => void this.tocar(p) });
+    this.picker = new JokerPicker(palco, {
+      aoEscolher: (valor) => void this.escolherJoker(valor),
+    });
     this.view.dimensionarPara(level.board);
     this.view.montar(level.board);
 
@@ -140,20 +147,36 @@ export class PuzzleScreen {
   }
 
   destruir(): void {
+    this.picker.destruir();
     this.view.destruir();
     this.raiz.remove();
   }
 
   /* ─── ações ─────────────────────────────────────────────────────────────── */
 
-  private async tocar(p: Packed): Promise<void> {
+  private async tocar(p: Packed, jokerAs?: JokerValue): Promise<void> {
     const antes = this.estado.game;
     if (isFinished(antes)) return;
 
+    /*
+     * O joker não entra na seleção sem valor: o toque abre a escolha, e é a
+     * escolha que faz a jogada. É o que dispensa um botão de confirmação.
+     */
+    if (cellAt(antes.board, p) === JOKER && jokerAs === undefined) {
+      const caixa = this.view.caixaDe(p);
+      if (caixa !== undefined) {
+        this.jokerPendente = p;
+        this.picker.abrir(caixa, antes.jokerAs);
+      }
+      return;
+    }
+
     // O grupo é a seleção mais a peça tocada — capturado antes, porque a sessão
     // limpa a seleção assim que a jogada acontece.
-    const candidato = [...antes.selection, p];
-    const jogo = tap(antes, p);
+    const candidato = antes.selection.includes(p)
+      ? [...antes.selection]
+      : [...antes.selection, p];
+    const jogo = tap(antes, p, jokerAs);
 
     this.estado = { ...this.estado, game: jogo };
     this.view.marcarSugestao(undefined);
@@ -163,6 +186,14 @@ export class PuzzleScreen {
     }
 
     this.pintar();
+  }
+
+  private async escolherJoker(valor: JokerValue): Promise<void> {
+    const p = this.jokerPendente;
+    this.jokerPendente = undefined;
+    if (p === undefined) return;
+
+    await this.tocar(p, valor);
   }
 
   private async animarJogada(candidato: readonly Packed[]): Promise<void> {
@@ -217,6 +248,9 @@ export class PuzzleScreen {
     this.pintarSelecao();
     this.view.marcarSelecao(new Set(jogo.selection));
 
+    const joker = jogo.selection.find((p) => cellAt(jogo.board, p) === JOKER);
+    this.view.marcarJoker(joker, jogo.jokerAs);
+
     this.btDesfazer.disabled =
       jogo.selection.length === 0 && jogo.history.length === 0;
     this.btDica.disabled = this.estado.hintsLeft <= 0 || isFinished(jogo);
@@ -244,11 +278,14 @@ export class PuzzleScreen {
     const parcelas = jogo.selection
       .map((p) => {
         const v = cellAt(jogo.board, p);
-        return v === JOKER ? "✳" : String(v ?? "?");
+        // O joker mostra-se pelo valor que o jogador lhe deu: é isso que conta
+        // para a soma, e é isso que ele precisa de reler.
+        if (v === JOKER) return jogo.jokerAs === undefined ? "✳" : `✳${String(jogo.jokerAs)}`;
+        return String(v ?? "?");
       })
       .join(" + ");
 
-    const soma = selectionSum(jogo.board, jogo.selection);
+    const soma = selectionTotal(jogo);
 
     /*
      * Com uma peça só, "3 = 3" não informa ninguém — e com o joker sozinho dava
@@ -268,21 +305,18 @@ export class PuzzleScreen {
   }
 
   /**
-   * O aviso diz o que falta, e mais nada.
+   * O aviso diz o que falta, e **nunca a resposta**.
    *
-   * Com o teto no valor certo do joker, deixou de haver estado ambíguo por
-   * explicar: a seleção ou ainda não chegou ao alvo, ou fechou sozinha. O
-   * triângulo fica reservado a erros a sério — uma peça que passa do alvo.
+   * O valor que o joker *tem* de tomar para o tabuleiro fechar fica de fora de
+   * propósito: descobri-lo é o desafio, e revelá-lo anulava a única decisão que
+   * o joker oferece (`[M 2.6]`).
    */
   private pintarAviso(): void {
     const jogo = this.estado.game;
 
-    if (jogo.rejection === "over-target" || jogo.rejection === "joker-cap") {
+    if (jogo.rejection === "over-target") {
       this.elAviso.dataset["tipo"] = "erro";
-      this.elAviso.replaceChildren(
-        marca("⚠"),
-        texto("essa peça passava do que falta"),
-      );
+      this.elAviso.replaceChildren(marca("⚠"), texto("essa peça passava de 7"));
       return;
     }
 

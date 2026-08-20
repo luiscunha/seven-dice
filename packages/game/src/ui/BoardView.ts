@@ -199,6 +199,32 @@ export class BoardView {
     this.fecharAnimacao = undefined;
   }
 
+  /** Retângulo de uma peça no ecrã — o seletor do joker ancora-se nele. */
+  caixaDe(p: Packed): DOMRect | undefined {
+    return this.pecas.get(p)?.getBoundingClientRect();
+  }
+
+  /**
+   * Mostra no joker o valor que o jogador lhe deu nesta seleção.
+   *
+   * Sem isto o jogador escolhe 5, junta peças, e a meio já não se lembra do que
+   * escolheu — que é precisamente a decisão que o nível inteiro depende.
+   */
+  marcarJoker(p: Packed | undefined, valor: number | undefined): void {
+    for (const el of this.pecas.values()) {
+      el.classList.remove("joker-escolhido");
+      delete el.dataset["jokerAs"];
+    }
+
+    if (p === undefined || valor === undefined) return;
+
+    const el = this.pecas.get(p);
+    if (el === undefined) return;
+
+    el.classList.add("joker-escolhido");
+    el.dataset["jokerAs"] = String(valor);
+  }
+
   marcarSelecao(selecao: ReadonlySet<Packed>): void {
     for (const [p, el] of this.pecas) {
       el.classList.toggle("selecionada", selecao.has(p));
