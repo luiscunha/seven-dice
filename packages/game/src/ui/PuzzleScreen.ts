@@ -25,11 +25,8 @@ import {
   usePuzzleHint,
 } from "../session/PuzzleSession";
 import {
-  commit,
   isFinished,
-  isPending,
-  jokerInSelection,
-  jokerRequiredValue,
+  remainingToTarget,
   selectionSum,
   tap,
 } from "../session/GameSession";
@@ -61,12 +58,10 @@ export class PuzzleScreen {
 
   private readonly elTitulo: HTMLElement;
   private readonly elMeta: HTMLElement;
-  private readonly elJoker: HTMLElement;
   private readonly elSoma: HTMLElement;
   private readonly elAviso: HTMLElement;
   private readonly elFim: HTMLElement;
 
-  private readonly btEliminar: HTMLButtonElement;
   private readonly btDesfazer: HTMLButtonElement;
   private readonly btReiniciar: HTMLButtonElement;
   private readonly btDica: HTMLButtonElement;
@@ -86,12 +81,11 @@ export class PuzzleScreen {
     this.elTitulo = document.createElement("h1");
     this.elMeta = document.createElement("div");
     this.elMeta.className = "meta";
-    this.elJoker = document.createElement("div");
 
     const espaco = document.createElement("div");
     espaco.className = "espaco";
 
-    topo.append(this.elTitulo, espaco, this.elJoker, this.elMeta);
+    topo.append(this.elTitulo, espaco, this.elMeta);
 
     /* ── palco ── */
     const palco = document.createElement("div");
@@ -115,12 +109,11 @@ export class PuzzleScreen {
     const acoes = document.createElement("div");
     acoes.className = "acoes";
 
-    this.btEliminar = botao("Eliminar", "primario");
     this.btDesfazer = botao("Desfazer");
     this.btReiniciar = botao("Reiniciar");
     this.btDica = botao("Dica");
 
-    acoes.append(this.btEliminar, this.btDesfazer, this.btReiniciar, this.btDica);
+    acoes.append(this.btDesfazer, this.btReiniciar, this.btDica);
 
     this.elFim = document.createElement("div");
     this.elFim.className = "fim";
@@ -133,7 +126,6 @@ export class PuzzleScreen {
     this.view.dimensionarPara(level.board);
     this.view.montar(level.board);
 
-    this.btEliminar.addEventListener("click", () => void this.confirmar());
     this.btDesfazer.addEventListener("click", () => {
       this.desfazer();
     });
@@ -170,17 +162,6 @@ export class PuzzleScreen {
       await this.animarJogada(candidato);
     }
 
-    this.pintar();
-  }
-
-  private async confirmar(): Promise<void> {
-    const antes = this.estado.game;
-    if (!isPending(antes)) return;
-
-    const candidato = [...antes.selection];
-    this.estado = { ...this.estado, game: commit(antes) };
-
-    await this.animarJogada(candidato);
     this.pintar();
   }
 
@@ -233,11 +214,9 @@ export class PuzzleScreen {
       texto(`${String(this.pontos)} pontos`),
     );
 
-    this.pintarJoker();
     this.pintarSelecao();
     this.view.marcarSelecao(new Set(jogo.selection));
 
-    this.btEliminar.hidden = !isPending(jogo);
     this.btDesfazer.disabled =
       jogo.selection.length === 0 && jogo.history.length === 0;
     this.btDica.disabled = this.estado.hintsLeft <= 0 || isFinished(jogo);
@@ -248,19 +227,6 @@ export class PuzzleScreen {
     );
 
     this.pintarFim();
-  }
-
-  private pintarJoker(): void {
-    const valor = jokerRequiredValue(this.estado.game.board);
-
-    if (valor === undefined) {
-      this.elJoker.replaceChildren();
-      this.elJoker.className = "";
-      return;
-    }
-
-    this.elJoker.className = "joker-valor";
-    this.elJoker.replaceChildren(texto("o joker vale"), forte(String(valor)));
   }
 
   private pintarSelecao(): void {
@@ -284,64 +250,47 @@ export class PuzzleScreen {
 
     const soma = selectionSum(jogo.board, jogo.selection);
 
-    this.elSoma.replaceChildren(
-      spanParcelas(`${parcelas} = `),
-      texto(String(soma)),
-    );
+    /*
+     * Com uma peça só, "3 = 3" não informa ninguém — e com o joker sozinho dava
+     * "✳ = 0", que é pior do que inútil. A soma corrente que o plano §3.1 exige
+     * aparece a partir da segunda peça, que é quando passa a haver conta.
+     */
+    if (jogo.selection.length === 1) {
+      this.elSoma.replaceChildren(spanParcelas(parcelas));
+    } else {
+      this.elSoma.replaceChildren(
+        spanParcelas(`${parcelas} = `),
+        texto(String(soma)),
+      );
+    }
 
     this.pintarAviso();
   }
 
   /**
-   * A mensagem tem de dizer **o que fazer**, não só o que se passa.
+   * O aviso diz o que falta, e mais nada.
    *
-   * Dizer "junta mais peças" quando o joker já está no valor obrigatório empurra
-   * o jogador para o erro exato que a pendência existe para evitar — foi o que
-   * aconteceu no playtest.
+   * Com o teto no valor certo do joker, deixou de haver estado ambíguo por
+   * explicar: a seleção ou ainda não chegou ao alvo, ou fechou sozinha. O
+   * triângulo fica reservado a erros a sério — uma peça que passa do alvo.
    */
   private pintarAviso(): void {
     const jogo = this.estado.game;
-    const joker = jokerInSelection(jogo);
 
-    if (joker !== undefined) {
-      this.elAviso.dataset["tipo"] = "convite";
-
-      if (joker.required === undefined) {
-        this.elAviso.replaceChildren(
-          marca("▸"),
-          texto(`o joker fica a ${String(joker.taking)}`),
-        );
-      } else if (joker.taking === joker.required) {
-        this.elAviso.replaceChildren(
-          marca("▸"),
-          texto(
-            `o joker fica a ${String(joker.taking)}, que é o valor certo`,
-          ),
-        );
-      } else {
-        this.elAviso.replaceChildren(
-          marca("▸"),
-          texto(
-            `ficaria a ${String(joker.taking)}, mas tem de valer ` +
-              `${String(joker.required)} — junta ou tira peças`,
-          ),
-        );
-      }
-      return;
-    }
-
-    if (jogo.rejection === "over-target") {
-      this.elAviso.dataset["tipo"] = "erro";
-      this.elAviso.replaceChildren(marca("⚠"), texto("essa peça passava de 7"));
-      return;
-    }
-
-    if (jogo.rejection === "joker-cap") {
+    if (jogo.rejection === "over-target" || jogo.rejection === "joker-cap") {
       this.elAviso.dataset["tipo"] = "erro";
       this.elAviso.replaceChildren(
         marca("⚠"),
-        texto("com joker, as fixas não passam de 6"),
+        texto("essa peça passava do que falta"),
       );
+      return;
+    }
+
+    const falta = remainingToTarget(jogo);
+
+    if (falta > 0) {
+      this.elAviso.dataset["tipo"] = "convite";
+      this.elAviso.replaceChildren(texto(`faltam ${String(falta)}`));
       return;
     }
 
@@ -401,12 +350,6 @@ function botao(rotulo: string, extra?: string): HTMLButtonElement {
 }
 
 const texto = (s: string): Text => document.createTextNode(s);
-
-function forte(s: string): HTMLElement {
-  const el = document.createElement("b");
-  el.textContent = s;
-  return el;
-}
 
 function marca(s: string): HTMLElement {
   const el = document.createElement("span");

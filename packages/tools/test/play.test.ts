@@ -20,13 +20,12 @@ import {
 import {
   desfazer,
   dica,
-  eliminar,
   iniciar,
   reiniciar,
-  selecaoPendente,
   selo,
   terminado,
   tocar,
+  alvoDaSelecao,
   valorDoJoker,
 } from "../src/session";
 import { avaliar } from "../src/candidate";
@@ -159,85 +158,57 @@ describe("seleção tocar-a-acumular", () => {
     expect(s.mensagem).toContain("9");
   });
 
-  it("com joker o teto das fixas é 6, e diz-se porquê", () => {
-    let s = iniciar(nivel([[0, 1, 6], [1]]));
 
-    s = tocar(s, packed(0, 0)); // joker
-    s = tocar(s, packed(0, 1)); // +1 → fixas 1
-    s = tocar(s, packed(0, 2)); // +6 → fixas 7, acima do teto de 6
-
-    expect(s.selecao).toHaveLength(2);
-    expect(s.mensagem).toContain("6");
-  });
 
   /*
-   * O joker não dispara sozinho — encontrado a jogar `meio-joker-000013`.
+   * O joker não precisa de tratamento especial.
    *
-   * Como `isValidGroup` aceita qualquer soma fixa entre 1 e 6, a eliminação
-   * automática gastava o joker com a primeira peça que lhe encostasse, ao valor
-   * que essa peça deixasse. O valor dele está globalmente determinado (plano
-   * §2.6), portanto isso não é uma jogada alternativa: é matar o tabuleiro.
+   * O valor dele está globalmente determinado (plano §2.6), logo também está
+   * determinada a soma que as fixas do grupo têm de atingir: `7 − valor`. Com o
+   * teto aí, acumula-se e elimina como qualquer outro grupo, e **não há maneira
+   * de o gastar mal**.
+   *
+   * A versão anterior punha o teto em 6 — a condição que o motor aceita — e por
+   * isso a seleção ficava válida à primeira peça encostada ao joker, o que
+   * obrigava a uma tecla de confirmação.
    */
   describe("seleção com joker (plano §2.6)", () => {
-    it("fica pendente em vez de eliminar, e avisa que o valor está errado", () => {
+    // fixas 2 + 2 = 4 → joker vale 3 → alvo das fixas é 4.
+    it("não elimina antes de as fixas atingirem o alvo", () => {
       let s = iniciar(nivel([[0, 2], [2]]));
 
       s = tocar(s, packed(0, 0)); // joker
-      s = tocar(s, packed(0, 1)); // +2 → fixas 2, já seria grupo válido
+      s = tocar(s, packed(0, 1)); // +2 → fixas 2, alvo 4
 
       expect(s.jogadas).toBe(0);
       expect(s.selecao).toHaveLength(2);
-      expect(s.mensagem).toContain("5"); // 7 − 2, o que o joker tomaria
-      expect(s.mensagem).toContain("tem de valer 3");
-      expect(selecaoPendente(s)).toBe(true);
     });
 
-    it("no valor obrigatório, a mensagem confirma em vez de sugerir mais peças", () => {
-      let s = iniciar(nivel([[0, 2], [2]]));
-
-      s = tocar(s, packed(0, 0)); // joker
-      s = tocar(s, packed(0, 1)); // +2
-      s = tocar(s, packed(1, 0)); // +2 → fixas 4, joker a 3
-
-      expect(s.jogadas).toBe(0);
-      expect(s.selecao).toHaveLength(3);
-      expect(s.mensagem).toContain("valor certo");
-      // O conselho que empurrava para o erro não pode reaparecer aqui.
-      expect(s.mensagem).not.toContain("junta");
-    });
-
-    it("`x` elimina a seleção pendente", () => {
+    it("elimina sozinho ao atingir o alvo", () => {
       let s = iniciar(nivel([[0, 2], [2]]));
 
       s = tocar(s, packed(0, 0));
       s = tocar(s, packed(0, 1));
-      s = tocar(s, packed(1, 0));
-      s = eliminar(s);
+      s = tocar(s, packed(1, 0)); // +2 → fixas 4 = alvo
 
       expect(s.jogadas).toBe(1);
-      expect(s.selecao).toEqual([]);
-      expect(terminado(s)).toBe(true); // as três peças eram o tabuleiro todo
+      expect(terminado(s)).toBe(true);
     });
 
-    it("`x` recusa uma seleção que ainda não faz grupo", () => {
-      let s = iniciar(nivel([[0, 2], [2]]));
-
-      s = tocar(s, packed(0, 0)); // só o joker — nunca forma grupo sozinho
-      s = eliminar(s);
-
-      expect(s.jogadas).toBe(0);
-      expect(s.mensagem).toContain("ainda não");
-    });
-
-    it("sem joker o disparo automático mantém-se", () => {
-      let s = iniciar(nivel(TABULEIRO));
+    it("recusa a peça que passaria do alvo", () => {
+      // fixas 5 + 6 = 11, 11 mod 7 = 4 → joker vale 3 → alvo 4.
+      let s = iniciar(nivel([[0, 5], [6]]));
 
       s = tocar(s, packed(0, 0));
-      s = tocar(s, packed(0, 1));
-      s = tocar(s, packed(1, 0));
+      s = tocar(s, packed(0, 1)); // +5 → passa de 4
 
-      expect(s.jogadas).toBe(1);
-      expect(selecaoPendente(s)).toBe(false);
+      expect(s.selecao).toHaveLength(1);
+      expect(s.mensagem).toContain("4");
+    });
+
+    it("sem joker o alvo continua a ser 7", () => {
+      expect(alvoDaSelecao(TABULEIRO, false)).toBe(7);
+      expect(alvoDaSelecao([[0, 2], [2]], true)).toBe(4);
     });
   });
 

@@ -14,11 +14,9 @@ import { boardKey, packed } from "@septet/engine";
 
 import {
   clearSelection,
-  commit,
   hint,
   isFinished,
-  isPending,
-  jokerInSelection,
+  remainingToTarget,
   restart,
   startGame,
   tap,
@@ -123,45 +121,61 @@ describe("GameSession", () => {
    * seleções diferentes são todas válidas, e eliminar à primeira rouba ao
    * jogador a única decisão que o joker oferece.
    */
+  /*
+   * O joker não precisa de tratamento especial na interação, e é isso que se
+   * fixa aqui.
+   *
+   * O valor dele está globalmente determinado (spec §2.6), logo também está
+   * determinada a soma que as fixas do grupo têm de atingir: `7 − valor`. Com o
+   * teto aí, o joker acumula-se e elimina como qualquer outro grupo — não há
+   * botão de confirmação, não é preciso mostrar o valor, e **não há maneira de o
+   * gastar mal**.
+   *
+   * A versão anterior punha o teto em 6, que é o que o motor aceita, e por isso
+   * a seleção ficava válida logo à primeira peça encostada ao joker.
+   */
   describe("seleção com joker", () => {
+    // fixas 2 + 2 = 4 → o joker vale 3, logo o alvo das fixas é 4.
     const JOKER_BOARD: Board = [[0, 2], [2]];
 
-    it("fica pendente em vez de eliminar", () => {
+    it("não elimina antes de as fixas atingirem o alvo", () => {
       let s = startGame(level(JOKER_BOARD));
 
       s = tap(s, packed(0, 0)); // joker
-      s = tap(s, packed(0, 1)); // +2 → já seria grupo válido
+      s = tap(s, packed(0, 1)); // +2 → fixas 2, alvo 4
 
       expect(s.moves).toBe(0);
-      expect(isPending(s)).toBe(true);
+      expect(s.selection).toHaveLength(2);
+      expect(remainingToTarget(s)).toBe(2);
     });
 
-    it("diz o que o joker toma e o que tem de valer", () => {
+    it("elimina sozinho quando o alvo é atingido", () => {
       let s = startGame(level(JOKER_BOARD));
 
       s = tap(s, packed(0, 0));
       s = tap(s, packed(0, 1));
-      expect(jokerInSelection(s)).toEqual({ taking: 5, required: 3 });
-
-      s = tap(s, packed(1, 0));
-      expect(jokerInSelection(s)).toEqual({ taking: 3, required: 3 });
-    });
-
-    it("`commit` fecha a seleção pendente", () => {
-      let s = startGame(level(JOKER_BOARD));
-
-      s = tap(s, packed(0, 0));
-      s = tap(s, packed(0, 1));
-      s = tap(s, packed(1, 0));
-      s = commit(s);
+      s = tap(s, packed(1, 0)); // +2 → fixas 4 = alvo
 
       expect(s.moves).toBe(1);
       expect(isFinished(s)).toBe(true);
     });
 
-    it("`commit` sem seleção válida não faz nada", () => {
-      const s = startGame(level(JOKER_BOARD));
-      expect(commit(tap(s, packed(0, 0))).moves).toBe(0);
+    it("recusa a peça que passaria do alvo do joker", () => {
+      // fixas 1 + 6 = 7 → o joker vale 7 − 0... 7 mod 7 = 0, portanto não há
+      // valor possível. Usa-se um tabuleiro com alvo baixo: fixas 5 + 6 = 11,
+      // 11 mod 7 = 4, joker = 3, alvo das fixas = 4.
+      let s = startGame(level([[0, 5], [6]] as Board));
+
+      s = tap(s, packed(0, 0)); // joker
+      s = tap(s, packed(0, 1)); // +5 → passa do alvo 4
+
+      expect(s.selection).toHaveLength(1);
+      expect(s.rejection).toBe("joker-cap");
+    });
+
+    it("o alvo sem joker continua a ser 7", () => {
+      const s = startGame(level(BOARD));
+      expect(remainingToTarget(s)).toBe(7);
     });
   });
 

@@ -46,7 +46,6 @@ transforma a tarde em dados.
 |---|---|
 | `b2` | toca na peça — coluna por letra, linha **a partir da base** |
 | `b2 c2 c3` | toca em várias de uma vez |
-| `x` | elimina a seleção pendente — só é preciso com joker |
 | `z` | desfaz: primeiro a última peça tocada, depois a última jogada |
 | `c` | limpa a seleção |
 | `r` | reinicia |
@@ -100,16 +99,14 @@ contra a planear.
 
 ### 5. O joker — 3 níveis de `meio-joker` ou `denso`
 
-O joker aparece como `*`. O valor obrigatório dele está no cabeçalho, como
-`joker = 3`, recalculado a cada jogada.
+O joker aparece como `*` e **comporta-se como qualquer outra peça**: acumula-se
+até a soma fechar e elimina sozinho.
 
-> **Isto mudou depois da primeira tarde de playtest.** A pergunta original era
-> "descobriste sozinho quanto vale?", e a resposta medida foi **não** — o valor
-> passou a estar à vista por isso. A pergunta que resta é a outra.
-
-A seleção com joker **não elimina sozinha**: fica pendente e fecha-se com `x`.
-Sem isso o joker gastava-se com a primeira peça que lhe encostasse, ao valor que
-essa peça deixasse.
+> **Isto mudou duas vezes desde a primeira tarde de playtest.** Primeiro passou a
+> exigir confirmação, porque a eliminação automática o gastava com a primeira
+> peça encostada. Depois percebeu-se que o problema era outro: o teto estava em
+> 6, quando devia estar em `7 − valor do joker`. Com o teto certo, não há
+> ambiguidade nenhuma a resolver — e não há maneira de o gastar mal.
 
 A pergunta:
 

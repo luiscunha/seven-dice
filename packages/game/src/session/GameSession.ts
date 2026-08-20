@@ -24,8 +24,6 @@ import {
   toGroup,
 } from "@septet/engine";
 
-/** Reexportado para a UI não ter de importar da engine só por causa disto. */
-export const jokerRequiredValue = jokerValue;
 
 /** Porque é que uma peça tocada não entrou na seleção. */
 export type TapRejection =
@@ -82,49 +80,45 @@ export const selectionHasJoker = (
 ): boolean => selection.some((p) => cellAt(b, p) === JOKER);
 
 /**
- * A seleção já faz um grupo válido e espera confirmação.
+ * A soma que as faces fixas da seleção têm de atingir.
  *
- * **Só acontece com joker.** Ver a nota em `tap`: é o que distingue um convite
- * de um erro, e a UI da fase 8 precisa da distinção para não desenhar um aviso
- * onde devia desenhar um botão.
- */
-export const isPending = (s: GameState): boolean =>
-  s.selection.length > 0 && isValidGroup(s.board, toGroup(s.selection));
-
-/**
- * O valor que o joker tomaria na seleção atual, e o que ele **tem** de valer.
+ * Sem joker é `TARGET`, como sempre. **Com joker é `TARGET − valor do joker`** —
+ * e é daí que vem toda a simplicidade do resto.
  *
- * Sem joker na seleção, ambos são `undefined`. A comparação entre os dois é o
- * que permite à UI dizer ao jogador se está prestes a matar o tabuleiro — o
- * defeito que o playtest da fase 6 expôs.
+ * O valor do joker está globalmente determinado (spec §2.6): só um número entre
+ * 1 e 6 permite esvaziar o tabuleiro. Logo também só existe uma soma correta
+ * para as fixas de um grupo com joker, e a partir daí o joker comporta-se como
+ * qualquer outra peça — acumula-se até ao alvo e elimina.
+ *
+ * `TARGET − 1` é o recuo para o caso em que já não há valor possível, que só
+ * acontece num tabuleiro que já não fecha.
  */
-export function jokerInSelection(
-  s: GameState,
-): { readonly taking: number; readonly required: number | undefined } | undefined {
-  if (!selectionHasJoker(s.board, s.selection)) return undefined;
+function targetFor(board: Board, hasJoker: boolean): number {
+  if (!hasJoker) return TARGET;
 
-  const sum = selectionSum(s.board, s.selection);
-  if (sum < 1 || sum > TARGET - 1) return undefined;
-
-  return { taking: TARGET - sum, required: jokerRequiredValue(s.board) };
+  const required = jokerValue(board);
+  return required === undefined ? TARGET - 1 : TARGET - required;
 }
 
 /**
- * Tocar acumula; tocar outra vez retira.
+ * Tocar acumula; tocar outra vez retira. Ao atingir o alvo, elimina.
  *
- * Duas decisões que vieram do playtest da fase 6 e não da especificação:
+ * **Uma peça que faça a soma passar do alvo é recusada**, não aceite. Como as
+ * faces são >= 1 e o alvo é exato, a soma só cresce: uma seleção acima do alvo
+ * nunca mais dá grupo válido, e aceitá-la só deixaria o jogador a desfazer à mão.
  *
- * 1. **Uma peça que faça a soma passar do alvo é recusada**, não aceite. Como as
- *    faces são >= 1 e o alvo é exato, a soma só cresce: uma seleção acima do alvo
- *    nunca mais dá grupo válido, e aceitá-la só deixa o jogador a desfazer à mão.
+ * Isto vale **também com joker**, e é o que torna o joker gerível sem explicação
+ * nenhuma. A primeira versão desta camada punha o teto em 6 — a condição que o
+ * motor aceita — e aí a seleção ficava válida logo à primeira peça encostada ao
+ * joker, obrigando a um botão de confirmação para o jogador poder juntar mais.
+ * Com o teto no valor certo esse problema desaparece: nunca há duas seleções
+ * válidas diferentes, porque juntar mais peças só aumenta a soma.
  *
- * 2. **Com joker, a eliminação não é automática.** `isValidGroup` aceita qualquer
- *    soma fixa entre 1 e 6, portanto a seleção fica válida logo à primeira peça
- *    encostada ao joker, e o joker gasta-se com o valor que essa peça deixar. Mas
- *    o valor dele está globalmente determinado (spec §2.6) — a escolha do jogador
- *    é *em que grupo* o gasta, e o disparo automático roubava-lha. Sem joker o
- *    problema não existe e o disparo automático fica, porque um grupo válido
- *    nunca é prefixo de outro.
+ * O que se perde é a jogada que mata o tabuleiro em silêncio, que o plano §2.6
+ * desenhou de propósito. Perde-se por escolha: essa jogada já era incompatível
+ * com o piso de justiça — tanto que as bandas com joker o excluem — e a decisão
+ * que torna o joker interessante mantém-se intacta, porque continua a ser preciso
+ * descobrir **qual** grupo atinge o alvo.
  */
 export function tap(s: GameState, p: Packed): GameState {
   if (isFinished(s)) return { ...s, rejection: "board-finished" };
@@ -140,30 +134,25 @@ export function tap(s: GameState, p: Packed): GameState {
   const selection = [...s.selection, p];
   const sum = selectionSum(s.board, selection);
   const hasJoker = selectionHasJoker(s.board, selection);
-  const cap = hasJoker ? TARGET - 1 : TARGET;
+  const alvo = targetFor(s.board, hasJoker);
 
-  if (sum > cap) {
+  if (sum > alvo) {
     return { ...s, rejection: hasJoker ? "joker-cap" : "over-target" };
   }
 
   const group = toGroup(selection);
 
-  if (isValidGroup(s.board, group) && !hasJoker) {
+  if (sum === alvo && isValidGroup(s.board, group)) {
     return applyGroup(s, group);
   }
 
   return omitRejection({ ...s, selection });
 }
 
-/**
- * Confirma a seleção pendente.
- *
- * Só é preciso com joker. Sem joker nenhuma seleção válida fica pendente,
- * portanto isto nunca lhe pega — e chamá-lo à toa é inofensivo.
- */
-export function commit(s: GameState): GameState {
-  if (!isPending(s)) return s;
-  return applyGroup(s, toGroup(s.selection));
+/** A soma que falta para a seleção atual fechar. Zero quando está no alvo. */
+export function remainingToTarget(s: GameState): number {
+  const hasJoker = selectionHasJoker(s.board, s.selection);
+  return targetFor(s.board, hasJoker) - selectionSum(s.board, s.selection);
 }
 
 export const clearSelection = (s: GameState): GameState =>

@@ -18,16 +18,13 @@ export type {
 } from "./session/GameSession";
 export {
   clearSelection,
-  commit,
   hint,
   isFinished,
-  isPending,
-  jokerInSelection,
-  jokerRequiredValue,
   restart,
   selectionHasJoker,
   selectionSum,
   startGame,
+  remainingToTarget,
   tap,
   undo,
 } from "./session/GameSession";

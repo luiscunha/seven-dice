@@ -33,16 +33,13 @@ import type { Sessao } from "./session";
 import {
   dica,
   desfazer,
-  eliminar,
   gruposValidos,
   iniciar,
   limparSelecao,
   reiniciar,
-  selecaoPendente,
   selo,
   terminado,
   tocar,
-  valorDoJoker,
 } from "./session";
 
 const escrever = (s: string): void => {
@@ -52,7 +49,6 @@ const escrever = (s: string): void => {
 const AJUDA = `
   b2          toca na peça (coluna por letra, linha a partir da base)
   b2 c2 c3    toca em várias de uma vez
-  x           elimina a seleção pendente (só é preciso com joker)
   z           desfaz — a última peça tocada, ou a última jogada
   c           limpa a seleção
   r           reinicia o nível
@@ -75,17 +71,9 @@ export interface OpcoesPlay {
 
 function cabecalho(s: Sessao): string {
   const m = s.level.metrics;
-  /*
-   * O valor obrigatório do joker está sempre à vista. É uma conta que o jogador
-   * pode fazer de cabeça (plano §2.6), mas o playtest mostrou que não se
-   * descobre a jogar — e sem ela gastar o joker é às cegas.
-   */
-  const joker = valorDoJoker(s.board);
-
   return (
     `${s.level.id}  ·  ${pieceCount(s.board)}/${m?.pieces ?? pieceCount(s.level.board)} peças` +
     `  ·  jogadas ${s.jogadas}` +
-    (joker === undefined ? "" : `  ·  joker = ${joker}`) +
     (m === undefined
       ? ""
       : `  ·  sobrevivência ${(m.survivalRate * 100).toFixed(0)}%` +
@@ -106,11 +94,7 @@ function mostrar(s: Sessao, marcadas?: ReadonlySet<Packed>): void {
   escrever("");
   escrever(`  ${descreverSelecao(s.board, s.selecao)}`);
 
-  // Uma pendência é um convite, não um erro. O triângulo em tudo fazia o
-  // jogador procurar o que tinha feito de mal.
-  if (s.mensagem !== "") {
-    escrever(`  ${selecaoPendente(s) ? "▸" : "⚠"} ${s.mensagem}`);
-  }
+  if (s.mensagem !== "") escrever(`  ⚠ ${s.mensagem}`);
 }
 
 /**
@@ -222,20 +206,6 @@ export async function comandoPlay(o: OpcoesPlay): Promise<number> {
 
     if (comando === "?") {
       escrever(AJUDA);
-      continue;
-    }
-
-    if (comando === "x") {
-      const antes = s;
-      const selecionadas = [...s.selecao];
-      s = eliminar(s);
-
-      if (passos && s.historico.length > antes.historico.length) {
-        mostrarPassos(antes, [...selecionadas].sort((a, b) => a - b), s);
-      }
-
-      mostrar(s);
-      if (anunciarFim(s)) break;
       continue;
     }
 

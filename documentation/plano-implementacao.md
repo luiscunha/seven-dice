@@ -919,12 +919,15 @@ O tabuleiro não bloqueia nessa jogada: fica insolúvel em silêncio e só falha
 fim. Três reinícios seguidos sem perceber porquê, num nível resolvido à primeira
 depois da correção.
 
-Não é um defeito da consola — é do **modelo de interação**, e a UI da fase 8
-herda-o inteiro se o repetir. A seleção com joker passa a exigir confirmação
-explícita (`x`), e sem joker o disparo automático mantém-se: as faces são >= 1 e o
-alvo é exato, logo um grupo válido nunca é prefixo de outro. Só com joker é que
-várias seleções diferentes são todas válidas — e é só aí que existe uma decisão a
-proteger.
+Não é um defeito da consola — é do **modelo de interação**. A correção feita aqui
+foi exigir confirmação explícita (`x`) na seleção com joker.
+
+> **Corrigido outra vez na fase 8, e melhor.** A confirmação era a solução errada
+> para o problema certo: o teto estava em 6 — a condição que o motor aceita — em
+> vez de estar em `7 − valor do joker`, que é a única soma correta das fixas. Com
+> o teto certo não há ambiguidade nenhuma a resolver, e o joker acumula-se e
+> elimina como qualquer outro grupo. A tecla `x` desapareceu. Ver
+> `desenho-fase-8.md` §5.2.
 
 ### O valor do joker não se descobre a jogar
 
@@ -934,8 +937,12 @@ pergunta do jogador, ao quarto nível com joker, foi literalmente *"o joker tem 
 valor fixo?"*.
 
 O renderer passou a mostrar `joker = N` no cabeçalho, recalculado a cada jogada.
-Isso resolve a consola, mas para o jogo é a confirmação de que **o tutorial
-dedicado de `[M 2.6]` deixa de ser opcional**.
+
+> **Revisto na fase 8.** A conclusão foi tirada com o defeito acima ainda
+> presente, portanto a medição está contaminada: boa parte da dificuldade era o
+> joker gastar-se sozinho ao valor errado, não a dedução ser difícil. Com o teto
+> em `7 − valor`, saber o número deixou de ser preciso — o jogo não deixa errar —
+> e o `joker = N` foi retirado do cabeçalho.
 
 Consequência para o protocolo: com o valor à vista, a pergunta do playtest do
 joker deixa de ser "consegues deduzir quanto vale" — está respondida — e passa a

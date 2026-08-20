@@ -20,19 +20,17 @@ Não se rediscute. Fica aqui para não se voltar a discutir por engano.
 | DOM + transições CSS, **não Canvas** | spec §1.4 |
 | Tocar-a-acumular, soma corrente visível, desfazer a última peça | plano §3.1 |
 | Level packs como JSON estático; **o jogo nunca gera nem mede** | spec §7.5 |
-| Tutorial dedicado ao joker, obrigatório | plano §2.6 |
 | Web primeiro, sem lojas — playtest por link | spec §1.5 |
 | Dois modos, corpora opostos | plano §6.1 |
 
-E uma correção que veio do playtest da Fase 6, e que **contraria o plano §3.1**:
+E uma precisão sobre o plano §3.1, que a Fase 8 resolveu:
 
-> A eliminação automática ao atingir 7 mantém-se **exceto quando há joker na
-> seleção**. Aí a jogada fica pendente e confirma-se.
+> A eliminação automática mantém-se **sempre**. O que muda com joker é o alvo:
+> as faces fixas têm de somar `7 − valor do joker`, não 7.
 
-A razão está no `plano-implementacao.md`, fase 6: com joker, várias seleções
-diferentes são todas válidas, e disparar à primeira rouba ao jogador a única
-decisão que o joker oferece. Repetir o disparo automático aqui reintroduz o
-defeito na UI.
+Ver §5.2. O plano dizia "ao atingir 7" a pensar num tabuleiro sem joker; com
+joker o alvo é outro, e é isso — e não a eliminação automática — que estava
+errado.
 
 ---
 
@@ -46,7 +44,7 @@ defeito na UI.
 | Formato | **Desktop primeiro**, com dimensionamento fluido |
 | Âmbito | Núcleo jogável **e** meta-jogo |
 | Pontuação | Também na campanha, mas **só no fim** e sem combos |
-| Aprendizagem | **Os níveis ensinam.** Sem tutorial guiado, exceto o joker |
+| Aprendizagem | **Os níveis ensinam.** Sem tutorial guiado, nem para o joker |
 | Campanha | **Lista por banda**, sequencial. Sem mapa com percurso |
 
 ### 2.1 A direção de arte, e o que ela proíbe
@@ -307,26 +305,37 @@ para isso.
 - A dica é um botão **separado e com contador visível** — é o recurso escasso, e
   tem de se ver que é.
 
-### 5.2 O estado pendente do joker
+### 5.2 O joker não precisa de tratamento especial
 
-O único momento em que a jogada não dispara sozinha. Precisa de ser óbvio o que
-fazer, e a Fase 6 mostrou o custo de não ser:
+O valor do joker está globalmente determinado (spec §2.6): só um número entre 1 e
+6 permite esvaziar o tabuleiro. Logo **também só existe uma soma correta para as
+faces fixas de um grupo com joker** — `7 − valor`.
+
+Pondo o teto aí, o joker comporta-se como qualquer outra peça: acumula-se até ao
+alvo e elimina sozinho. Não há botão, não é preciso mostrar o valor, e não há
+tutorial a dar.
 
 ```
-seleção: * + 2 + 2 = 4 (+ joker)
-▸ o joker fica a 3, que é o valor certo     [ eliminar ]
+seleção: ✳ + 1
+faltam 3
 ```
 
-Três coisas, todas aprendidas a jogar:
+**Porque é que isto não é óbvio.** `isValidGroup` aceita, com joker, qualquer soma
+fixa entre 1 e 6 — é a condição do motor, e a primeira versão desta UI leu-a como
+se fosse o teto da seleção. Com o teto em 6, a seleção fica válida logo à primeira
+peça encostada ao joker, e a eliminação automática gasta-o com o valor que essa
+peça deixar. A correção inicial foi um botão de confirmação; **era a solução
+errada para o problema certo**.
 
-1. **O valor obrigatório do joker está sempre visível** no cabeçalho, não só
-   durante a seleção. É a conta que o jogador não descobre sozinho.
-2. **A mensagem diz se o valor atual é o certo**, e nunca sugere juntar mais
-   peças quando já está certo — era o conselho que empurrava para o erro.
-3. **É um convite, não um aviso.** Botão, não triângulo vermelho.
+Com o teto no valor obrigatório, a ambiguidade desaparece por construção: juntar
+mais peças só aumenta a soma, portanto nunca há duas seleções válidas diferentes.
 
-A `GameSession` já serve isto: `isPending`, `jokerInSelection` e
-`jokerRequiredValue`.
+**O que se perde**, e é uma escolha e não um descuido: a jogada que mata o
+tabuleiro em silêncio, que o plano §2.6 desenhou de propósito. Já era
+incompatível com o piso de justiça — tanto que as bandas com joker o excluem da
+verificação — e contraria a direção limpa e intuitiva desta fase. A decisão que
+torna o joker interessante mantém-se intacta: continua a ser preciso descobrir
+**qual** grupo atinge o alvo, e há vários candidatos.
 
 ### 5.3 Modo tempo
 
@@ -337,12 +346,15 @@ loop de reforço do plano §6.3 só funciona se o jogador ligar a jogada ao pré
 Sem botão de undo. Não é restrição escondida: os níveis deste modo são
 greedy-safe e não há como bloquear, portanto não há nada que desfazer.
 
-### 5.4 Tutorial do joker
+### 5.4 O tutorial do joker deixou de ser preciso
 
-Obrigatório (plano §2.6), e antes do primeiro nível com joker. Tem de mostrar
-**explicitamente que existe um valor certo e um errado**, e deixar o jogador
-errar num tabuleiro pequeno onde a consequência é imediata e reversível — não a
-cinco jogadas de distância, que é como ela aparece num nível a sério.
+O plano §2.6 exige um tutorial dedicado, e o playtest da Fase 6 confirmou que a
+regra do valor não se descobre a jogar. Ambos partiam do princípio de que o
+jogador tem de **saber** o valor para não o gastar mal.
+
+Com o teto em `7 − valor` (§5.2) já não há como o gastar mal, portanto não há o
+que ensinar. O joker aparece, encaixa como as outras peças, e a única diferença
+que o jogador nota é que não tem pintas.
 
 ### 5.5 A pontuação da campanha, e a armadilha que ela tem
 

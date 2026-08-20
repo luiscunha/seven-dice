@@ -92,18 +92,26 @@ Como cada jogada remove exatamente 7, qualquer tabuleiro limpo leva sempre
 
 ### Os dois achados que mudam a Fase 8
 
-**A eliminação automática é incompatível com o joker.** O modelo de interação do
-plano §3.1 — tocar-a-acumular, elimina ao chegar a 7 — gasta o joker com a
-primeira peça que lhe encostem, ao valor que essa peça deixar, porque
-`isValidGroup` aceita qualquer soma fixa entre 1 e 6. O tabuleiro fica insolúvel
-em silêncio e só falha no fim. A consola passou a exigir confirmação (`x`) quando
-há joker na seleção; **a UI da Fase 8 herda o problema inteiro se repetir o
-modelo**.
+**O teto da seleção com joker é `7 − valor do joker`, não 6.**
 
-**O valor do joker não se descobre a jogar.** O plano §2.6 supõe que a dedução é
-descobrível com o tutorial certo; medido, não é descoberta sem ele. A consola
-mostra `joker = N` no cabeçalho, recalculado a cada jogada. Para o jogo, o
-tutorial dedicado do §2.6 deixa de ser opcional.
+O modelo de interação do plano §3.1 — tocar-a-acumular, elimina ao chegar a 7 —
+parecia incompatível com o joker: `isValidGroup` aceita qualquer soma fixa entre
+1 e 6, portanto a seleção ficava válida à primeira peça encostada e o joker
+gastava-se ao valor que essa peça deixasse. A primeira correção foi um botão de
+confirmação.
+
+**Era a solução errada para o problema certo.** Como o valor do joker está
+globalmente determinado (§2.6), também está determinada a soma correta das fixas.
+Pondo o teto aí, o joker acumula-se e elimina como qualquer outro grupo: sem
+botão, sem mostrar o valor, e sem maneira de o gastar mal — porque juntar mais
+peças só aumenta a soma, e nunca há duas seleções válidas diferentes.
+
+O que se perde é a jogada que mata o tabuleiro em silêncio, que o §2.6 desenhou
+de propósito. Perde-se por escolha: já era incompatível com o piso de justiça
+(ver "contrariou os documentos" nº 2), e a decisão que torna o joker interessante
+mantém-se — continua a ser preciso descobrir **qual** grupo atinge o alvo.
+
+Consequência: **o tutorial dedicado ao joker do §2.6 deixa de ser necessário.**
 
 ## O que se segue
 
