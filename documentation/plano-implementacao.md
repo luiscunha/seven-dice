@@ -751,9 +751,12 @@ Fica registado como trabalho da fase 6, com dados, em vez de suposição.
 
 ---
 
-## Fase 6 — Renderer de consola · `S` · **M4 · GATE DE DESIGN**
+## Fase 6 — Renderer de consola · `S` · **M4 · GATE DE DESIGN** · 🔨 ferramenta pronta
 
 > Prova: **dá para jogar e sentir a mecânica.** `[E 10, fase 6]`
+>
+> Branch `fase-6-renderer-de-consola`. A ferramenta está feita e testada; **o gate
+> só fecha com uma tarde de jogo humano.** Ver `guia-playtest-fase-6.md`.
 
 São poucas horas de trabalho antes de existir uma única linha de UI, e respondem
 à pergunta que nenhuma métrica responde.
@@ -774,11 +777,104 @@ e é incomparavelmente mais barato fazê-lo aqui do que depois da UI.
 Secundariamente: se grupos de 5+ peças são vistosos ou tediosos `[M 3.1]`, e se a
 dedução do joker `[M 2.6]` é descobrível com o tutorial certo.
 
-### Critério de aceitação
+### O defeito que a fase apanhou logo ao primeiro desenho
+
+**O gerador construía torres.** A banda de perito dava em média 11 colunas por 32
+linhas, com máximos de 42 — quando `[M 7]` pede "6x6+ e silhuetas".
+
+A causa era minha, da fase 4: a escolha de coluna estava ponderada por
+`(altura + 1)^insertionDepthBias`, lendo `[E 6.5]` — "preferir o fundo de colunas
+altas" — como se falasse da escolha *da coluna*. É um ciclo de realimentação:
+quanto mais alta a coluna, mais atrai, mais alta fica. Com bias 3, uma coluna de
+dez linhas pesa 1331 contra 1 de uma coluna nova.
+
+A leitura certa é que o enviesamento é da **linha dentro da coluna**. A
+profundidade cria dependências; a altura descontrolada só cria uma torre.
+
+**Nenhuma métrica da fase 5 deu por isto**, porque a taxa de sobrevivência não
+olha para a forma. Foi preciso desenhar um tabuleiro — que é exatamente para o
+que esta fase serve, e chegou ao primeiro.
+
+Corrigido com escolha de coluna uniforme travada por uma altura alvo derivada do
+tamanho, mais um travão simétrico na largura (sem ele o resultado saltou para o
+extremo oposto: 49 peças em 20 colunas por 6 linhas). Agora:
+
+| Peças | Largura | Altura | Alvo de `[M 7]` |
+|---|---|---|---|
+| 12 | 4.1 | 4.4 | 4x4 |
+| 24 | 5.5 | 6.6 | 4x4–5x5 |
+| 36 | 7.0 | 7.6 | 5x5–6x6 |
+| 49 | 8.5 | 8.8 | 6x6+ |
+
+E **80 em 80 tabuleiros têm silhueta irregular** — o perfil de `[M 3.2]` sai de
+graça, sem mecanismo nenhum, porque colunas de alturas diferentes *são* a
+silhueta.
+
+### O terceiro achado: a ordem das alavancas de dificuldade
+
+Corrigir a forma mudou a dificuldade de todas as bandas — tabuleiros aproximadamente
+quadrados são mais difíceis do que torres ou tabuleiros largos e baixos. Isso obrigou
+a remedir tudo, e a medição arrumou as alavancas por força:
+
+| Alavanca | Sobrevivência mediana |
+|---|---|
+| **Joker** | 0.83 → 0.20 |
+| Composições só até 3 peças | 0.28 |
+| Faces altas (3–6) | 0.43 |
+| **Todas as composições** | **0.70** |
+| Tamanho (12 → 49 peças) | 1.00 → 0.69 |
+
+As duas linhas do meio são a surpresa e **contrariam a tabela de `[M 7]`**, que
+alarga as composições à medida que a dificuldade sobe. Composições grandes são
+feitas de 1s e 2s, que se juntam a tudo. O plano já o diz em `[M 4.4]` — "muitos
+1s e 2s → tabuleiro flexível" — só a tabela de §7 é que não o reflete.
+
+Consequência concreta: com todas as composições, `avancado` era a banda **mais
+fácil do pack**, com mediana 0.70. Passou a usar faces altas e caiu para 0.49.
+
+As bandas foram recalibradas a partir dos quartis medidos, não da tabela — que
+`[M 7]` já avisava ser "o ponto de partida, não o resultado". A progressão fica
+monótona e cada banda captura entre 8% e 65% dos candidatos.
+
+### O quarto achado: o rigor do piso de justiça cresce com o branching
+
+Corrigida a forma, a profundidade 3 do piso passou a rejeitar quase tudo: na banda
+`inicio`, **1840 de 1856** candidatos que já tinham passado a sobrevivência.
+
+A razão é estrutural. O piso exige que **todas** as sequências de jogadas até à
+profundidade `d` deixem o tabuleiro resolúvel, portanto o número de caminhos a
+verificar é `branching^d`. Tabuleiros de forma correta ramificam muito mais do que
+as torres que o gerador produzia antes, e à profundidade 3 basta um caminho mau
+entre centenas para reprovar.
+
+`[M 6.2]` pede "as primeiras 2–3 jogadas". Passou a usar-se **2**, que continua
+dentro do que o plano pede e deixa passar níveis: as oito bandas encheram-se em 9
+minutos, contra as duas que enchiam antes.
+
+### O outro defeito, este de interação
+
+Ao jogar o primeiro tabuleiro, a seleção continuava a acumular depois de passar de
+7, deixando o jogador atolado num estado que só se desfazia à mão. Como o mínimo
+de uma face é 1 e o alvo é exatamente 7, a soma só cresce — uma peça que passe de
+7 nunca mais pode dar grupo válido. Passa a ser **recusada**, com a razão.
+
+É pequeno, mas é o género de coisa que se descobre a jogar e não a especificar, e
+teria ido parar à UI se esta fase não existisse.
+
+### Critério de aceitação — **por fechar**
 
 **Dezenas de tabuleiros jogados numa tarde, e uma decisão escrita** sobre o risco
-nº 1. É um gate humano, não automatizável. Se a resposta for negativa, o plano
-volta à Fase 1 com uma regra de reorganização diferente.
+nº 1. É um gate humano, não automatizável — a ferramenta mede, quem decide é o
+jogador.
+
+O protocolo está em `guia-playtest-fase-6.md`: prever o resultado de cada jogada
+antes de a fazer, e registar a taxa de acerto. As três saídas possíveis:
+
+| Decisão | Significado |
+|---|---|
+| **Verde** | A previsão acerta. A mecânica fica; segue a fase 7. |
+| **Amarelo** | Só acerta com o modo de dois passos ligado. A mecânica fica, mas animar gravidade e colapso em separado passa a **requisito** da fase 8. |
+| **Vermelho** | Falha mesmo com ajuda. A regra de reorganização muda e o plano volta à fase 1. |
 
 ---
 

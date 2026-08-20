@@ -8,5 +8,6 @@ export default defineConfig({
     // A engine e o pipeline são Node puro. Quando a UI web chegar (fase 8),
     // separar em `projects` e dar ao `game` um ambiente jsdom.
     environment: "node",
+
   },
 });

@@ -252,3 +252,70 @@ describe("parâmetros", () => {
     ).not.toThrow();
   });
 });
+
+describe("forma do tabuleiro", () => {
+  /*
+   * Descoberto na fase 6, ao **desenhar** um tabuleiro pela primeira vez.
+   *
+   * A escolha de coluna estava ponderada por `(altura + 1)^insertionDepthBias`,
+   * o que é um ciclo de realimentação: quanto mais alta a coluna, mais atrai. A
+   * banda de perito produzia 11 colunas por 32 linhas, com máximos de 42 — torres,
+   * não os "6x6+ e silhuetas" de `[M 7]`.
+   *
+   * Nenhuma métrica da fase 5 deu por isso, porque a taxa de sobrevivência não
+   * olha para a forma. Este teste existe para que não volte a passar despercebido.
+   */
+  it("as proporções seguem a curva do plano §7", () => {
+    const casos: readonly (readonly [number, number])[] = [
+      [12, 4],
+      [24, 5],
+      [36, 6],
+      [49, 7],
+    ];
+
+    for (const [pecas, lado] of casos) {
+      let larguras = 0;
+      let alturas = 0;
+      let n = 0;
+
+      for (let seed = 0; seed < 40; seed++) {
+        const g = generate(seed, {
+          targetPieceCount: pecas,
+          insertionDepthBias: 3,
+        });
+        if (g === undefined) continue;
+
+        larguras += g.board.length;
+        alturas += Math.max(...g.board.map((c) => c.length));
+        n++;
+      }
+
+      expect(n).toBeGreaterThan(30);
+
+      // Aproximadamente quadrado, com folga generosa — o alvo é a ordem de
+      // grandeza, não um número exato.
+      expect(larguras / n).toBeGreaterThan(lado * 0.6);
+      expect(larguras / n).toBeLessThan(lado * 1.8);
+      expect(alturas / n).toBeGreaterThan(lado * 0.6);
+      expect(alturas / n).toBeLessThan(lado * 1.8);
+    }
+  });
+
+  it("quase todos os tabuleiros têm silhueta irregular", () => {
+    // O perfil irregular não precisa de mecanismo nenhum: colunas de alturas
+    // diferentes *são* a silhueta (spec §2.3).
+    let comSilhueta = 0;
+    let total = 0;
+
+    for (let seed = 0; seed < 60; seed++) {
+      const g = generate(seed, { targetPieceCount: 30 });
+      if (g === undefined) continue;
+
+      total++;
+      if (new Set(g.board.map((c) => c.length)).size > 1) comSilhueta++;
+    }
+
+    expect(total).toBeGreaterThan(40);
+    expect(comSilhueta / total).toBeGreaterThan(0.9);
+  });
+});

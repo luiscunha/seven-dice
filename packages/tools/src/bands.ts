@@ -39,7 +39,17 @@ export interface BandSpec {
     /** Modo tempo: nenhum estado alcançável pode ser beco sem saída. */
     readonly requireGreedySafe?: boolean;
 
-    /** Profundidade do piso de justiça. Zero desliga-o. */
+    /**
+     * Profundidade do piso de justiça. Zero desliga-o.
+     *
+     * Plano §6.2 pede "as primeiras 2–3 jogadas". Usa-se **2**, e a razão é
+     * medida: o piso exige que *todas* as sequências de jogadas até essa
+     * profundidade deixem o tabuleiro resolúvel, portanto o seu rigor cresce com
+     * o branching factor. Em tabuleiros de forma correta — que têm muito mais
+     * ramificação do que as torres que o gerador produzia antes — a profundidade
+     * 3 rejeitava 1840 de 1856 candidatos que já tinham passado a sobrevivência.
+     * A 2 continua dentro do que o plano pede, e deixa passar níveis.
+     */
     readonly fairnessDepth: number;
 
     /**
@@ -50,10 +60,30 @@ export interface BandSpec {
   };
 }
 
-/**
- * Os corpora dos dois modos são **opostos** (plano §6.1). O modo puzzle filtra
- * por sobrevivência baixa — quer armadilhas; o modo tempo exige 100% e
- * greedy-safe, porque lá o jogador só pode perder por ser lento.
+/*
+ * ── As alavancas de dificuldade, por ordem de força (medido na fase 6) ──
+ *
+ * Sobrevivência mediana observada, 120 candidatos por configuração:
+ *
+ *   joker                       0.83 → 0.20    esmagadoramente a maior
+ *   composições só até 3 peças        0.28     restringir aperta
+ *   faces altas (3–6)                 0.43
+ *   todas as composições              0.70     alargar **alivia**
+ *   tamanho (12 → 49 peças)      1.00 → 0.69   fraca
+ *
+ * A terceira linha e a quarta são a surpresa, e contrariam a tabela do plano §7,
+ * que alarga as composições à medida que a dificuldade sobe. Composições grandes
+ * são feitas de 1s e 2s, que se juntam a tudo — o plano §4.4 já o diz ("muitos 1s
+ * e 2s → tabuleiro flexível"), só a tabela de §7 é que não o reflete.
+ *
+ * Daí a banda `avancado` usar faces altas em vez de tudo: com todas as
+ * composições era a banda **mais fácil** do pack, com mediana 0.70.
+ *
+ * Os intervalos abaixo saem dos quartis medidos, não da tabela de §7 — que
+ * `[M 7]` já avisava ser "o ponto de partida, não o resultado".
+ *
+ * Os corpora dos dois modos continuam **opostos** (plano §6.1): o puzzle filtra
+ * por sobrevivência baixa, o modo tempo exige 100% e greedy-safe.
  */
 export const BANDS: readonly BandSpec[] = [
   {
@@ -61,14 +91,14 @@ export const BANDS: readonly BandSpec[] = [
     label: "Tutorial — só pares, impossível bloquear",
     params: { compositionWeights: ateNPecas(2), newColumnProbability: 0.45 },
     pieces: [10, 14],
-    accept: { survival: [1, 1], requireGreedySafe: true, fairnessDepth: 3 },
+    accept: { survival: [1, 1], requireGreedySafe: true, fairnessDepth: 2 },
   },
   {
     id: "inicio",
     label: "Início — pares e trios, relaxante",
     params: { compositionWeights: ateNPecas(3), newColumnProbability: 0.4 },
     pieces: [16, 25],
-    accept: { survival: [0.9, 1], fairnessDepth: 3 },
+    accept: { survival: [0.55, 1], fairnessDepth: 2 },
   },
   /*
    * ── A tabela do plano §7 não fecha, e a medição é que o mostrou ──
@@ -92,7 +122,7 @@ export const BANDS: readonly BandSpec[] = [
       insertionDepthBias: 1,
     },
     pieces: [25, 36],
-    accept: { survival: [0.5, 0.7], fairnessDepth: 3 },
+    accept: { survival: [0.3, 0.55], fairnessDepth: 2 },
   },
   {
     id: "meio-joker",
@@ -105,14 +135,18 @@ export const BANDS: readonly BandSpec[] = [
       jokerProgress: 0.3,
     },
     pieces: [22, 30],
-    accept: { survival: [0.1, 0.35], fairnessDepth: 3, fairnessSkipsJoker: true },
+    accept: { survival: [0.02, 0.15], fairnessDepth: 2, fairnessSkipsJoker: true },
   },
   {
     id: "avancado",
-    label: "Avançado — todas as composições",
-    params: { newColumnProbability: 0.3, insertionDepthBias: 2 },
+    label: "Avançado — faces altas, poucos parceiros",
+    params: {
+      compositionWeights: facesAltas(),
+      newColumnProbability: 0.3,
+      insertionDepthBias: 2,
+    },
     pieces: [30, 42],
-    accept: { survival: [0.2, 0.4], fairnessDepth: 3 },
+    accept: { survival: [0.2, 0.45], fairnessDepth: 2 },
   },
   {
     id: "perito",
@@ -123,7 +157,7 @@ export const BANDS: readonly BandSpec[] = [
       insertionDepthBias: 3,
     },
     pieces: [35, 50],
-    accept: { survival: [0, 0.2], fairnessDepth: 3 },
+    accept: { survival: [0.03, 0.22], fairnessDepth: 2 },
   },
   /*
    * ── Tamanho não é alavanca de dificuldade; o joker é ──
@@ -152,7 +186,7 @@ export const BANDS: readonly BandSpec[] = [
       jokerProgress: 0.3,
     },
     pieces: [10, 15],
-    accept: { survival: [0, 0.15], fairnessDepth: 2, fairnessSkipsJoker: true },
+    accept: { survival: [0.03, 0.2], fairnessDepth: 2, fairnessSkipsJoker: true },
   },
   {
     id: "tempo",
