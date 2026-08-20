@@ -49,7 +49,7 @@ contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 | 5 | Métricas e pipeline | ✅ |
 | 6 | Renderer de consola | ✅ **gate fechado a Verde** |
 | 7 | Camada de sessão | ✅ |
-| 8 | UI web | 🔨 **em curso** — tabuleiro jogável, falta meta-jogo e modo tempo |
+| 8 | UI web | 🔨 **em curso** — tabuleiro e tutorial do joker feitos; falta lista de níveis, modo tempo e meta-jogo |
 | 9 | Empacotamento | por começar |
 
 O motor está completo e é puro: `packages/engine/src/` não importa nada de Node,
@@ -134,8 +134,8 @@ remede-se antes de a tratar como facto.
 ## O que se segue
 
 A **Fase 8**, a meio. O tabuleiro joga-se ponta a ponta — seleção, animação em
-três tempos, undo, reinício, dicas, joker e fim de nível com selo. Falta a lista
-de níveis, o tutorial do joker, o modo tempo e o meta-jogo.
+três tempos, undo, reinício, dicas, joker e fim de nível com selo — e o tutorial
+do joker está feito. Falta a lista de níveis, o modo tempo e o meta-jogo.
 
 ```bash
 pnpm dev     # localhost:5173
@@ -143,7 +143,22 @@ pnpm dev     # localhost:5173
 
 Enquanto não há lista, escolhe-se por query: `?banda=denso&nivel=20`.
 
-Duas coisas por resolver, que vieram de jogar e ainda não têm decisão:
+O critério de aceitação da fase é *campanha inicial jogável ponta a ponta, com os
+dois modos, num link partilhável*. Contra ele falta, por ordem:
+
+| | | |
+|---|---|---|
+| 1 | Tutorial do joker | ✅ |
+| 2 | Lista de níveis por banda, com os selos | por fazer |
+| 3 | Modo tempo — `TimeAttackSession` existe desde a Fase 7 e **nenhuma linha de UI o usa** | por fazer |
+| 4 | Link partilhável, para o playtest externo | por fazer |
+
+O mapa de progressão, o perfil, as definições e o puzzle diário ficam **depois**
+da marca do playtest (desenho §8) e não bloqueiam a Fase 9.
+
+Duas coisas por resolver, que vieram de jogar e ainda não têm decisão. Ambas são
+mais baratas antes do playtest externo do que depois — regerar bandas depois de
+alguém jogar invalida o que essa pessoa jogou:
 
 - **A dificuldade chega sempre aos ~78% do jogo**, em todas as bandas. No
   `perito` são 15 jogadas com a primeira fatal à décima segunda. Não é afinável:
@@ -153,6 +168,34 @@ Duas coisas por resolver, que vieram de jogar e ainda não têm decisão:
   bandas, e nunca sai um 7×7 cheio. O gerador já sabe fazê-lo — o parâmetro
   `silhouetteProfile` existe desde a Fase 4 e **nenhuma banda o usa**. Com um
   perfil plano, 120 candidatos dão até 100% de preenchimento.
+
+---
+
+## O tutorial do joker — feito
+
+O plano §2.6 chama-lhe obrigatório, e é a mitigação nomeada do risco *"joker mal
+usado mata o tabuleiro"*. Ficou mais necessário do que estava: com o joker livre
+restaurado, voltou a ser possível matar o tabuleiro em silêncio, e sem tutorial
+isso lê-se como defeito e não como puzzle.
+
+**É um tabuleiro a sério, de quatro peças** — `[[0, 4], [5, 3]]`, joker a valer 2,
+duas jogadas. Tem duas saídas boas e uma má: gastar o joker com o 4 soma 7, o
+jogo aceita, e sobram 5 e 3 — soma 8, zero grupos, sem joker para corrigir. Morre
+numa jogada, à frente do jogador, e o ecrã nomeia o que aconteceu sem o
+repreender.
+
+A conta aparece **com números, uma vez**: `as faces somam 12` · `faltam 2 para 14`
+· `que é 7 × 2 → ✳ = 2`.
+
+**O andaime.** Aplicar a regra exige a soma do tabuleiro, e somar 27 faces de
+cabeça no telemóvel não é um puzzle, é trabalho. O cabeçalho mostra
+`faces somam N` nos **três primeiros níveis com joker que o jogador completar**, e
+nunca mais — nem no `denso`, que é dedução pura. O número não dá a resposta:
+continua a ser o jogador a fechar a conta.
+
+Detalhes de desenho e o porquê de cada um: `desenho-fase-8.md` §5.4.
+`packages/game/test/tutorial.test.ts` verifica contra a engine as três coisas que
+o tabuleiro promete ensinar.
 
 ---
 

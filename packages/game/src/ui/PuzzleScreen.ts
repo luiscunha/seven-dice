@@ -6,15 +6,18 @@
  *
  * Duas coisas que vêm do playtest da Fase 6 e não da especificação:
  *
- * - **Com joker, a jogada fica pendente** e confirma-se num botão. Repetir aqui
- *   a eliminação automática reintroduzia o defeito que a consola expôs: o joker
- *   gasto ao valor errado, e o tabuleiro insolúvel em silêncio.
- * - **O valor obrigatório do joker está sempre à vista.** Não se descobre a
- *   jogar — foi medido.
+ * - **Tocar no joker abre a escolha do valor**, e é a escolha que faz a jogada.
+ *   A eliminação automática ao primeiro grupo válido — o modelo de `[M 3.1]` —
+ *   gastava o joker com a primeira peça encostada, ao valor que ela deixasse, e
+ *   o tabuleiro ficava insolúvel em silêncio.
+ * - **O valor obrigatório do joker nunca é mostrado.** Descobri-lo é a decisão
+ *   que o joker oferece. O que se mostra, e só nos três primeiros níveis com
+ *   joker, é a soma das faces — o andaime de `session/tutorial.ts`, que poupa a
+ *   aritmética e não dá a resposta.
  */
 
 import type { Group, Level, Packed } from "@septet/engine";
-import { JOKER, cellAt, colOf, rowOf } from "@septet/engine";
+import { JOKER, cellAt, colOf, jokerAt, rowOf, totalSum } from "@septet/engine";
 
 import type { PuzzleState } from "../session/PuzzleSession";
 import {
@@ -48,6 +51,15 @@ export interface OpcoesPuzzleScreen {
     readonly pontos: number;
   }) => void;
   readonly aoPedirSeguinte?: () => void;
+
+  /** Abre o tutorial do joker em revisão. Sem isto o `?` não aparece. */
+  readonly aoPedirAjuda?: () => void;
+
+  /**
+   * O andaime dos três primeiros níveis com joker (`session/tutorial.ts`): a
+   * soma das faces no cabeçalho, enquanto o joker ainda estiver no tabuleiro.
+   */
+  readonly mostrarSomaDasFaces?: boolean;
 }
 
 export class PuzzleScreen {
@@ -90,6 +102,15 @@ export class PuzzleScreen {
     espaco.className = "espaco";
 
     topo.append(this.elTitulo, espaco, this.elMeta);
+
+    if (opcoes.aoPedirAjuda !== undefined) {
+      const ajuda = botao("?", "redondo");
+      ajuda.setAttribute("aria-label", "como funciona o joker");
+      ajuda.addEventListener("click", () => {
+        opcoes.aoPedirAjuda?.();
+      });
+      topo.appendChild(ajuda);
+    }
 
     /* ── palco ── */
     const palco = document.createElement("div");
@@ -241,6 +262,7 @@ export class PuzzleScreen {
 
     this.elMeta.replaceChildren(
       texto(`${String(restantes)}/${String(total)} peças`),
+      ...this.andaime(),
       texto(`${String(jogo.moves)} jogadas`),
       texto(`${String(this.pontos)} pontos`),
     );
@@ -261,6 +283,25 @@ export class PuzzleScreen {
     );
 
     this.pintarFim();
+  }
+
+  /**
+   * A soma das faces, enquanto o andaime durar e o joker ainda lá estiver.
+   *
+   * Lê-se do tabuleiro **atual** e não do inicial: cada jogada tira exatamente
+   * 7, portanto o valor do joker não muda, mas o número que o jogador tem à
+   * frente sim — e um número desatualizado é pior do que nenhum.
+   *
+   * Desaparece assim que o joker é gasto, porque a partir daí a soma é múltipla
+   * de 7 e não informa nada.
+   */
+  private andaime(): readonly Node[] {
+    if (this.opcoes.mostrarSomaDasFaces !== true) return [];
+
+    const { board } = this.estado.game;
+    if (jokerAt(board) === undefined) return [];
+
+    return [texto(`faces somam ${String(totalSum(board))}`)];
   }
 
   private pintarSelecao(): void {

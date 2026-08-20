@@ -163,6 +163,10 @@ async function comandoExport(args: string[]): Promise<number> {
       niveis: niveis.map((n) => ({
         id: n.id,
         pieces: n.metrics?.pieces ?? 0,
+        // O jogo precisa disto no arranque, para saber quando abrir o tutorial
+        // do joker e durante quantos níveis manter o andaime da soma. Sem estar
+        // no índice, obrigava a carregar as bandas todas para o descobrir.
+        joker: n.joker !== undefined,
       })),
     };
   });

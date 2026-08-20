@@ -11,13 +11,17 @@ import type { Level } from "@septet/engine";
 
 import { carregarBanda, carregarIndice } from "./levels";
 import {
+  countCompleted,
   emptyProfile,
   load,
+  markJokerTutorialSeen,
   recordLevel,
   save,
 } from "./session/progress";
 import type { Profile } from "./session/progress";
 import type { Seal } from "./session/PuzzleSession";
+import { mostraSomaDasFaces } from "./session/tutorial";
+import { JokerTutorial } from "./ui/JokerTutorial";
 import { PuzzleScreen } from "./ui/PuzzleScreen";
 
 const app = document.querySelector<HTMLElement>("#app");
@@ -34,8 +38,16 @@ let perfil: Profile = armazenamento === undefined
   : load(armazenamento);
 
 let ecra: PuzzleScreen | undefined;
+let tutorial: JokerTutorial | undefined;
 let niveis: readonly Level[] = [];
 let indice = 0;
+
+/** Todos os níveis com joker do pack, na ordem da campanha. Vem do índice. */
+let idsComJoker: readonly string[] = [];
+
+const guardar = (): void => {
+  if (armazenamento !== undefined) save(armazenamento, perfil);
+};
 
 function jogar(i: number): void {
   const nivel = niveis[i];
@@ -47,13 +59,42 @@ function jogar(i: number): void {
   indice = i;
   ecra?.destruir();
 
+  const temJoker = nivel.joker !== undefined;
+  const feitos = countCompleted(perfil, idsComJoker);
+
   ecra = new PuzzleScreen(app as HTMLElement, nivel, {
     aoTerminar: ({ level, selo, pontos }) => {
       perfil = recordLevel(perfil, level.id, selo as Seal, pontos);
-      if (armazenamento !== undefined) save(armazenamento, perfil);
+      guardar();
     },
     aoPedirSeguinte: () => {
       jogar(indice + 1);
+    },
+    aoPedirAjuda: () => {
+      abrirTutorial(true);
+    },
+    mostrarSomaDasFaces: temJoker && mostraSomaDasFaces(feitos),
+  });
+
+  /*
+   * O tutorial é obrigatório à primeira, e abre **por cima** do nível em vez de
+   * o preceder: o jogador vê o tabuleiro que vai jogar por trás, e o tutorial
+   * deixa de parecer um ecrã que se atravessa para chegar ao jogo.
+   */
+  if (temJoker && !perfil.sawJokerTutorial) abrirTutorial(false);
+}
+
+function abrirTutorial(revisao: boolean): void {
+  tutorial?.destruir();
+
+  tutorial = new JokerTutorial(app as HTMLElement, {
+    revisao,
+    aoFechar: () => {
+      tutorial?.destruir();
+      tutorial = undefined;
+
+      perfil = markJokerTutorialSeen(perfil);
+      guardar();
     },
   });
 }
@@ -87,6 +128,10 @@ async function arrancar(): Promise<void> {
   try {
     const bandas = await carregarIndice();
     const escolha = pedido();
+
+    idsComJoker = bandas.flatMap((b) =>
+      b.niveis.filter((n) => n.joker === true).map((n) => n.id),
+    );
 
     const banda =
       bandas.find((b) => b.id === escolha.banda) ?? bandas[0];

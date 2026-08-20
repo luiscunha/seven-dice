@@ -360,3 +360,135 @@
   opacity: 0.25;
   transform: translate(28%, -28%) scale(0.42);
 }
+
+/* ─── Botão redondo do cabeçalho ──────────────────────────────────────────── */
+
+/*
+ * O `?` que reabre o tutorial do joker. Fica no topo e não no rodapé porque não
+ * é uma ação de jogo — não pertence à mesma família que Desfazer e Dica.
+ */
+.btn.redondo {
+  width: 40px;
+  padding: 0;
+  border-radius: 50%;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+/* ─── Tutorial do joker ───────────────────────────────────────────────────── */
+
+/*
+ * Abre por cima do nível, com o tabuleiro a jogar visível por trás. É um véu e
+ * não um ecrã à parte: o tutorial não interrompe o jogo, prepara-o.
+ */
+.tutorial {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overflow-y: auto;
+  background: rgb(18 63 58 / 0.42);
+}
+
+.tutorial-caixa {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(420px, 100%);
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.tutorial-cabecalho h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.tutorial-cabecalho p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+/*
+ * A conta em três passos, cada um numa linha. Uma expressão numa linha só —
+ * `12 + 2 = 14 = 7 × 2` — lê-se como fórmula; em passos lê-se como raciocínio,
+ * que é o que se pretende que fique.
+ */
+.tutorial-conta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px;
+  background: var(--surface-alt);
+  border-radius: var(--raio);
+  font-variant-numeric: tabular-nums;
+}
+
+.tutorial-passo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 12px;
+  background: var(--surface);
+}
+
+.tutorial-passo:first-child {
+  border-radius: calc(var(--raio) - 3px) calc(var(--raio) - 3px) 0 0;
+}
+
+.tutorial-passo:last-child {
+  border-radius: 0 0 calc(var(--raio) - 3px) calc(var(--raio) - 3px);
+}
+
+.tutorial-passo .rotulo {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.tutorial-passo .valor {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* A última linha é a conclusão, e é a única que muda de cor. */
+.tutorial-passo:last-child .valor {
+  color: var(--accent);
+}
+
+.tutorial-palco {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 132px;
+  padding: 12px;
+  background: var(--tray);
+  border-radius: var(--raio);
+}
+
+.tutorial-estado {
+  margin: 0;
+  min-height: 3.6em;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+/*
+ * No caminho fatal a frase é a lição inteira, e passa a ser o texto principal
+ * do ecrã. Não leva vermelho nem triângulo: o jogador não fez nada de errado do
+ * ponto de vista das regras — fez exatamente o que o jogo permite.
+ */
+.tutorial[data-fase="morto"] .tutorial-estado,
+.tutorial[data-fase="limpo"] .tutorial-estado {
+  color: var(--ink);
+}

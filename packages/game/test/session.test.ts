@@ -44,6 +44,7 @@ import { breakCombo, registerMove, startCombo } from "../src/session/combos";
 import { comboMultiplier, moveScore } from "../src/session/scoring";
 import {
   PROFILE_KEY,
+  PROFILE_VERSION,
   emptyProfile,
   load,
   recordLevel,
@@ -623,7 +624,7 @@ describe("progresso", () => {
 
     it("níveis com campos de outro tipo são descartados um a um", () => {
       const raw = JSON.stringify({
-        version: 1,
+        version: PROFILE_VERSION,
         levels: {
           bom: { seal: "clean", bestMoves: 4 },
           mau: { seal: "inventado", bestMoves: 4 },

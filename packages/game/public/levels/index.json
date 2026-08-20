@@ -5,123 +5,153 @@
   "niveis": [
    {
     "id": "tutorial-000003",
-    "pieces": 14
+    "pieces": 14,
+    "joker": false
    },
    {
     "id": "tutorial-000008",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000009",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000012",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000022",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000052",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000066",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000076",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000107",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000116",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000144",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000145",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000150",
-    "pieces": 14
+    "pieces": 14,
+    "joker": false
    },
    {
     "id": "tutorial-000183",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000191",
-    "pieces": 14
+    "pieces": 14,
+    "joker": false
    },
    {
     "id": "tutorial-000196",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000225",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000235",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000238",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000261",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000264",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000266",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000267",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000301",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000316",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000320",
-    "pieces": 14
+    "pieces": 14,
+    "joker": false
    },
    {
     "id": "tutorial-000329",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000338",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tutorial-000340",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tutorial-000341",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    }
   ]
  },
@@ -131,123 +161,153 @@
   "niveis": [
    {
     "id": "inicio-000034",
-    "pieces": 24
+    "pieces": 24,
+    "joker": false
    },
    {
     "id": "inicio-000134",
-    "pieces": 20
+    "pieces": 20,
+    "joker": false
    },
    {
     "id": "inicio-000150",
-    "pieces": 24
+    "pieces": 24,
+    "joker": false
    },
    {
     "id": "inicio-000204",
-    "pieces": 24
+    "pieces": 24,
+    "joker": false
    },
    {
     "id": "inicio-000241",
-    "pieces": 19
+    "pieces": 19,
+    "joker": false
    },
    {
     "id": "inicio-000256",
-    "pieces": 24
+    "pieces": 24,
+    "joker": false
    },
    {
     "id": "inicio-000260",
-    "pieces": 22
+    "pieces": 22,
+    "joker": false
    },
    {
     "id": "inicio-000296",
-    "pieces": 18
+    "pieces": 18,
+    "joker": false
    },
    {
     "id": "inicio-000358",
-    "pieces": 18
+    "pieces": 18,
+    "joker": false
    },
    {
     "id": "inicio-000371",
-    "pieces": 23
+    "pieces": 23,
+    "joker": false
    },
    {
     "id": "inicio-000392",
-    "pieces": 16
+    "pieces": 16,
+    "joker": false
    },
    {
     "id": "inicio-000432",
-    "pieces": 16
+    "pieces": 16,
+    "joker": false
    },
    {
     "id": "inicio-000491",
-    "pieces": 19
+    "pieces": 19,
+    "joker": false
    },
    {
     "id": "inicio-000516",
-    "pieces": 24
+    "pieces": 24,
+    "joker": false
    },
    {
     "id": "inicio-000529",
-    "pieces": 19
+    "pieces": 19,
+    "joker": false
    },
    {
     "id": "inicio-000537",
-    "pieces": 21
+    "pieces": 21,
+    "joker": false
    },
    {
     "id": "inicio-000540",
-    "pieces": 20
+    "pieces": 20,
+    "joker": false
    },
    {
     "id": "inicio-000541",
-    "pieces": 23
+    "pieces": 23,
+    "joker": false
    },
    {
     "id": "inicio-000633",
-    "pieces": 23
+    "pieces": 23,
+    "joker": false
    },
    {
     "id": "inicio-000654",
-    "pieces": 16
+    "pieces": 16,
+    "joker": false
    },
    {
     "id": "inicio-000666",
-    "pieces": 22
+    "pieces": 22,
+    "joker": false
    },
    {
     "id": "inicio-000685",
-    "pieces": 23
+    "pieces": 23,
+    "joker": false
    },
    {
     "id": "inicio-000693",
-    "pieces": 21
+    "pieces": 21,
+    "joker": false
    },
    {
     "id": "inicio-000728",
-    "pieces": 18
+    "pieces": 18,
+    "joker": false
    },
    {
     "id": "inicio-000735",
-    "pieces": 17
+    "pieces": 17,
+    "joker": false
    },
    {
     "id": "inicio-000746",
-    "pieces": 16
+    "pieces": 16,
+    "joker": false
    },
    {
     "id": "inicio-000747",
-    "pieces": 21
+    "pieces": 21,
+    "joker": false
    },
    {
     "id": "inicio-000765",
-    "pieces": 19
+    "pieces": 19,
+    "joker": false
    },
    {
     "id": "inicio-000781",
-    "pieces": 23
+    "pieces": 23,
+    "joker": false
    },
    {
     "id": "inicio-000821",
-    "pieces": 25
+    "pieces": 25,
+    "joker": false
    }
   ]
  },
@@ -257,123 +317,153 @@
   "niveis": [
    {
     "id": "meio-000006",
-    "pieces": 35
+    "pieces": 35,
+    "joker": false
    },
    {
     "id": "meio-000015",
-    "pieces": 28
+    "pieces": 28,
+    "joker": false
    },
    {
     "id": "meio-000022",
-    "pieces": 35
+    "pieces": 35,
+    "joker": false
    },
    {
     "id": "meio-000028",
-    "pieces": 33
+    "pieces": 33,
+    "joker": false
    },
    {
     "id": "meio-000045",
-    "pieces": 32
+    "pieces": 32,
+    "joker": false
    },
    {
     "id": "meio-000050",
-    "pieces": 27
+    "pieces": 27,
+    "joker": false
    },
    {
     "id": "meio-000059",
-    "pieces": 36
+    "pieces": 36,
+    "joker": false
    },
    {
     "id": "meio-000071",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "meio-000082",
-    "pieces": 27
+    "pieces": 27,
+    "joker": false
    },
    {
     "id": "meio-000091",
-    "pieces": 36
+    "pieces": 36,
+    "joker": false
    },
    {
     "id": "meio-000100",
-    "pieces": 29
+    "pieces": 29,
+    "joker": false
    },
    {
     "id": "meio-000103",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "meio-000111",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "meio-000113",
-    "pieces": 36
+    "pieces": 36,
+    "joker": false
    },
    {
     "id": "meio-000119",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "meio-000125",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "meio-000126",
-    "pieces": 31
+    "pieces": 31,
+    "joker": false
    },
    {
     "id": "meio-000134",
-    "pieces": 31
+    "pieces": 31,
+    "joker": false
    },
    {
     "id": "meio-000144",
-    "pieces": 33
+    "pieces": 33,
+    "joker": false
    },
    {
     "id": "meio-000149",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "meio-000153",
-    "pieces": 36
+    "pieces": 36,
+    "joker": false
    },
    {
     "id": "meio-000157",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "meio-000159",
-    "pieces": 32
+    "pieces": 32,
+    "joker": false
    },
    {
     "id": "meio-000166",
-    "pieces": 31
+    "pieces": 31,
+    "joker": false
    },
    {
     "id": "meio-000177",
-    "pieces": 30
+    "pieces": 30,
+    "joker": false
    },
    {
     "id": "meio-000183",
-    "pieces": 32
+    "pieces": 32,
+    "joker": false
    },
    {
     "id": "meio-000187",
-    "pieces": 26
+    "pieces": 26,
+    "joker": false
    },
    {
     "id": "meio-000190",
-    "pieces": 35
+    "pieces": 35,
+    "joker": false
    },
    {
     "id": "meio-000193",
-    "pieces": 30
+    "pieces": 30,
+    "joker": false
    },
    {
     "id": "meio-000202",
-    "pieces": 35
+    "pieces": 35,
+    "joker": false
    }
   ]
  },
@@ -383,123 +473,153 @@
   "niveis": [
    {
     "id": "meio-joker-000003",
-    "pieces": 27
+    "pieces": 27,
+    "joker": true
    },
    {
     "id": "meio-joker-000010",
-    "pieces": 23
+    "pieces": 23,
+    "joker": true
    },
    {
     "id": "meio-joker-000013",
-    "pieces": 27
+    "pieces": 27,
+    "joker": true
    },
    {
     "id": "meio-joker-000021",
-    "pieces": 26
+    "pieces": 26,
+    "joker": true
    },
    {
     "id": "meio-joker-000034",
-    "pieces": 23
+    "pieces": 23,
+    "joker": true
    },
    {
     "id": "meio-joker-000041",
-    "pieces": 29
+    "pieces": 29,
+    "joker": true
    },
    {
     "id": "meio-joker-000047",
-    "pieces": 28
+    "pieces": 28,
+    "joker": true
    },
    {
     "id": "meio-joker-000058",
-    "pieces": 30
+    "pieces": 30,
+    "joker": true
    },
    {
     "id": "meio-joker-000067",
-    "pieces": 30
+    "pieces": 30,
+    "joker": true
    },
    {
     "id": "meio-joker-000072",
-    "pieces": 26
+    "pieces": 26,
+    "joker": true
    },
    {
     "id": "meio-joker-000073",
-    "pieces": 29
+    "pieces": 29,
+    "joker": true
    },
    {
     "id": "meio-joker-000074",
-    "pieces": 30
+    "pieces": 30,
+    "joker": true
    },
    {
     "id": "meio-joker-000078",
-    "pieces": 25
+    "pieces": 25,
+    "joker": true
    },
    {
     "id": "meio-joker-000083",
-    "pieces": 30
+    "pieces": 30,
+    "joker": true
    },
    {
     "id": "meio-joker-000088",
-    "pieces": 26
+    "pieces": 26,
+    "joker": true
    },
    {
     "id": "meio-joker-000091",
-    "pieces": 30
+    "pieces": 30,
+    "joker": true
    },
    {
     "id": "meio-joker-000098",
-    "pieces": 30
+    "pieces": 30,
+    "joker": true
    },
    {
     "id": "meio-joker-000109",
-    "pieces": 22
+    "pieces": 22,
+    "joker": true
    },
    {
     "id": "meio-joker-000122",
-    "pieces": 27
+    "pieces": 27,
+    "joker": true
    },
    {
     "id": "meio-joker-000127",
-    "pieces": 23
+    "pieces": 23,
+    "joker": true
    },
    {
     "id": "meio-joker-000156",
-    "pieces": 28
+    "pieces": 28,
+    "joker": true
    },
    {
     "id": "meio-joker-000207",
-    "pieces": 30
+    "pieces": 30,
+    "joker": true
    },
    {
     "id": "meio-joker-000225",
-    "pieces": 24
+    "pieces": 24,
+    "joker": true
    },
    {
     "id": "meio-joker-000226",
-    "pieces": 26
+    "pieces": 26,
+    "joker": true
    },
    {
     "id": "meio-joker-000231",
-    "pieces": 30
+    "pieces": 30,
+    "joker": true
    },
    {
     "id": "meio-joker-000234",
-    "pieces": 26
+    "pieces": 26,
+    "joker": true
    },
    {
     "id": "meio-joker-000241",
-    "pieces": 29
+    "pieces": 29,
+    "joker": true
    },
    {
     "id": "meio-joker-000244",
-    "pieces": 25
+    "pieces": 25,
+    "joker": true
    },
    {
     "id": "meio-joker-000247",
-    "pieces": 30
+    "pieces": 30,
+    "joker": true
    },
    {
     "id": "meio-joker-000251",
-    "pieces": 25
+    "pieces": 25,
+    "joker": true
    }
   ]
  },
@@ -509,123 +629,153 @@
   "niveis": [
    {
     "id": "avancado-000002",
-    "pieces": 40
+    "pieces": 40,
+    "joker": false
    },
    {
     "id": "avancado-000006",
-    "pieces": 35
+    "pieces": 35,
+    "joker": false
    },
    {
     "id": "avancado-000013",
-    "pieces": 36
+    "pieces": 36,
+    "joker": false
    },
    {
     "id": "avancado-000019",
-    "pieces": 42
+    "pieces": 42,
+    "joker": false
    },
    {
     "id": "avancado-000020",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "avancado-000021",
-    "pieces": 32
+    "pieces": 32,
+    "joker": false
    },
    {
     "id": "avancado-000022",
-    "pieces": 38
+    "pieces": 38,
+    "joker": false
    },
    {
     "id": "avancado-000024",
-    "pieces": 41
+    "pieces": 41,
+    "joker": false
    },
    {
     "id": "avancado-000030",
-    "pieces": 33
+    "pieces": 33,
+    "joker": false
    },
    {
     "id": "avancado-000033",
-    "pieces": 40
+    "pieces": 40,
+    "joker": false
    },
    {
     "id": "avancado-000049",
-    "pieces": 37
+    "pieces": 37,
+    "joker": false
    },
    {
     "id": "avancado-000053",
-    "pieces": 38
+    "pieces": 38,
+    "joker": false
    },
    {
     "id": "avancado-000054",
-    "pieces": 38
+    "pieces": 38,
+    "joker": false
    },
    {
     "id": "avancado-000055",
-    "pieces": 41
+    "pieces": 41,
+    "joker": false
    },
    {
     "id": "avancado-000073",
-    "pieces": 39
+    "pieces": 39,
+    "joker": false
    },
    {
     "id": "avancado-000074",
-    "pieces": 40
+    "pieces": 40,
+    "joker": false
    },
    {
     "id": "avancado-000079",
-    "pieces": 39
+    "pieces": 39,
+    "joker": false
    },
    {
     "id": "avancado-000084",
-    "pieces": 38
+    "pieces": 38,
+    "joker": false
    },
    {
     "id": "avancado-000085",
-    "pieces": 31
+    "pieces": 31,
+    "joker": false
    },
    {
     "id": "avancado-000088",
-    "pieces": 42
+    "pieces": 42,
+    "joker": false
    },
    {
     "id": "avancado-000094",
-    "pieces": 37
+    "pieces": 37,
+    "joker": false
    },
    {
     "id": "avancado-000096",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "avancado-000098",
-    "pieces": 38
+    "pieces": 38,
+    "joker": false
    },
    {
     "id": "avancado-000118",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "avancado-000122",
-    "pieces": 33
+    "pieces": 33,
+    "joker": false
    },
    {
     "id": "avancado-000125",
-    "pieces": 37
+    "pieces": 37,
+    "joker": false
    },
    {
     "id": "avancado-000128",
-    "pieces": 41
+    "pieces": 41,
+    "joker": false
    },
    {
     "id": "avancado-000133",
-    "pieces": 42
+    "pieces": 42,
+    "joker": false
    },
    {
     "id": "avancado-000141",
-    "pieces": 34
+    "pieces": 34,
+    "joker": false
    },
    {
     "id": "avancado-000145",
-    "pieces": 41
+    "pieces": 41,
+    "joker": false
    }
   ]
  },
@@ -635,123 +785,153 @@
   "niveis": [
    {
     "id": "perito-000003",
-    "pieces": 48
+    "pieces": 48,
+    "joker": false
    },
    {
     "id": "perito-000010",
-    "pieces": 45
+    "pieces": 45,
+    "joker": false
    },
    {
     "id": "perito-000017",
-    "pieces": 50
+    "pieces": 50,
+    "joker": false
    },
    {
     "id": "perito-000018",
-    "pieces": 37
+    "pieces": 37,
+    "joker": false
    },
    {
     "id": "perito-000021",
-    "pieces": 46
+    "pieces": 46,
+    "joker": false
    },
    {
     "id": "perito-000022",
-    "pieces": 45
+    "pieces": 45,
+    "joker": false
    },
    {
     "id": "perito-000025",
-    "pieces": 44
+    "pieces": 44,
+    "joker": false
    },
    {
     "id": "perito-000028",
-    "pieces": 47
+    "pieces": 47,
+    "joker": false
    },
    {
     "id": "perito-000034",
-    "pieces": 37
+    "pieces": 37,
+    "joker": false
    },
    {
     "id": "perito-000045",
-    "pieces": 38
+    "pieces": 38,
+    "joker": false
    },
    {
     "id": "perito-000052",
-    "pieces": 39
+    "pieces": 39,
+    "joker": false
    },
    {
     "id": "perito-000054",
-    "pieces": 41
+    "pieces": 41,
+    "joker": false
    },
    {
     "id": "perito-000055",
-    "pieces": 44
+    "pieces": 44,
+    "joker": false
    },
    {
     "id": "perito-000056",
-    "pieces": 43
+    "pieces": 43,
+    "joker": false
    },
    {
     "id": "perito-000068",
-    "pieces": 39
+    "pieces": 39,
+    "joker": false
    },
    {
     "id": "perito-000069",
-    "pieces": 46
+    "pieces": 46,
+    "joker": false
    },
    {
     "id": "perito-000073",
-    "pieces": 44
+    "pieces": 44,
+    "joker": false
    },
    {
     "id": "perito-000080",
-    "pieces": 35
+    "pieces": 35,
+    "joker": false
    },
    {
     "id": "perito-000086",
-    "pieces": 41
+    "pieces": 41,
+    "joker": false
    },
    {
     "id": "perito-000090",
-    "pieces": 41
+    "pieces": 41,
+    "joker": false
    },
    {
     "id": "perito-000091",
-    "pieces": 46
+    "pieces": 46,
+    "joker": false
    },
    {
     "id": "perito-000094",
-    "pieces": 49
+    "pieces": 49,
+    "joker": false
    },
    {
     "id": "perito-000098",
-    "pieces": 49
+    "pieces": 49,
+    "joker": false
    },
    {
     "id": "perito-000099",
-    "pieces": 38
+    "pieces": 38,
+    "joker": false
    },
    {
     "id": "perito-000104",
-    "pieces": 43
+    "pieces": 43,
+    "joker": false
    },
    {
     "id": "perito-000109",
-    "pieces": 48
+    "pieces": 48,
+    "joker": false
    },
    {
     "id": "perito-000116",
-    "pieces": 47
+    "pieces": 47,
+    "joker": false
    },
    {
     "id": "perito-000117",
-    "pieces": 40
+    "pieces": 40,
+    "joker": false
    },
    {
     "id": "perito-000126",
-    "pieces": 37
+    "pieces": 37,
+    "joker": false
    },
    {
     "id": "perito-000129",
-    "pieces": 50
+    "pieces": 50,
+    "joker": false
    }
   ]
  },
@@ -761,123 +941,153 @@
   "niveis": [
    {
     "id": "denso-000011",
-    "pieces": 15
+    "pieces": 15,
+    "joker": true
    },
    {
     "id": "denso-000012",
-    "pieces": 12
+    "pieces": 12,
+    "joker": true
    },
    {
     "id": "denso-000020",
-    "pieces": 12
+    "pieces": 12,
+    "joker": true
    },
    {
     "id": "denso-000023",
-    "pieces": 13
+    "pieces": 13,
+    "joker": true
    },
    {
     "id": "denso-000028",
-    "pieces": 12
+    "pieces": 12,
+    "joker": true
    },
    {
     "id": "denso-000034",
-    "pieces": 14
+    "pieces": 14,
+    "joker": true
    },
    {
     "id": "denso-000036",
-    "pieces": 12
+    "pieces": 12,
+    "joker": true
    },
    {
     "id": "denso-000042",
-    "pieces": 12
+    "pieces": 12,
+    "joker": true
    },
    {
     "id": "denso-000044",
-    "pieces": 12
+    "pieces": 12,
+    "joker": true
    },
    {
     "id": "denso-000047",
-    "pieces": 13
+    "pieces": 13,
+    "joker": true
    },
    {
     "id": "denso-000048",
-    "pieces": 10
+    "pieces": 10,
+    "joker": true
    },
    {
     "id": "denso-000049",
-    "pieces": 11
+    "pieces": 11,
+    "joker": true
    },
    {
     "id": "denso-000054",
-    "pieces": 10
+    "pieces": 10,
+    "joker": true
    },
    {
     "id": "denso-000056",
-    "pieces": 10
+    "pieces": 10,
+    "joker": true
    },
    {
     "id": "denso-000060",
-    "pieces": 12
+    "pieces": 12,
+    "joker": true
    },
    {
     "id": "denso-000064",
-    "pieces": 10
+    "pieces": 10,
+    "joker": true
    },
    {
     "id": "denso-000065",
-    "pieces": 11
+    "pieces": 11,
+    "joker": true
    },
    {
     "id": "denso-000069",
-    "pieces": 11
+    "pieces": 11,
+    "joker": true
    },
    {
     "id": "denso-000077",
-    "pieces": 11
+    "pieces": 11,
+    "joker": true
    },
    {
     "id": "denso-000078",
-    "pieces": 10
+    "pieces": 10,
+    "joker": true
    },
    {
     "id": "denso-000082",
-    "pieces": 12
+    "pieces": 12,
+    "joker": true
    },
    {
     "id": "denso-000107",
-    "pieces": 15
+    "pieces": 15,
+    "joker": true
    },
    {
     "id": "denso-000111",
-    "pieces": 13
+    "pieces": 13,
+    "joker": true
    },
    {
     "id": "denso-000112",
-    "pieces": 14
+    "pieces": 14,
+    "joker": true
    },
    {
     "id": "denso-000118",
-    "pieces": 10
+    "pieces": 10,
+    "joker": true
    },
    {
     "id": "denso-000120",
-    "pieces": 14
+    "pieces": 14,
+    "joker": true
    },
    {
     "id": "denso-000130",
-    "pieces": 12
+    "pieces": 12,
+    "joker": true
    },
    {
     "id": "denso-000131",
-    "pieces": 11
+    "pieces": 11,
+    "joker": true
    },
    {
     "id": "denso-000133",
-    "pieces": 13
+    "pieces": 13,
+    "joker": true
    },
    {
     "id": "denso-000139",
-    "pieces": 11
+    "pieces": 11,
+    "joker": true
    }
   ]
  },
@@ -887,123 +1097,153 @@
   "niveis": [
    {
     "id": "tempo-000002",
-    "pieces": 11
+    "pieces": 11,
+    "joker": false
    },
    {
     "id": "tempo-000004",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tempo-000008",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000040",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000048",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000071",
-    "pieces": 13
+    "pieces": 13,
+    "joker": false
    },
    {
     "id": "tempo-000093",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000133",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000135",
-    "pieces": 11
+    "pieces": 11,
+    "joker": false
    },
    {
     "id": "tempo-000145",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tempo-000147",
-    "pieces": 11
+    "pieces": 11,
+    "joker": false
    },
    {
     "id": "tempo-000149",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000189",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000270",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tempo-000282",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000288",
-    "pieces": 11
+    "pieces": 11,
+    "joker": false
    },
    {
     "id": "tempo-000306",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000309",
-    "pieces": 15
+    "pieces": 15,
+    "joker": false
    },
    {
     "id": "tempo-000322",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000346",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000351",
-    "pieces": 14
+    "pieces": 14,
+    "joker": false
    },
    {
     "id": "tempo-000362",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000377",
-    "pieces": 13
+    "pieces": 13,
+    "joker": false
    },
    {
     "id": "tempo-000382",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tempo-000385",
-    "pieces": 13
+    "pieces": 13,
+    "joker": false
    },
    {
     "id": "tempo-000386",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    },
    {
     "id": "tempo-000390",
-    "pieces": 12
+    "pieces": 12,
+    "joker": false
    },
    {
     "id": "tempo-000391",
-    "pieces": 14
+    "pieces": 14,
+    "joker": false
    },
    {
     "id": "tempo-000417",
-    "pieces": 13
+    "pieces": 13,
+    "joker": false
    },
    {
     "id": "tempo-000431",
-    "pieces": 10
+    "pieces": 10,
+    "joker": false
    }
   ]
  }

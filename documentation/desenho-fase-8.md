@@ -365,6 +365,75 @@ vez de dez.
 O seletor de valor (§5.2) já ensina metade sozinho: ver seis faces e escolher uma
 explica o que o joker é sem uma linha de texto.
 
+#### O tabuleiro, e porque é este
+
+```
+✳ 4          board: [[0, 4], [5, 3]]
+5 3          o joker vale 2 · duas jogadas
+```
+
+Quatro peças. As faces somam **12**; faltam **2** para 14, que é 7 × 2. É uma
+conta que se segue de cabeça, e é esse o ponto.
+
+O que o torna um tutorial e não uma demonstração é ter **duas saídas boas e uma
+má**, todas ao alcance do primeiro toque:
+
+| Escolha | O que acontece |
+|---|---|
+| Joker 2, com o 5 | 7. Sobram o 4 e o 3, que dão 7. Limpo |
+| Começar pelo 4+3 | Sobram ✳ e 5. O joker vale 2. Limpo |
+| **Joker 3, com o 4** | **7 — e o jogo aceita.** Sobram 5 e 3: soma 8, zero grupos, e já não há joker |
+
+O caminho fatal mata **numa jogada** e deixa duas peças à vista a somar 8. É o
+argumento inteiro do joker com números pequenos: escolher mal é permitido, não
+avisa, e não tem volta. Num nível a sério a mesma lição chegava dez jogadas
+depois, e ninguém a ligava à causa.
+
+Um tabuleiro com um só caminho seria um carril — o jogador seguia-o sem decidir
+nada, e o tutorial não ensinava que há escolha. `test/tutorial.test.ts` verifica
+as três linhas da tabela contra a engine.
+
+#### A conta aparece com números
+
+Uma vez, e só aqui, em três passos numa coluna: `as faces somam 12` ·
+`faltam 2 para 14` · `que é 7 × 2 → ✳ = 2`. Numa linha só lê-se como fórmula; em
+passos lê-se como raciocínio, que é o que se pretende que fique.
+
+Sem jargão: «módulo 7» diz o mesmo e não se lê aos dez anos. O público vai de
+miúdos a graúdos e a regra tem de passar nos dois extremos.
+
+#### Obrigatório quer dizer sem saída
+
+Abre sozinho antes do primeiro nível com joker, **por cima** do tabuleiro que o
+jogador vai jogar — assim não parece um ecrã que se atravessa para chegar ao
+jogo. Não há botão de saltar, porque «obrigatório» e «saltável» são a mesma
+coisa; a saída aparece quando o tabuleiro fica limpo, e quem já percebeu chega lá
+em quatro toques. Depois disso fica sempre no `?` do cabeçalho.
+
+Se o jogador matar o tabuleiro, o jogo **nomeia-o** e não o repreende: aparece a
+conta do que sobrou — *«Sobram 8. Não é múltiplo de 7, e já não há joker»* — e um
+botão para tentar outra vez. A frase é a lição. E depois de limpar aparece o
+convite ao contrário: *«E se eu escolher outro valor?»*.
+
+#### O andaime: a soma das faces, e só durante três níveis
+
+Aplicar a regra exige a soma do tabuleiro. Num `denso` de 12 peças isso soma-se
+de cabeça; num `meio-joker` de 27 é trabalho de papel e lápis, e no telemóvel não
+há papel. Medir paciência aritmética não é medir leitura de tabuleiro.
+
+Por isso o cabeçalho mostra `faces somam 60` — **nos três primeiros níveis com
+joker que o jogador completar**, e nunca mais. Conta níveis distintos e não
+sessões; lê-se do tabuleiro atual e não do inicial; e desaparece assim que o
+joker é gasto, porque a partir daí a soma é múltipla de 7 e não informa nada.
+
+O número **não** dá a resposta: continua a ser o jogador a fechar a conta, e a
+decisão que interessa — em que grupo gastar o joker — fica intacta. Ao quarto
+nível o andaime sai, e a banda `denso`, que é dedução pura, chega sempre sem ele.
+
+> Isto revê o §5.2, que escrevia que o valor obrigatório nunca é mostrado.
+> Continua a não ser — o que se mostra é a soma, que é um passo antes. A
+> distinção é deliberada, e o número de níveis foi decidido a 2026-08-20.
+
 ### 5.5 A pontuação da campanha, e a armadilha que ela tem
 
 A campanha passa a ter pontuação, **mostrada só no ecrã de fim de nível** — nunca
@@ -455,18 +524,18 @@ Deliberadamente com o núcleo jogável primeiro, para haver um link partilhável
 cedo — o playtest externo pode mudar o resto, e o que ainda não existe não se
 deita fora.
 
-| | |
-|---|---|
-| 1 | Andaime Vite, e a correção ao `CLAUDE.md` |
-| 2 | `transition()` e os seus testes — **sem DOM** |
-| 3 | Tabuleiro, faces, seleção, soma corrente |
-| 4 | A animação em três fases |
-| 5 | Pendência do joker e o seu tutorial |
-| 6 | Lista de níveis, resultado com selo, persistência |
-| 7 | Modo tempo |
-| 8 | ← **aqui há link partilhável e o playtest externo pode começar** |
-| 9 | Mapa de progressão, perfil, definições |
-| 10 | Puzzle diário |
+| | | |
+|---|---|---|
+| 1 | Andaime Vite, e a correção ao `CLAUDE.md` | ✅ |
+| 2 | `transition()` e os seus testes — **sem DOM** | ✅ |
+| 3 | Tabuleiro, faces, seleção, soma corrente | ✅ |
+| 4 | A animação em três fases | ✅ |
+| 5 | Pendência do joker e o seu tutorial | ✅ |
+| 6 | Lista de níveis, resultado com selo, persistência | |
+| 7 | Modo tempo | |
+| 8 | ← **aqui há link partilhável e o playtest externo pode começar** | |
+| 9 | Mapa de progressão, perfil, definições | |
+| 10 | Puzzle diário | |
 
 ---
 

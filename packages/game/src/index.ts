@@ -74,9 +74,19 @@ export type { LevelProgress, Profile, ProfileStorage } from "./session/progress"
 export {
   PROFILE_KEY,
   PROFILE_VERSION,
+  countCompleted,
   emptyProfile,
   load,
+  markJokerTutorialSeen,
   recordLevel,
   recordTimeAttack,
   save,
 } from "./session/progress";
+
+export type { ContaDoJoker } from "./session/tutorial";
+export {
+  NIVEIS_COM_ANDAIME,
+  NIVEL_TUTORIAL_JOKER,
+  contaDoJoker,
+  mostraSomaDasFaces,
+} from "./session/tutorial";

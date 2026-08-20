@@ -14,6 +14,8 @@ import type { Level } from "@septet/engine";
 export interface NivelNoIndice {
   readonly id: string;
   readonly pieces: number;
+  /** Decide o tutorial do joker e o andaime da soma, no arranque. */
+  readonly joker?: boolean;
 }
 
 export interface BandaNoIndice {
