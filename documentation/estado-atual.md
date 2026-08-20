@@ -177,6 +177,34 @@ A severidade escala com ramificação^profundidade. Em tabuleiros com forma
 correta, a profundidade 3 rejeitava **1840 em 1856**. Todas as bandas usam
 `fairnessDepth: 2` (a `tempo` usa 0), que o plano §6.2 permite explicitamente.
 
+### 5. As faces não aparecem todas com a mesma frequência, nem de perto
+
+Notado a jogar — *"porque nunca aparece a face 6?"* — e medido no pack:
+
+| Face | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| Frequência | **36,0%** | 21,3% | 20,1% | 10,9% | 6,7% | **4,0%** |
+
+São **duas causas independentes**, e convém não as confundir:
+
+**Estrutural.** Das 14 composições de 7, só `[1,6]` contém um 6 — e as
+composições longas são feitas de 1 e 2, contribuindo muitas células cada vez que
+saem. Com pesos uniformes, o previsto é 56,6% de uns e 1,9% de seises.
+
+**O filtro da banda.** Um 6 tem um único parceiro, portanto tabuleiros com seises
+são rígidos e sobrevivem menos. Medido na `inicio`, que exige sobrevivência
+≥ 0,55: **6,1% de seises nos gerados, 0,9% nos aceites.** Não é defeito — é a
+alavanca de dificuldade a funcionar.
+
+Corolário contraintuitivo: **a banda onde se veem mais seises é o `tutorial`**, com
+16,6% e distribuição perfeitamente igual entre as seis faces. Só tem pares, e os
+pares que somam 7 são `1+6`, `2+5`, `3+4` — cada face uma vez.
+
+Isto expôs um defeito de contabilidade no `facesAltas()` das bandas `avancado` e
+`perito`: pesava composições e não células, portanto `[1,1,1,1,1,1,1]` saía com o
+mesmo peso de `[1,6]`. O rótulo "faces altas" não se cumpria no tabuleiro — a
+`perito` tinha 42,9% de uns. Corrigido a dividir o peso por `length`.
+
 ---
 
 ## Decisões de arquitetura que não se leem no código

@@ -508,19 +508,19 @@
   "label": "Avançado — faces altas, poucos parceiros",
   "niveis": [
    {
-    "id": "avancado-000000",
-    "pieces": 30
-   },
-   {
-    "id": "avancado-000003",
-    "pieces": 39
+    "id": "avancado-000002",
+    "pieces": 40
    },
    {
     "id": "avancado-000006",
     "pieces": 35
    },
    {
-    "id": "avancado-000012",
+    "id": "avancado-000013",
+    "pieces": 36
+   },
+   {
+    "id": "avancado-000019",
     "pieces": 42
    },
    {
@@ -532,99 +532,99 @@
     "pieces": 32
    },
    {
-    "id": "avancado-000032",
-    "pieces": 36
+    "id": "avancado-000022",
+    "pieces": 38
+   },
+   {
+    "id": "avancado-000024",
+    "pieces": 41
+   },
+   {
+    "id": "avancado-000030",
+    "pieces": 33
    },
    {
     "id": "avancado-000033",
     "pieces": 40
    },
    {
-    "id": "avancado-000036",
-    "pieces": 31
+    "id": "avancado-000049",
+    "pieces": 37
    },
    {
-    "id": "avancado-000037",
-    "pieces": 35
+    "id": "avancado-000053",
+    "pieces": 38
    },
    {
-    "id": "avancado-000041",
-    "pieces": 32
-   },
-   {
-    "id": "avancado-000043",
-    "pieces": 40
-   },
-   {
-    "id": "avancado-000048",
-    "pieces": 39
-   },
-   {
-    "id": "avancado-000050",
-    "pieces": 42
-   },
-   {
-    "id": "avancado-000052",
-    "pieces": 41
+    "id": "avancado-000054",
+    "pieces": 38
    },
    {
     "id": "avancado-000055",
     "pieces": 41
    },
    {
-    "id": "avancado-000057",
-    "pieces": 42
+    "id": "avancado-000073",
+    "pieces": 39
    },
    {
-    "id": "avancado-000058",
-    "pieces": 37
-   },
-   {
-    "id": "avancado-000063",
-    "pieces": 36
+    "id": "avancado-000074",
+    "pieces": 40
    },
    {
     "id": "avancado-000079",
     "pieces": 39
    },
    {
-    "id": "avancado-000082",
-    "pieces": 35
-   },
-   {
     "id": "avancado-000084",
     "pieces": 38
+   },
+   {
+    "id": "avancado-000085",
+    "pieces": 31
    },
    {
     "id": "avancado-000088",
     "pieces": 42
    },
    {
-    "id": "avancado-000091",
-    "pieces": 33
-   },
-   {
-    "id": "avancado-000095",
-    "pieces": 42
-   },
-   {
-    "id": "avancado-000103",
+    "id": "avancado-000094",
     "pieces": 37
    },
    {
-    "id": "avancado-000106",
+    "id": "avancado-000096",
+    "pieces": 34
+   },
+   {
+    "id": "avancado-000098",
+    "pieces": 38
+   },
+   {
+    "id": "avancado-000118",
+    "pieces": 34
+   },
+   {
+    "id": "avancado-000122",
     "pieces": 33
    },
    {
-    "id": "avancado-000109",
-    "pieces": 40
-   },
-   {
-    "id": "avancado-000126",
-    "pieces": 42
+    "id": "avancado-000125",
+    "pieces": 37
    },
    {
     "id": "avancado-000128",
+    "pieces": 41
+   },
+   {
+    "id": "avancado-000133",
+    "pieces": 42
+   },
+   {
+    "id": "avancado-000141",
+    "pieces": 34
+   },
+   {
+    "id": "avancado-000145",
     "pieces": 41
    }
   ]
@@ -634,124 +634,124 @@
   "label": "Perito — faces altas, silhuetas",
   "niveis": [
    {
-    "id": "perito-000009",
-    "pieces": 42
-   },
-   {
-    "id": "perito-000012",
-    "pieces": 47
-   },
-   {
-    "id": "perito-000013",
+    "id": "perito-000003",
     "pieces": 48
    },
    {
-    "id": "perito-000014",
-    "pieces": 37
+    "id": "perito-000010",
+    "pieces": 45
    },
    {
     "id": "perito-000017",
     "pieces": 50
    },
    {
-    "id": "perito-000019",
-    "pieces": 48
+    "id": "perito-000018",
+    "pieces": 37
+   },
+   {
+    "id": "perito-000021",
+    "pieces": 46
+   },
+   {
+    "id": "perito-000022",
+    "pieces": 45
+   },
+   {
+    "id": "perito-000025",
+    "pieces": 44
    },
    {
     "id": "perito-000028",
     "pieces": 47
    },
    {
-    "id": "perito-000035",
-    "pieces": 48
+    "id": "perito-000034",
+    "pieces": 37
    },
    {
-    "id": "perito-000041",
+    "id": "perito-000045",
+    "pieces": 38
+   },
+   {
+    "id": "perito-000052",
+    "pieces": 39
+   },
+   {
+    "id": "perito-000054",
+    "pieces": 41
+   },
+   {
+    "id": "perito-000055",
     "pieces": 44
-   },
-   {
-    "id": "perito-000046",
-    "pieces": 49
-   },
-   {
-    "id": "perito-000050",
-    "pieces": 49
-   },
-   {
-    "id": "perito-000051",
-    "pieces": 48
-   },
-   {
-    "id": "perito-000053",
-    "pieces": 46
    },
    {
     "id": "perito-000056",
     "pieces": 43
    },
    {
-    "id": "perito-000061",
-    "pieces": 38
+    "id": "perito-000068",
+    "pieces": 39
    },
    {
-    "id": "perito-000062",
-    "pieces": 49
+    "id": "perito-000069",
+    "pieces": 46
    },
    {
-    "id": "perito-000072",
-    "pieces": 43
+    "id": "perito-000073",
+    "pieces": 44
+   },
+   {
+    "id": "perito-000080",
+    "pieces": 35
    },
    {
     "id": "perito-000086",
     "pieces": 41
    },
    {
+    "id": "perito-000090",
+    "pieces": 41
+   },
+   {
+    "id": "perito-000091",
+    "pieces": 46
+   },
+   {
+    "id": "perito-000094",
+    "pieces": 49
+   },
+   {
     "id": "perito-000098",
     "pieces": 49
    },
    {
-    "id": "perito-000105",
-    "pieces": 42
+    "id": "perito-000099",
+    "pieces": 38
+   },
+   {
+    "id": "perito-000104",
+    "pieces": 43
    },
    {
     "id": "perito-000109",
     "pieces": 48
    },
    {
-    "id": "perito-000118",
-    "pieces": 45
+    "id": "perito-000116",
+    "pieces": 47
    },
    {
-    "id": "perito-000131",
-    "pieces": 48
+    "id": "perito-000117",
+    "pieces": 40
    },
    {
-    "id": "perito-000135",
-    "pieces": 42
+    "id": "perito-000126",
+    "pieces": 37
    },
    {
-    "id": "perito-000145",
+    "id": "perito-000129",
     "pieces": 50
-   },
-   {
-    "id": "perito-000153",
-    "pieces": 42
-   },
-   {
-    "id": "perito-000159",
-    "pieces": 50
-   },
-   {
-    "id": "perito-000165",
-    "pieces": 46
-   },
-   {
-    "id": "perito-000189",
-    "pieces": 38
-   },
-   {
-    "id": "perito-000201",
-    "pieces": 44
    }
   ]
  },

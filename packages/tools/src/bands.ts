@@ -20,9 +20,18 @@ const ateNPecas = (max: number): number[] =>
  * Favorece composições com faces de 3 para cima. São as peças com poucos
  * parceiros — um 5 só se junta a um 2 ou a `1+1` — e é daí que vem a rigidez que
  * a fase de perito quer (plano §4.4).
+ *
+ * **A divisão pelo número de células não é detalhe.** A primeira versão pesava
+ * composições e não peças, e por isso o rótulo "faces altas" não se cumpria no
+ * tabuleiro: `[1,1,1,1,1,1,1]` saía com o mesmo peso de `[1,6]` e despejava sete
+ * uns de cada vez. Medido no pack, a banda `perito` tinha 42,9% de uns e **4,3%
+ * de seises** — praticamente o mesmo que uma banda sem preferência nenhuma.
+ *
+ * Um peso é a probabilidade de escolher a composição; o que se vê no tabuleiro é
+ * a contagem de células. Dividir por `length` converte um no outro.
  */
 const facesAltas = (): number[] =>
-  COMPOSITIONS.map((c) => 1 + c.filter((v) => v >= 3).length * 2);
+  COMPOSITIONS.map((c) => (1 + c.filter((v) => v >= 3).length * 2) / c.length);
 
 export interface BandSpec {
   readonly id: string;
