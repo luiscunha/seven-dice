@@ -203,8 +203,10 @@ decisão.
   deliberadamente inválidos.
 - **Os Workers não herdam o loader do pai.** O `worker.ts` precisa de
   `execArgv: ["--import", "tsx"]` ou não resolve os módulos sob o Vitest.
-- **O git avisa LF→CRLF em cada commit.** Falta um `.gitattributes` com
-  `* text=auto eol=lf`. Nunca foi feito.
+- ~~O git avisa LF→CRLF em cada commit.~~ Resolvido: o `.gitattributes` fixa
+  `* text=auto eol=lf`, portanto o comportamento é do repositório e não do
+  `core.autocrlf` de cada máquina. Índice e cópia de trabalho em LF nos 59
+  ficheiros versionados.
 
 ---
 
