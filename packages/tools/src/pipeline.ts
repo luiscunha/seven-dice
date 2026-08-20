@@ -36,6 +36,13 @@ export interface OpcoesPipeline {
   /** Candidatos a avaliar por ronda antes de verificar se já chegam. */
   readonly loteInicial?: number;
   readonly runs?: number;
+  /**
+   * Playouts do pré-filtro, antes da medição completa. `0` desliga-o.
+   *
+   * Ver a nota em `avaliar`: corta cedo os candidatos que estão fora da banda
+   * com folga, sem tocar na garantia de resolubilidade.
+   */
+  readonly preRuns?: number;
   readonly workers?: number;
   readonly maxCandidatos?: number;
   readonly onProgresso?: (msg: string) => void;
@@ -66,6 +73,7 @@ export async function construirBanda(
       seeds,
       band: opcoes.band,
       runs,
+      preRuns: opcoes.preRuns ?? 0,
       ...(opcoes.workers === undefined ? {} : { workers: opcoes.workers }),
     });
 

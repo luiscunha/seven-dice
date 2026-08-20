@@ -120,6 +120,49 @@ describe("avaliação de um candidato", () => {
   });
 });
 
+/*
+ * O pré-filtro corta cedo, com uma amostra curta e a banda alargada, os
+ * candidatos que a medição completa iria rejeitar por sobrevivência.
+ *
+ * A propriedade que tem de valer é uma só: **o que é aceite tem de ser aceite
+ * exatamente igual**. O atalho pode perder candidatos — isso só custa procurar
+ * mais uma seed — mas não pode mudar um nível nem uma métrica.
+ */
+describe("pré-filtro de sobrevivência", () => {
+  it("não altera nenhum nível aceite, nem as suas métricas", () => {
+    for (let seed = 0; seed < 60; seed++) {
+      const sem = avaliar(seed, DENSO!, 200);
+      const com = avaliar(seed, DENSO!, 200, 50);
+
+      if (com.level !== undefined) {
+        expect(com).toEqual(sem);
+      }
+    }
+  }, 120_000);
+
+  it("só descarta candidatos que a medição completa também descartaria", () => {
+    /*
+     * Não é uma garantia matemática — é ruído de amostragem, e a margem existe
+     * para o tornar improvável, não impossível. O teste vigia a taxa: se um dia
+     * passar a haver descartes falsos, a margem é curta de mais.
+     */
+    let falsos = 0;
+
+    for (let seed = 0; seed < 60; seed++) {
+      const sem = avaliar(seed, DENSO!, 200);
+      const com = avaliar(seed, DENSO!, 200, 50);
+
+      if (sem.level !== undefined && com.level === undefined) falsos++;
+    }
+
+    expect(falsos).toBe(0);
+  }, 120_000);
+
+  it("desligado, é indistinguível de não existir", () => {
+    expect(avaliar(17, TUTORIAL!, 200, 0)).toEqual(avaliar(17, TUTORIAL!, 200));
+  });
+});
+
 describe("paralelismo (spec §7.2)", () => {
   it("o resultado não depende do número de workers", async () => {
     /*

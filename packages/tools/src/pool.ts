@@ -71,6 +71,8 @@ export interface OpcoesPool {
   readonly seeds: readonly number[];
   readonly band: BandSpec;
   readonly runs: number;
+  /** Playouts do pré-filtro. `0` desliga-o. */
+  readonly preRuns?: number;
   /** 1 força execução no processo principal — útil para depurar. */
   readonly workers?: number;
   readonly onProgresso?: (feitos: number, total: number) => void;
@@ -80,12 +82,13 @@ export async function avaliarEmParalelo(
   opcoes: OpcoesPool,
 ): Promise<Avaliacao[]> {
   const { seeds, band, runs } = opcoes;
+  const preRuns = opcoes.preRuns ?? 0;
   const n = Math.max(1, opcoes.workers ?? availableParallelism());
 
   if (n === 1 || seeds.length < 8) {
     const out: Avaliacao[] = [];
     for (const seed of seeds) {
-      out.push(avaliar(seed, band, runs));
+      out.push(avaliar(seed, band, runs, preRuns));
       opcoes.onProgresso?.(out.length, seeds.length);
     }
     return out;
@@ -102,7 +105,7 @@ export async function avaliarEmParalelo(
     fatias
       .filter((f) => f.length > 0)
       .map((f) =>
-        correrFatia({ seeds: f, band, runs }).then((r) => {
+        correrFatia({ seeds: f, band, runs, preRuns }).then((r) => {
           feitos += r.length;
           opcoes.onProgresso?.(feitos, seeds.length);
           return r;

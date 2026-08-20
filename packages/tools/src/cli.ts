@@ -1,7 +1,7 @@
 /**
  * CLI do pipeline offline.
  *
- *   sete build [--band <id>] [--count <n>] [--runs <n>] [--out <dir>]
+ *   sete build [--band <id>] [--count <n>] [--runs <n>] [--pre <n>] [--out <dir>]
  *   sete bands
  *   sete verify <ficheiro.json>
  *
@@ -43,6 +43,9 @@ async function comandoBuild(args: string[]): Promise<number> {
       band: { type: "string" },
       count: { type: "string", default: "40" },
       runs: { type: "string", default: "2000" },
+      // Pré-filtro ligado por omissão: −37% de playouts, 0 descartes falsos em
+      // 512 candidatos, e o pack sai idêntico. `--pre 0` desliga-o.
+      pre: { type: "string", default: "100" },
       out: { type: "string", default: "packages/tools/out" },
       workers: { type: "string" },
     },
@@ -50,6 +53,7 @@ async function comandoBuild(args: string[]): Promise<number> {
 
   const alvo = Number(values.count);
   const runs = Number(values.runs);
+  const preRuns = Number(values.pre);
   const bandas =
     values.band === undefined
       ? BANDS
@@ -70,6 +74,7 @@ async function comandoBuild(args: string[]): Promise<number> {
       band,
       alvo,
       runs,
+      preRuns,
       ...(values.workers === undefined
         ? {}
         : { workers: Number(values.workers) }),

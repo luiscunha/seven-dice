@@ -56,10 +56,32 @@ function tamanhoParaSeed(seed: number, band: BandSpec): number {
   return inicio;
 }
 
+/**
+ * Margem com que **cada extremo** da banda é alargado no pré-filtro: três erros
+ * padrão da proporção, calculados no próprio extremo.
+ *
+ * A margem tem de acompanhar o erro de amostragem, e o erro de uma proporção
+ * colapsa perto de 0 e de 1. Uma margem fixa é generosa de mais exatamente onde
+ * as bandas são estreitas: com 0,15, a `meio-joker` — que aceita [0,02, 0,15] —
+ * ficava a cortar acima de 0,30, não cortava quase nada, e ainda pagava os
+ * playouts do pré-filtro. Medido em 64 candidatos por banda:
+ *
+ * | Margem | meio-joker | denso | total de playouts |
+ * |---|---|---|---|
+ * | fixa 0,15 | **−7%** | **−2%** | −31% |
+ * | 3σ no extremo | −1% | +4% | **−37%** |
+ *
+ * Em ambas as variantes, **0 descartes falsos em 512 candidatos**.
+ */
+export const margemPre = (p: number, runs: number): number =>
+  3 * Math.sqrt((p * (1 - p)) / runs);
+
 export function avaliar(
   seed: number,
   band: BandSpec,
   runs: number,
+  /** Playouts do pré-filtro. `0` desliga-o. */
+  preRuns = 0,
 ): Avaliacao {
   const gerado = generate(seed, {
     ...band.params,
@@ -80,8 +102,41 @@ export function avaliar(
   }
   if (b.length !== 0) return { seed, rejeicao: "ida-e-volta" };
 
-  const m = measureSurvival(gerado.board, runs, seed);
   const [min, max] = band.accept.survival;
+
+  /*
+   * Pré-filtro: uma medição curta antes da longa.
+   *
+   * Na `perito`, 44 de 64 candidatos morrem no teste de sobrevivência **depois**
+   * de terem pago a medição inteira — medido. Cortá-los com um décimo dos
+   * playouts dá o mesmo veredicto por um décimo do custo.
+   *
+   * Não toca na garantia central. A resolubilidade vem da ida-e-volta, que já
+   * correu acima, e do piso de justiça, que corre abaixo; a sobrevivência é
+   * dificuldade. O pior que este atalho pode fazer é descartar um candidato bom,
+   * e isso só custa procurar mais uma seed — o pipeline avalia até a banda
+   * encher.
+   *
+   * A medição final é uma chamada independente, com os `runs` pedidos. Os níveis
+   * aceites e as métricas guardadas são idênticos aos de sempre.
+   *
+   * Ressalva: a `survivalRate` devolvida numa rejeição do pré-filtro é a
+   * estimativa curta, mais ruidosa. Como essas taxas alimentam os percentis que
+   * calibram as bandas, a distribuição observada fica com caudas um pouco mais
+   * largas do que ficaria só com medições longas.
+   */
+  if (preRuns > 0 && preRuns < runs) {
+    const pre = measureSurvival(gerado.board, preRuns, seed);
+
+    if (
+      pre.survivalRate < min - margemPre(min, preRuns) ||
+      pre.survivalRate > max + margemPre(max, preRuns)
+    ) {
+      return { seed, rejeicao: "sobrevivencia", survivalRate: pre.survivalRate };
+    }
+  }
+
+  const m = measureSurvival(gerado.board, runs, seed);
 
   if (m.survivalRate < min || m.survivalRate > max) {
     return { seed, rejeicao: "sobrevivencia", survivalRate: m.survivalRate };

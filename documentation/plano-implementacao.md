@@ -720,6 +720,47 @@ joker, com mediana observada de 1.00. Um tabuleiro pequeno não tem por onde
 correr mal. Com joker, a mesma banda dá 30 aceites em 192 candidatos, em 7
 segundos.
 
+### Medição em duas fases — proposta no PR #5, decidida a 2026-08-20
+
+Cada candidato pagava 1000 playouts **antes** de se saber se servia. Na `perito`,
+44 de 64 candidatos morriam logo no teste de sobrevivência a seguir. Passa a
+haver um pré-filtro de 100 playouts contra a banda alargada, e só os sobreviventes
+levam a medição completa.
+
+Isto **não toca na garantia central**, e é isso que o torna aceitável. A
+resolubilidade vem da ida-e-volta, que corre antes, e do piso de justiça, que
+corre depois; a sobrevivência é dificuldade. O pior que o atalho pode fazer é
+descartar um candidato bom — e como o pipeline avalia até a banda encher, isso só
+custa procurar mais uma seed.
+
+A margem de alargamento não é constante. O erro de amostragem de uma proporção
+colapsa perto de 0, portanto uma margem fixa é generosa de mais exatamente onde as
+bandas são estreitas. Usa-se **3σ calculados em cada extremo**. Medido em 64
+candidatos por banda, nas oito:
+
+| Margem | `meio-joker` | `denso` | Total de playouts | Descartes falsos |
+|---|---|---|---|---|
+| fixa 0,15 | **−7%** | −2% | −31% | 0 em 512 |
+| **3σ no extremo** | −1% | +4% | **−37%** | **0 em 512** |
+
+A poupança é muito desigual, por duas razões que convém não confundir:
+`tutorial`, `tempo` e `perito` poupam 60–70% porque os candidatos caem longe da
+banda; `meio-joker` e `denso` poupam ~0% porque as bandas são estreitas e perto de
+zero, **e** porque as rejeições delas são dominadas pelo piso de justiça, que
+corre depois da medição e que o pré-filtro não alcança.
+
+Validação de ponta a ponta: as oito bandas construídas pelos dois caminhos dão um
+pack **idêntico byte a byte**.
+
+Duas notas de método:
+
+- **O relógio não serve para medir isto.** A mesma banda `perito`, com trabalho
+  idêntico — 64 candidatos, mesmas rejeições — levou 88,1 s numa corrida e 49,5 s
+  noutra. A grandeza fiável é a contagem de playouts.
+- **Os percentis de calibração ficam mais ruidosos**, porque a `survivalRate`
+  guardada numa rejeição do pré-filtro é a estimativa curta. Quem recalibrar
+  bandas deve correr com `--pre 0`.
+
 ### Critério de aceitação — verificado
 
 **240 níveis exportados em 8 bandas, 30 por banda, 0 falhas na reverificação

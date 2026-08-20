@@ -19,7 +19,7 @@ pnpm check
 ```
 
 Node ≥ 20, pnpm 11.22.0 (fixado em `packageManager`). O `pnpm check` corre
-lint + typecheck + testes: **197 testes, ~20 s**. Se demorar muito mais do que
+lint + typecheck + testes: **200 testes, ~20 s**. Se demorar muito mais do que
 isso, ver "Armadilhas" no fim.
 
 Leituras, por esta ordem:
@@ -182,16 +182,49 @@ correta, a profundidade 3 rejeitava **1840 em 1856**. Todas as bandas usam
 
 ---
 
-## Proposto e não implementado
+## Medição em duas fases — decidida e implementada
 
-**Medição em duas fases no pipeline.** Hoje cada candidato leva 1000 playouts.
-A proposta é um pré-filtro de 100 playouts com a banda alargada, e só os
-sobreviventes levam os 1000. Medido em 40 candidatos: **40/40 de concordância,
-0 descartes falsos**.
+Vinha do PR #5 sem decisão. Ficou **implementada e ligada por omissão** a
+2026-08-20. Cada candidato leva agora 100 playouts contra a banda alargada, e só
+os sobreviventes levam os 1000.
 
-Vale a pena porque o tempo está concentrado: o pack completo leva **922,4 s**, e
-a banda `perito` sozinha leva **383,7 s**. Foi discutido no PR #5 e ficou sem
-decisão.
+O que a torna segura não é a precisão da amostra curta — é onde ela vive. A
+resolubilidade vem da ida-e-volta, que corre **antes**, e do piso de justiça, que
+corre **depois**; a sobrevivência é uma métrica de dificuldade. O pior que o
+atalho pode fazer é descartar um candidato bom, e isso só custa procurar mais uma
+seed, porque o pipeline avalia até a banda encher. **A garantia central não é
+tocada.**
+
+Medido em 64 candidatos por banda, nas oito:
+
+| | Playouts | Descartes falsos |
+|---|---|---|
+| Margem fixa 0,15 | −31% | 0 em 512 |
+| **Margem 3σ no extremo** | **−37%** | **0 em 512** |
+
+A margem fixa era ingénua: o erro de amostragem de uma proporção colapsa perto de
+0, e uma margem constante é generosa de mais exatamente onde as bandas são
+estreitas. Com 0,15, a `meio-joker` ficava **−7%** — pior do que não ter
+pré-filtro. Com 3σ calculados no próprio extremo, nenhuma banda perde.
+
+A poupança é muito desigual, e é bom saber porquê: `tutorial`, `tempo` e `perito`
+poupam 60–70%, porque os candidatos caem longe da banda; `meio-joker` e `denso`
+poupam ~0%, porque as bandas são estreitas e perto de zero, e porque as rejeições
+delas são dominadas pelo piso de justiça, que corre depois da medição e o
+pré-filtro não alcança.
+
+Validação de ponta a ponta: as oito bandas construídas pelos dois caminhos dão um
+pack **idêntico byte a byte**.
+
+Duas ressalvas honestas:
+
+- **O relógio não serve para medir isto.** A mesma banda `perito`, com trabalho
+  idêntico, levou 88,1 s numa corrida e 49,5 s noutra. A grandeza fiável é a
+  contagem de playouts, não o tempo.
+- **Os percentis de calibração ficam mais ruidosos.** A `survivalRate` guardada
+  numa rejeição do pré-filtro é a estimativa curta. Como essas taxas alimentam os
+  p10/mediana/p90 que se usam para recalibrar bandas, as caudas ficam um pouco
+  mais largas. Quem recalibrar bandas a sério deve correr com `--pre 0`.
 
 ---
 
@@ -233,9 +266,9 @@ decisão.
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 197 testes
+pnpm check                                    # lint + typecheck + 200 testes
 pnpm sete bands                               # as bandas e os seus critérios
 pnpm sete play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm sete verify                              # revalida o pack todo
-pnpm sete build --count 30 --runs 1000        # reconstrói o pack (~15 min)
+pnpm sete build --count 30 --runs 1000        # reconstrói o pack (--pre 0 desliga o pré-filtro)
 ```

@@ -17,12 +17,13 @@ export interface TarefaWorker {
   readonly seeds: readonly number[];
   readonly band: BandSpec;
   readonly runs: number;
+  readonly preRuns: number;
 }
 
 const tarefa = workerData as TarefaWorker;
 
 const resultado: Avaliacao[] = tarefa.seeds.map((seed) =>
-  avaliar(seed, tarefa.band, tarefa.runs),
+  avaliar(seed, tarefa.band, tarefa.runs, tarefa.preRuns),
 );
 
 parentPort?.postMessage(resultado);
