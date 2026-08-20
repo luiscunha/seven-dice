@@ -1,0 +1,34 @@
+# Normalização de fins de linha.
+#
+# Sem isto, o comportamento depende do `core.autocrlf` de cada máquina — nesta
+# está a `true`, e o git avisava a cada commit que ia trocar LF por CRLF. Aqui
+# a regra passa a ser do repositório: LF no índice e LF na cópia de trabalho,
+# igual em Windows, macOS e Linux.
+#
+# `text=auto` deixa o git decidir o que é texto; `eol=lf` fixa o que ele escreve.
+* text=auto eol=lf
+
+# Ficheiros que têm de ser LF por contrato, e não por inferência.
+*.sh text eol=lf
+
+# Gerados: contam para o `linguist` como ruído e o diff raramente ajuda.
+pnpm-lock.yaml linguist-generated=true
+packages/tools/out/level-pack.json linguist-generated=true
+
+# Binários — para o git não tentar normalizar nem produzir diffs inúteis.
+# Ainda não há nenhum no repositório; a fase 8 traz-nos.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.pdf binary
+*.zip binary
