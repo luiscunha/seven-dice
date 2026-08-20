@@ -1,0 +1,294 @@
+/*
+ * Ecrã de jogo.
+ *
+ * Todas as cores e medidas vêm de `theme.css`. Se aparecer aqui um valor
+ * literal que não seja geometria pura, está no sítio errado.
+ */
+
+.ecra {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 12px 16px 16px;
+}
+
+/* ─── Cabeçalho ───────────────────────────────────────────────────────────── */
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-height: 40px;
+}
+
+.topo h1 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.topo .meta {
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.topo .espaco {
+  flex: 1;
+}
+
+/*
+ * O valor obrigatório do joker está **sempre** à vista, não só durante a
+ * seleção. É a conta que o playtest da Fase 6 provou não se descobrir a jogar.
+ */
+.joker-valor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.joker-valor b {
+  font-size: 15px;
+}
+
+/* ─── Tabuleiro ───────────────────────────────────────────────────────────── */
+
+.palco {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  background: var(--tray);
+  border-radius: var(--raio);
+  padding: clamp(8px, 2vw, 20px);
+}
+
+.tabuleiro {
+  position: relative;
+  /* A caixa não encolhe a meio do nível: o tabuleiro perde peças, não âncora. */
+  flex: none;
+}
+
+.peca {
+  --lado-real: var(--lado, 48px);
+
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--lado-real);
+  height: var(--lado-real);
+  border-radius: calc(var(--lado-real) * var(--raio-peca));
+
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  padding: calc(var(--lado-real) * 0.15);
+
+  transform: translate(
+    calc(var(--c) * (var(--lado-real) + var(--gap-peca))),
+    calc(-1 * var(--r) * (var(--lado-real) + var(--gap-peca)))
+  );
+
+  /*
+   * O anel de 1 px não é enfeite: a face 1 tem contraste 1,17 contra o papel, e
+   * sem contorno as peças mais claras dissolvem-se no fundo.
+   */
+  box-shadow:
+    inset 0 0 0 1px rgb(18 63 58 / 0.18),
+    inset 0 calc(var(--lado-real) * -0.055) 0 rgb(0 0 0 / 0.14),
+    inset 0 calc(var(--lado-real) * 0.035) 0 rgb(255 255 255 / 0.17);
+
+  cursor: pointer;
+  transition:
+    transform var(--t-gravidade) var(--suavizacao),
+    opacity var(--t-saida) linear,
+    scale var(--t-saida) var(--suavizacao);
+}
+
+.peca[data-valor="1"] { background: var(--face-1); --tinta: var(--ink-1); }
+.peca[data-valor="2"] { background: var(--face-2); --tinta: var(--ink-2); }
+.peca[data-valor="3"] { background: var(--face-3); --tinta: var(--ink-3); }
+.peca[data-valor="4"] { background: var(--face-4); --tinta: var(--ink-4); }
+.peca[data-valor="5"] { background: var(--face-5); --tinta: var(--ink-5); }
+.peca[data-valor="6"] { background: var(--face-6); --tinta: var(--ink-6); }
+.peca[data-valor="0"] { background: var(--face-joker); --tinta: var(--ink-joker); }
+
+.pinta {
+  align-self: center;
+  justify-self: center;
+  width: calc(var(--lado-real) * 0.155);
+  height: calc(var(--lado-real) * 0.155);
+  border-radius: 50%;
+  background: var(--tinta);
+}
+
+.glifo {
+  grid-area: 1 / 1 / 4 / 4;
+  align-self: center;
+  justify-self: center;
+  font-size: calc(var(--lado-real) * 0.5);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--tinta);
+}
+
+/*
+ * A seleção não pode ser uma cor: a rampa ocupa todo o azul-verde da marca, e
+ * qualquer matiz entraria em conflito com alguma face. É um anel duplo — claro
+ * por dentro, escuro por fora — e um dos dois destaca-se sempre.
+ */
+.peca.selecionada {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 5px #08221e,
+    inset 0 0 0 1px rgb(18 63 58 / 0.18),
+    inset 0 calc(var(--lado-real) * -0.055) 0 rgb(0 0 0 / 0.14);
+  z-index: 2;
+}
+
+.peca.sugerida {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    inset 0 0 0 1px rgb(18 63 58 / 0.18);
+  z-index: 1;
+}
+
+/* Sair é desaparecer, não explodir. */
+.peca.a-sair {
+  opacity: 0;
+  scale: 0.82;
+  pointer-events: none;
+}
+
+/* Abaixo do piso de toque: assinala-se para não passar despercebido. */
+.tabuleiro.apertado .peca {
+  cursor: pointer;
+}
+
+/* ─── Rodapé: seleção, soma, ações ────────────────────────────────────────── */
+
+.rodape {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.linha-selecao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-height: 34px;
+  font-variant-numeric: tabular-nums;
+}
+
+.soma {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.soma .parcelas {
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+
+/* Um convite, não um aviso. O triângulo fica reservado a erros a sério. */
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.aviso[data-tipo="convite"] {
+  color: var(--ink);
+}
+
+.aviso[data-tipo="erro"] {
+  color: var(--ink-muted);
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background var(--t-ui) linear,
+    border-color var(--t-ui) linear;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--ink-muted);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.btn.primario {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.btn .contador {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.btn.primario .contador {
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* ─── Fim de nível ────────────────────────────────────────────────────────── */
+
+.fim {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--raio);
+}
+
+.fim .selo {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.fim .detalhe {
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}

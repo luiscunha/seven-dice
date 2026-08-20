@@ -14,16 +14,20 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
-    "septet": "tsx packages/tools/src/cli.ts"
+    "septet": "tsx packages/tools/src/cli.ts",
+    "dev": "pnpm --filter @septet/game dev",
+    "build:game": "pnpm --filter @septet/game build"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/node": "^22.19.1",
     "eslint": "^9.39.1",
     "fast-check": "^4.4.0",
+    "jsdom": "^30.0.1",
     "tsx": "^4.23.12",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
+    "vite": "^8.2.1",
     "vitest": "^3.2.4"
   }
 }

@@ -1,0 +1,1010 @@
+[
+ {
+  "id": "tutorial",
+  "label": "Tutorial — só pares, impossível bloquear",
+  "niveis": [
+   {
+    "id": "tutorial-000003",
+    "pieces": 14
+   },
+   {
+    "id": "tutorial-000008",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000009",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000012",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000022",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000052",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000066",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000076",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000107",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000116",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000144",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000145",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000150",
+    "pieces": 14
+   },
+   {
+    "id": "tutorial-000183",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000191",
+    "pieces": 14
+   },
+   {
+    "id": "tutorial-000196",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000225",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000235",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000238",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000261",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000264",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000266",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000267",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000301",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000316",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000320",
+    "pieces": 14
+   },
+   {
+    "id": "tutorial-000329",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000338",
+    "pieces": 12
+   },
+   {
+    "id": "tutorial-000340",
+    "pieces": 10
+   },
+   {
+    "id": "tutorial-000341",
+    "pieces": 10
+   }
+  ]
+ },
+ {
+  "id": "inicio",
+  "label": "Início — pares e trios, relaxante",
+  "niveis": [
+   {
+    "id": "inicio-000034",
+    "pieces": 24
+   },
+   {
+    "id": "inicio-000134",
+    "pieces": 20
+   },
+   {
+    "id": "inicio-000150",
+    "pieces": 24
+   },
+   {
+    "id": "inicio-000204",
+    "pieces": 24
+   },
+   {
+    "id": "inicio-000241",
+    "pieces": 19
+   },
+   {
+    "id": "inicio-000256",
+    "pieces": 24
+   },
+   {
+    "id": "inicio-000260",
+    "pieces": 22
+   },
+   {
+    "id": "inicio-000296",
+    "pieces": 18
+   },
+   {
+    "id": "inicio-000358",
+    "pieces": 18
+   },
+   {
+    "id": "inicio-000371",
+    "pieces": 23
+   },
+   {
+    "id": "inicio-000392",
+    "pieces": 16
+   },
+   {
+    "id": "inicio-000432",
+    "pieces": 16
+   },
+   {
+    "id": "inicio-000491",
+    "pieces": 19
+   },
+   {
+    "id": "inicio-000516",
+    "pieces": 24
+   },
+   {
+    "id": "inicio-000529",
+    "pieces": 19
+   },
+   {
+    "id": "inicio-000537",
+    "pieces": 21
+   },
+   {
+    "id": "inicio-000540",
+    "pieces": 20
+   },
+   {
+    "id": "inicio-000541",
+    "pieces": 23
+   },
+   {
+    "id": "inicio-000633",
+    "pieces": 23
+   },
+   {
+    "id": "inicio-000654",
+    "pieces": 16
+   },
+   {
+    "id": "inicio-000666",
+    "pieces": 22
+   },
+   {
+    "id": "inicio-000685",
+    "pieces": 23
+   },
+   {
+    "id": "inicio-000693",
+    "pieces": 21
+   },
+   {
+    "id": "inicio-000728",
+    "pieces": 18
+   },
+   {
+    "id": "inicio-000735",
+    "pieces": 17
+   },
+   {
+    "id": "inicio-000746",
+    "pieces": 16
+   },
+   {
+    "id": "inicio-000747",
+    "pieces": 21
+   },
+   {
+    "id": "inicio-000765",
+    "pieces": 19
+   },
+   {
+    "id": "inicio-000781",
+    "pieces": 23
+   },
+   {
+    "id": "inicio-000821",
+    "pieces": 25
+   }
+  ]
+ },
+ {
+  "id": "meio",
+  "label": "Meio — até 4 peças, sem joker",
+  "niveis": [
+   {
+    "id": "meio-000006",
+    "pieces": 35
+   },
+   {
+    "id": "meio-000015",
+    "pieces": 28
+   },
+   {
+    "id": "meio-000022",
+    "pieces": 35
+   },
+   {
+    "id": "meio-000028",
+    "pieces": 33
+   },
+   {
+    "id": "meio-000045",
+    "pieces": 32
+   },
+   {
+    "id": "meio-000050",
+    "pieces": 27
+   },
+   {
+    "id": "meio-000059",
+    "pieces": 36
+   },
+   {
+    "id": "meio-000071",
+    "pieces": 34
+   },
+   {
+    "id": "meio-000082",
+    "pieces": 27
+   },
+   {
+    "id": "meio-000091",
+    "pieces": 36
+   },
+   {
+    "id": "meio-000100",
+    "pieces": 29
+   },
+   {
+    "id": "meio-000103",
+    "pieces": 34
+   },
+   {
+    "id": "meio-000111",
+    "pieces": 34
+   },
+   {
+    "id": "meio-000113",
+    "pieces": 36
+   },
+   {
+    "id": "meio-000119",
+    "pieces": 34
+   },
+   {
+    "id": "meio-000125",
+    "pieces": 34
+   },
+   {
+    "id": "meio-000126",
+    "pieces": 31
+   },
+   {
+    "id": "meio-000134",
+    "pieces": 31
+   },
+   {
+    "id": "meio-000144",
+    "pieces": 33
+   },
+   {
+    "id": "meio-000149",
+    "pieces": 34
+   },
+   {
+    "id": "meio-000153",
+    "pieces": 36
+   },
+   {
+    "id": "meio-000157",
+    "pieces": 34
+   },
+   {
+    "id": "meio-000159",
+    "pieces": 32
+   },
+   {
+    "id": "meio-000166",
+    "pieces": 31
+   },
+   {
+    "id": "meio-000177",
+    "pieces": 30
+   },
+   {
+    "id": "meio-000183",
+    "pieces": 32
+   },
+   {
+    "id": "meio-000187",
+    "pieces": 26
+   },
+   {
+    "id": "meio-000190",
+    "pieces": 35
+   },
+   {
+    "id": "meio-000193",
+    "pieces": 30
+   },
+   {
+    "id": "meio-000202",
+    "pieces": 35
+   }
+  ]
+ },
+ {
+  "id": "meio-joker",
+  "label": "Meio — o nível de estrangulamento, construído à volta do joker",
+  "niveis": [
+   {
+    "id": "meio-joker-000003",
+    "pieces": 27
+   },
+   {
+    "id": "meio-joker-000010",
+    "pieces": 23
+   },
+   {
+    "id": "meio-joker-000013",
+    "pieces": 27
+   },
+   {
+    "id": "meio-joker-000021",
+    "pieces": 26
+   },
+   {
+    "id": "meio-joker-000034",
+    "pieces": 23
+   },
+   {
+    "id": "meio-joker-000041",
+    "pieces": 29
+   },
+   {
+    "id": "meio-joker-000047",
+    "pieces": 28
+   },
+   {
+    "id": "meio-joker-000058",
+    "pieces": 30
+   },
+   {
+    "id": "meio-joker-000067",
+    "pieces": 30
+   },
+   {
+    "id": "meio-joker-000072",
+    "pieces": 26
+   },
+   {
+    "id": "meio-joker-000073",
+    "pieces": 29
+   },
+   {
+    "id": "meio-joker-000074",
+    "pieces": 30
+   },
+   {
+    "id": "meio-joker-000078",
+    "pieces": 25
+   },
+   {
+    "id": "meio-joker-000083",
+    "pieces": 30
+   },
+   {
+    "id": "meio-joker-000088",
+    "pieces": 26
+   },
+   {
+    "id": "meio-joker-000091",
+    "pieces": 30
+   },
+   {
+    "id": "meio-joker-000098",
+    "pieces": 30
+   },
+   {
+    "id": "meio-joker-000109",
+    "pieces": 22
+   },
+   {
+    "id": "meio-joker-000122",
+    "pieces": 27
+   },
+   {
+    "id": "meio-joker-000127",
+    "pieces": 23
+   },
+   {
+    "id": "meio-joker-000156",
+    "pieces": 28
+   },
+   {
+    "id": "meio-joker-000207",
+    "pieces": 30
+   },
+   {
+    "id": "meio-joker-000225",
+    "pieces": 24
+   },
+   {
+    "id": "meio-joker-000226",
+    "pieces": 26
+   },
+   {
+    "id": "meio-joker-000231",
+    "pieces": 30
+   },
+   {
+    "id": "meio-joker-000234",
+    "pieces": 26
+   },
+   {
+    "id": "meio-joker-000241",
+    "pieces": 29
+   },
+   {
+    "id": "meio-joker-000244",
+    "pieces": 25
+   },
+   {
+    "id": "meio-joker-000247",
+    "pieces": 30
+   },
+   {
+    "id": "meio-joker-000251",
+    "pieces": 25
+   }
+  ]
+ },
+ {
+  "id": "avancado",
+  "label": "Avançado — faces altas, poucos parceiros",
+  "niveis": [
+   {
+    "id": "avancado-000000",
+    "pieces": 30
+   },
+   {
+    "id": "avancado-000003",
+    "pieces": 39
+   },
+   {
+    "id": "avancado-000006",
+    "pieces": 35
+   },
+   {
+    "id": "avancado-000012",
+    "pieces": 42
+   },
+   {
+    "id": "avancado-000020",
+    "pieces": 34
+   },
+   {
+    "id": "avancado-000021",
+    "pieces": 32
+   },
+   {
+    "id": "avancado-000032",
+    "pieces": 36
+   },
+   {
+    "id": "avancado-000033",
+    "pieces": 40
+   },
+   {
+    "id": "avancado-000036",
+    "pieces": 31
+   },
+   {
+    "id": "avancado-000037",
+    "pieces": 35
+   },
+   {
+    "id": "avancado-000041",
+    "pieces": 32
+   },
+   {
+    "id": "avancado-000043",
+    "pieces": 40
+   },
+   {
+    "id": "avancado-000048",
+    "pieces": 39
+   },
+   {
+    "id": "avancado-000050",
+    "pieces": 42
+   },
+   {
+    "id": "avancado-000052",
+    "pieces": 41
+   },
+   {
+    "id": "avancado-000055",
+    "pieces": 41
+   },
+   {
+    "id": "avancado-000057",
+    "pieces": 42
+   },
+   {
+    "id": "avancado-000058",
+    "pieces": 37
+   },
+   {
+    "id": "avancado-000063",
+    "pieces": 36
+   },
+   {
+    "id": "avancado-000079",
+    "pieces": 39
+   },
+   {
+    "id": "avancado-000082",
+    "pieces": 35
+   },
+   {
+    "id": "avancado-000084",
+    "pieces": 38
+   },
+   {
+    "id": "avancado-000088",
+    "pieces": 42
+   },
+   {
+    "id": "avancado-000091",
+    "pieces": 33
+   },
+   {
+    "id": "avancado-000095",
+    "pieces": 42
+   },
+   {
+    "id": "avancado-000103",
+    "pieces": 37
+   },
+   {
+    "id": "avancado-000106",
+    "pieces": 33
+   },
+   {
+    "id": "avancado-000109",
+    "pieces": 40
+   },
+   {
+    "id": "avancado-000126",
+    "pieces": 42
+   },
+   {
+    "id": "avancado-000128",
+    "pieces": 41
+   }
+  ]
+ },
+ {
+  "id": "perito",
+  "label": "Perito — faces altas, silhuetas",
+  "niveis": [
+   {
+    "id": "perito-000009",
+    "pieces": 42
+   },
+   {
+    "id": "perito-000012",
+    "pieces": 47
+   },
+   {
+    "id": "perito-000013",
+    "pieces": 48
+   },
+   {
+    "id": "perito-000014",
+    "pieces": 37
+   },
+   {
+    "id": "perito-000017",
+    "pieces": 50
+   },
+   {
+    "id": "perito-000019",
+    "pieces": 48
+   },
+   {
+    "id": "perito-000028",
+    "pieces": 47
+   },
+   {
+    "id": "perito-000035",
+    "pieces": 48
+   },
+   {
+    "id": "perito-000041",
+    "pieces": 44
+   },
+   {
+    "id": "perito-000046",
+    "pieces": 49
+   },
+   {
+    "id": "perito-000050",
+    "pieces": 49
+   },
+   {
+    "id": "perito-000051",
+    "pieces": 48
+   },
+   {
+    "id": "perito-000053",
+    "pieces": 46
+   },
+   {
+    "id": "perito-000056",
+    "pieces": 43
+   },
+   {
+    "id": "perito-000061",
+    "pieces": 38
+   },
+   {
+    "id": "perito-000062",
+    "pieces": 49
+   },
+   {
+    "id": "perito-000072",
+    "pieces": 43
+   },
+   {
+    "id": "perito-000086",
+    "pieces": 41
+   },
+   {
+    "id": "perito-000098",
+    "pieces": 49
+   },
+   {
+    "id": "perito-000105",
+    "pieces": 42
+   },
+   {
+    "id": "perito-000109",
+    "pieces": 48
+   },
+   {
+    "id": "perito-000118",
+    "pieces": 45
+   },
+   {
+    "id": "perito-000131",
+    "pieces": 48
+   },
+   {
+    "id": "perito-000135",
+    "pieces": 42
+   },
+   {
+    "id": "perito-000145",
+    "pieces": 50
+   },
+   {
+    "id": "perito-000153",
+    "pieces": 42
+   },
+   {
+    "id": "perito-000159",
+    "pieces": 50
+   },
+   {
+    "id": "perito-000165",
+    "pieces": 46
+   },
+   {
+    "id": "perito-000189",
+    "pieces": 38
+   },
+   {
+    "id": "perito-000201",
+    "pieces": 44
+   }
+  ]
+ },
+ {
+  "id": "denso",
+  "label": "Denso — curto, de dedução pura, à volta do joker",
+  "niveis": [
+   {
+    "id": "denso-000011",
+    "pieces": 15
+   },
+   {
+    "id": "denso-000012",
+    "pieces": 12
+   },
+   {
+    "id": "denso-000020",
+    "pieces": 12
+   },
+   {
+    "id": "denso-000023",
+    "pieces": 13
+   },
+   {
+    "id": "denso-000028",
+    "pieces": 12
+   },
+   {
+    "id": "denso-000034",
+    "pieces": 14
+   },
+   {
+    "id": "denso-000036",
+    "pieces": 12
+   },
+   {
+    "id": "denso-000042",
+    "pieces": 12
+   },
+   {
+    "id": "denso-000044",
+    "pieces": 12
+   },
+   {
+    "id": "denso-000047",
+    "pieces": 13
+   },
+   {
+    "id": "denso-000048",
+    "pieces": 10
+   },
+   {
+    "id": "denso-000049",
+    "pieces": 11
+   },
+   {
+    "id": "denso-000054",
+    "pieces": 10
+   },
+   {
+    "id": "denso-000056",
+    "pieces": 10
+   },
+   {
+    "id": "denso-000060",
+    "pieces": 12
+   },
+   {
+    "id": "denso-000064",
+    "pieces": 10
+   },
+   {
+    "id": "denso-000065",
+    "pieces": 11
+   },
+   {
+    "id": "denso-000069",
+    "pieces": 11
+   },
+   {
+    "id": "denso-000077",
+    "pieces": 11
+   },
+   {
+    "id": "denso-000078",
+    "pieces": 10
+   },
+   {
+    "id": "denso-000082",
+    "pieces": 12
+   },
+   {
+    "id": "denso-000107",
+    "pieces": 15
+   },
+   {
+    "id": "denso-000111",
+    "pieces": 13
+   },
+   {
+    "id": "denso-000112",
+    "pieces": 14
+   },
+   {
+    "id": "denso-000118",
+    "pieces": 10
+   },
+   {
+    "id": "denso-000120",
+    "pieces": 14
+   },
+   {
+    "id": "denso-000130",
+    "pieces": 12
+   },
+   {
+    "id": "denso-000131",
+    "pieces": 11
+   },
+   {
+    "id": "denso-000133",
+    "pieces": 13
+   },
+   {
+    "id": "denso-000139",
+    "pieces": 11
+   }
+  ]
+ },
+ {
+  "id": "tempo",
+  "label": "Modo tempo — greedy-safe, sem joker",
+  "niveis": [
+   {
+    "id": "tempo-000002",
+    "pieces": 11
+   },
+   {
+    "id": "tempo-000004",
+    "pieces": 12
+   },
+   {
+    "id": "tempo-000008",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000040",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000048",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000071",
+    "pieces": 13
+   },
+   {
+    "id": "tempo-000093",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000133",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000135",
+    "pieces": 11
+   },
+   {
+    "id": "tempo-000145",
+    "pieces": 12
+   },
+   {
+    "id": "tempo-000147",
+    "pieces": 11
+   },
+   {
+    "id": "tempo-000149",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000189",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000270",
+    "pieces": 12
+   },
+   {
+    "id": "tempo-000282",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000288",
+    "pieces": 11
+   },
+   {
+    "id": "tempo-000306",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000309",
+    "pieces": 15
+   },
+   {
+    "id": "tempo-000322",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000346",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000351",
+    "pieces": 14
+   },
+   {
+    "id": "tempo-000362",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000377",
+    "pieces": 13
+   },
+   {
+    "id": "tempo-000382",
+    "pieces": 12
+   },
+   {
+    "id": "tempo-000385",
+    "pieces": 13
+   },
+   {
+    "id": "tempo-000386",
+    "pieces": 10
+   },
+   {
+    "id": "tempo-000390",
+    "pieces": 12
+   },
+   {
+    "id": "tempo-000391",
+    "pieces": 14
+   },
+   {
+    "id": "tempo-000417",
+    "pieces": 13
+   },
+   {
+    "id": "tempo-000431",
+    "pieces": 10
+   }
+  ]
+ }
+]

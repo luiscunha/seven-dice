@@ -113,6 +113,81 @@ async function comandoBuild(args: string[]): Promise<number> {
   return pack.length === 0 ? 1 : 0;
 }
 
+/* ─── export ───────────────────────────────────────────────────────────────── */
+
+/**
+ * Parte o pack curado em um ficheiro por banda, para o jogo carregar a pedido.
+ *
+ * Duzentos e quarenta níveis num só ficheiro obrigariam a descarregar a campanha
+ * inteira para jogar o primeiro nível. O índice traz só o que a lista de níveis
+ * precisa de mostrar — id, peças, selo por conquistar — e o tabuleiro fica no
+ * ficheiro da banda.
+ *
+ * **A solução vai no ficheiro da banda**, porque é dela que saem as dicas
+ * (spec §4.3). Não é um segredo a proteger: quem quiser ler o JSON já podia
+ * resolver o nível com um solver em cinco linhas.
+ */
+async function comandoExport(args: string[]): Promise<number> {
+  const { values } = parseArgs({
+    args,
+    options: {
+      pack: { type: "string", default: "packages/tools/out/level-pack.json" },
+      out: { type: "string", default: "packages/game/public/levels" },
+    },
+  });
+
+  const pack = JSON.parse(await readFile(values.pack, "utf8")) as Level[];
+
+  if (pack.length === 0) {
+    log("o pack está vazio");
+    return 1;
+  }
+
+  await mkdir(values.out, { recursive: true });
+
+  const porBanda = new Map<string, Level[]>();
+  for (const nivel of pack) {
+    const banda = nivel.band ?? "sem-banda";
+    const lista = porBanda.get(banda) ?? [];
+    lista.push(nivel);
+    porBanda.set(banda, lista);
+  }
+
+  // A ordem do índice é a ordem das bandas em `BANDS`, que é a progressão
+  // desenhada — e não a ordem por que os níveis calharam no ficheiro.
+  const indice = BANDS.filter((b) => porBanda.has(b.id)).map((b) => {
+    const niveis = porBanda.get(b.id) ?? [];
+    return {
+      id: b.id,
+      label: b.label,
+      niveis: niveis.map((n) => ({
+        id: n.id,
+        pieces: n.metrics?.pieces ?? 0,
+      })),
+    };
+  });
+
+  for (const [banda, niveis] of porBanda) {
+    const destino = resolve(values.out, `${banda}.json`);
+    await writeFile(destino, `${JSON.stringify(niveis)}\n`, "utf8");
+  }
+
+  await writeFile(
+    resolve(values.out, "index.json"),
+    `${JSON.stringify(indice, null, 1)}\n`,
+    "utf8",
+  );
+
+  log(
+    `${pack.length} níveis em ${porBanda.size} bandas → ${resolve(values.out)}`,
+  );
+  for (const b of indice) {
+    log(`  ${b.id.padEnd(11)} ${String(b.niveis.length).padStart(3)} níveis`);
+  }
+
+  return 0;
+}
+
 /* ─── verify ───────────────────────────────────────────────────────────────── */
 
 /**
@@ -204,14 +279,17 @@ const codigo = await (async (): Promise<number> => {
       });
       return comandoPlay(values);
     }
+    case "export":
+      return comandoExport(resto);
     default:
-      log("uso: septet <build|bands|play|verify>");
+      log("uso: septet <build|bands|play|verify|export>");
       log("");
       log("  build   [--band <id>] [--count <n>] [--runs <n>] [--out <dir>]");
       log("  bands   lista as bandas e os seus critérios");
       log("  play    [--band <id>] [--id <levelId>] [--seed <n>]");
       log("          [--pack <ficheiro>] [--log <ficheiro>] [--passos]");
       log("  verify  <ficheiro.json>  reverifica um level pack");
+      log("  export  [--pack <ficheiro>] [--out <dir>]  parte o pack por banda");
       return comando === undefined ? 0 : 1;
   }
 })();

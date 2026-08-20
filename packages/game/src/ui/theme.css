@@ -1,0 +1,155 @@
+/*
+ * Tokens do Septet.
+ *
+ * **Nenhuma constante visual vive fora deste ficheiro.** Um hex escrito à mão
+ * dentro de um componente é o que transforma uma mudança de paleta num dia de
+ * trabalho em vez de dois minutos — e este jogo vai ser afinado a jogar.
+ *
+ * A paleta deriva do logótipo. Ver `documentation/desenho-fase-8.md` §4.
+ */
+
+:root {
+  /* ─── Neutros ─────────────────────────────────────────────────────────── */
+  --ground: #f1f2f0;
+  --surface: #ffffff;
+  --surface-alt: #e6eae8;
+  --tray: #e9edea;
+  --line: #cdd5d3;
+  --ink: #123f3a;
+  --ink-muted: #6b7a7b;
+  --accent: #1b6b62;
+  --on-accent: #f1f2f0;
+
+  /*
+   * ─── A rampa ──────────────────────────────────────────────────────────
+   *
+   * Toda dentro do azul-verde da marca, porque a marca não tem uma única cor
+   * quente. A luminância desce sempre — 0.746 → 0.116 — e é ela que carrega a
+   * ordem. É mais seguro do que uma rampa de matiz: a luminância é o canal que
+   * sobrevive a todas as formas de daltonismo.
+   *
+   * A cor é redundante. As pintas carregam sempre o valor completo.
+   */
+  --face-1: #cfe3f2;
+  --face-2: #a9cbe8;
+  --face-3: #74c8b0;
+  --face-4: #3ebb94;
+  --face-5: #2a8c77;
+  --face-6: #1b6b62;
+
+  /* O joker é acromático: no logótipo, o cinzento é o próprio 7. */
+  --face-joker: #8e999c;
+
+  /* Tinta das pintas. Escura enquanto a face for clara. */
+  --ink-1: #123f3a;
+  --ink-2: #123f3a;
+  --ink-3: #0e3b33;
+  --ink-4: #0c332c;
+  --ink-5: #eaf5f1;
+  --ink-6: #e8f3f0;
+  --ink-joker: #123f3a;
+
+  /* ─── Forma ───────────────────────────────────────────────────────────── */
+  --raio: 10px;
+  --raio-peca: 0.21;
+  --gap-peca: 6px;
+  --sombra: 0 1px 2px rgb(18 63 58 / 0.1), 0 6px 18px rgb(18 63 58 / 0.07);
+
+  /*
+   * ─── Movimento ────────────────────────────────────────────────────────
+   *
+   * Estes quatro números são o que se afina a jogar. Achar o colapso brusco é
+   * mudar um deles — não é tocar em lógica nenhuma.
+   */
+  --t-saida: 140ms;
+  --t-gravidade: 220ms;
+  --t-colapso: 260ms;
+  --t-ui: 120ms;
+  --suavizacao: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/*
+ * Só o cromado muda de tema. **As faces não**: uma peça é a mesma peça nos dois
+ * fundos, e trocá-las quebrava a identidade que o jogador aprendeu.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --ground: #0d1917;
+    --surface: #14231f;
+    --surface-alt: #1b2e29;
+    --tray: #101d1a;
+    --line: #2b403a;
+    --ink: #e3edea;
+    --ink-muted: #8fa3a0;
+    --accent: #3ebb94;
+    --on-accent: #0d1917;
+    --sombra: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 22px rgb(0 0 0 / 0.35);
+  }
+}
+
+:root[data-tema="escuro"] {
+  --ground: #0d1917;
+  --surface: #14231f;
+  --surface-alt: #1b2e29;
+  --tray: #101d1a;
+  --line: #2b403a;
+  --ink: #e3edea;
+  --ink-muted: #8fa3a0;
+  --accent: #3ebb94;
+  --on-accent: #0d1917;
+  --sombra: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 22px rgb(0 0 0 / 0.35);
+}
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* O tabuleiro é uma superfície de toque, não de seleção de texto. */
+  -webkit-user-select: none;
+  user-select: none;
+  /* Safe areas, para a fase 9 não ser uma surpresa. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+#app {
+  height: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Quem pede menos movimento recebe o estado final, sem a explicação do
+ * movimento. O jogo tem de continuar correto — e continua, porque a animação
+ * nunca é o que decide o estado.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-saida: 0ms;
+    --t-gravidade: 0ms;
+    --t-colapso: 0ms;
+    --t-ui: 0ms;
+  }
+}

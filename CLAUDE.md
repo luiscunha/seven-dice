@@ -40,8 +40,24 @@ pnpm check      # lint + typecheck + test — corre isto antes de dar algo por f
 `pnpm lint` · `pnpm typecheck` · `pnpm test` · `pnpm test:watch` correm em
 separado. Node ≥ 20, pnpm 11.
 
-Não há passo de build: cada pacote expõe `"exports": "./src/index.ts"` e os
-consumidores importam código-fonte. O `tsc` corre sempre com `--noEmit`.
+**`engine` e `tools` não têm passo de build**: cada pacote expõe
+`"exports": "./src/index.ts"` e os consumidores importam código-fonte. É o que
+garante que a mesma engine corre no jogo, no pipeline e nos testes — e daí que
+venha a impossibilidade de divergência entre gerador e jogo. O `tsc` corre sempre
+com `--noEmit`.
+
+**O `game` é a exceção, desde a fase 8**, porque é uma app web e precisa de
+bundler:
+
+```bash
+pnpm dev          # servidor de desenvolvimento do jogo
+pnpm build:game   # bundle de produção para packages/game/dist
+pnpm septet export  # parte o level pack por banda para game/public/levels
+```
+
+O Vite não tem alias para `@septet/engine`: resolve-o pelo workspace, como o
+Vitest e o `tsc`. Um alias seria um segundo caminho de resolução, e dois caminhos
+são a porta para divergirem.
 
 ## Estrutura
 
