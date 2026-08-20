@@ -1,9 +1,9 @@
 /**
  * CLI do pipeline offline.
  *
- *   sete build [--band <id>] [--count <n>] [--runs <n>] [--pre <n>] [--out <dir>]
- *   sete bands
- *   sete verify <ficheiro.json>
+ *   septet build [--band <id>] [--count <n>] [--runs <n>] [--pre <n>] [--out <dir>]
+ *   septet bands
+ *   septet verify <ficheiro.json>
  *
  * Corre uma vez, fora do jogo (spec §7.5).
  */
@@ -12,8 +12,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
-import type { Level } from "@sete/engine";
-import { applyMove, isValidGroup, pieceCount, totalSum } from "@sete/engine";
+import type { Level } from "@septet/engine";
+import { applyMove, isValidGroup, pieceCount, totalSum } from "@septet/engine";
 
 import { BANDS, bandById } from "./bands";
 import { comandoPlay } from "./play";
@@ -124,7 +124,7 @@ async function comandoBuild(args: string[]): Promise<number> {
 async function comandoVerify(args: string[]): Promise<number> {
   const caminho = args[0];
   if (caminho === undefined) {
-    log("uso: sete verify <ficheiro.json>");
+    log("uso: septet verify <ficheiro.json>");
     return 1;
   }
 
@@ -205,7 +205,7 @@ const codigo = await (async (): Promise<number> => {
       return comandoPlay(values);
     }
     default:
-      log("uso: sete <build|bands|play|verify>");
+      log("uso: septet <build|bands|play|verify>");
       log("");
       log("  build   [--band <id>] [--count <n>] [--runs <n>] [--out <dir>]");
       log("  bands   lista as bandas e os seus critérios");

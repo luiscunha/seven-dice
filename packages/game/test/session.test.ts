@@ -9,8 +9,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import type { Board, Group, Level } from "@sete/engine";
-import { boardKey, packed } from "@sete/engine";
+import type { Board, Group, Level } from "@septet/engine";
+import { boardKey, packed } from "@septet/engine";
 
 import {
   clearSelection,
@@ -575,6 +575,6 @@ describe("progresso", () => {
   });
 
   it("a chave é estável — mudá-la apaga o progresso de toda a gente", () => {
-    expect(PROFILE_KEY).toBe("sete.profile");
+    expect(PROFILE_KEY).toBe("septet.profile");
   });
 });

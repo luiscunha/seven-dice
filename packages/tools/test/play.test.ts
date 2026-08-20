@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import type { Board, Level } from "@sete/engine";
+import type { Board, Level } from "@septet/engine";
 import { escreverGrupo } from "../src/render";
 import {
   desenharTabuleiro,
@@ -31,7 +31,7 @@ import {
 } from "../src/session";
 import { avaliar } from "../src/candidate";
 import { bandById } from "../src/bands";
-import { packed } from "@sete/engine";
+import { packed } from "@septet/engine";
 
 const TABULEIRO: Board = [
   [1, 2],
@@ -444,7 +444,7 @@ describe("uma partida completa, conduzida por guião", () => {
   }, 120_000);
 });
 
-describe("o comando `sete play` ponta a ponta", () => {
+describe("o comando `septet play` ponta a ponta", () => {
   it("carrega um nível, aceita jogadas e escreve o registo", () => {
     const log = `${process.env["TEMP"] ?? "."}/sete-play-teste.jsonl`;
 

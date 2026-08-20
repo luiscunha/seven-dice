@@ -17,8 +17,8 @@
  * por parâmetro, que é o que torna isto testável (plano, fase 7).
  */
 
-import type { Level, Packed } from "@sete/engine";
-import { jokerAt } from "@sete/engine";
+import type { Level, Packed } from "@septet/engine";
+import { jokerAt } from "@septet/engine";
 
 import type { ComboState } from "./combos";
 import { DEFAULT_COMBO_CONFIG, breakCombo, registerMove, startCombo } from "./combos";

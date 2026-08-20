@@ -37,13 +37,13 @@ importers:
 
   packages/game:
     dependencies:
-      '@sete/engine':
+      '@septet/engine':
         specifier: workspace:*
         version: link:../engine
 
   packages/tools:
     dependencies:
-      '@sete/engine':
+      '@septet/engine':
         specifier: workspace:*
         version: link:../engine
 

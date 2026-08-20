@@ -5,7 +5,7 @@
  * usa a engine, que é pura. É esta função que o pool paraleliza (spec §7.2).
  */
 
-import type { Level } from "@sete/engine";
+import type { Level } from "@septet/engine";
 import {
   applyMove,
   fairnessFloor,
@@ -16,7 +16,7 @@ import {
   pieceCount,
   reachablePieceCounts,
   toLevel,
-} from "@sete/engine";
+} from "@septet/engine";
 
 import type { BandSpec } from "./bands";
 

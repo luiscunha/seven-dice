@@ -43,7 +43,7 @@ export interface ProfileStorage {
   setItem(key: string, value: string): void;
 }
 
-export const PROFILE_KEY = "sete.profile";
+export const PROFILE_KEY = "septet.profile";
 
 /** Ordem dos selos, do menos exigente para o mais. */
 const SEAL_RANK: Readonly<Record<Seal, number>> = {

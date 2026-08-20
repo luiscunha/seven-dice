@@ -6,7 +6,7 @@
  * carrega JSON estático.
  */
 
-import type { Level } from "@sete/engine";
+import type { Level } from "@septet/engine";
 
 import type { BandSpec } from "./bands";
 import type { Avaliacao, Rejeicao } from "./candidate";

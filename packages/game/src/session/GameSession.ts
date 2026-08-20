@@ -10,7 +10,7 @@
  * é o que torna o undo uma pilha de tabuleiros e nada mais (spec §1.1).
  */
 
-import type { Board, Group, Level, Packed } from "@sete/engine";
+import type { Board, Group, Level, Packed } from "@septet/engine";
 import {
   JOKER,
   TARGET,
@@ -22,7 +22,7 @@ import {
   isValidGroup,
   jokerValue,
   toGroup,
-} from "@sete/engine";
+} from "@septet/engine";
 
 /** Reexportado para a UI não ter de importar da engine só por causa disto. */
 export const jokerRequiredValue = jokerValue;

@@ -1,7 +1,7 @@
-# Plano de Implementação — "Sete"
+# Plano de Implementação — "Septet"
 
-> Companheiro operacional de `plano-modelo-jogo-sete.md` (modelo de jogo) e
-> `spec-motor-sete.md` (motor). Referências `[M x.y]` apontam para o plano do
+> Companheiro operacional de `plano-modelo-jogo-septet.md` (modelo de jogo) e
+> `spec-motor-septet.md` (motor). Referências `[M x.y]` apontam para o plano do
 > modelo; `[E x.y]` para a spec do motor.
 >
 > Este documento responde a *como e por que ordem se constrói*. Não redefine
@@ -646,7 +646,7 @@ duvidoso é a direção segura.
 | `tools/src/worker.ts` | Playouts em `worker_threads` |
 | `tools/src/pipeline.ts` | gerar → medir → filtrar → exportar `[E 7.5]` |
 | `tools/src/bands.ts` | Bandas de `[M 5.1]` e `[M 7]` |
-| `tools/src/cli.ts` | `sete generate`, `sete measure`, `sete export` |
+| `tools/src/cli.ts` | `septet generate`, `septet measure`, `septet export` |
 
 ### Notas de implementação
 
@@ -685,7 +685,7 @@ duvidoso é a direção segura.
 - **`firstFatalDepth` é `number | null`.** Num tabuleiro greedy-safe não há
   profundidade fatal, e zero seria mentira.
 - **`--import tsx` no worker, não só no processo principal.** Um `Worker` do Node
-  arranca sem herdar o loader de quem o criou. Sob `pnpm sete` o tsx chegaria por
+  arranca sem herdar o loader de quem o criou. Sob `pnpm septet` o tsx chegaria por
   acaso; sob o Vitest não, porque aí quem transforma o TypeScript é o Vite e o
   worker corre em Node puro. Pedir o loader explicitamente é o que torna este
   código testável em vez de só executável à mão.
@@ -764,7 +764,7 @@ Duas notas de método:
 ### Critério de aceitação — verificado
 
 **240 níveis exportados em 8 bandas, 30 por banda, 0 falhas na reverificação
-independente** (`sete verify`, que reaplica a solução de cada nível sem confiar
+independente** (`septet verify`, que reaplica a solução de cada nível sem confiar
 em nada do que está no ficheiro).
 
 | Banda | Aceitação | Sobrevivência observada (p10 / mediana / p90) | Tempo |
@@ -806,7 +806,7 @@ São poucas horas de trabalho antes de existir uma única linha de UI, e respond
 
 ### Entregáveis
 
-`tools/src/play.ts` — `sete play <levelId | seed>`: desenha o tabuleiro em texto,
+`tools/src/play.ts` — `septet play <levelId | seed>`: desenha o tabuleiro em texto,
 aceita seleção por coordenadas, mostra a soma corrente, aplica ao chegar a 7, e
 suporta `undo`, `restart`, `hint`, `groups` (realce dos grupos válidos).
 

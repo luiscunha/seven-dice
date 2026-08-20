@@ -31,7 +31,7 @@ Leituras, por esta ordem:
    foram verificados.
 3. Este ficheiro.
 
-Os documentos de origem — `spec-motor-sete.md` e `plano-modelo-jogo-sete.md` —
+Os documentos de origem — `spec-motor-septet.md` e `plano-modelo-jogo-septet.md` —
 mantêm-se como estavam. **Não foram corrigidos**, e em quatro pontos estão
 contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 
@@ -281,8 +281,8 @@ Duas ressalvas honestas:
 
 ```bash
 pnpm check                                    # lint + typecheck + 249 testes
-pnpm sete bands                               # as bandas e os seus critérios
-pnpm sete play --id inicio-000296 --log p.jsonl # jogar um nível na consola
-pnpm sete verify                              # revalida o pack todo
-pnpm sete build --count 30 --runs 1000        # reconstrói o pack (--pre 0 desliga o pré-filtro)
+pnpm septet bands                               # as bandas e os seus critérios
+pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
+pnpm septet verify                              # revalida o pack todo
+pnpm septet build --count 30 --runs 1000        # reconstrói o pack (--pre 0 desliga o pré-filtro)
 ```

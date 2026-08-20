@@ -1,5 +1,5 @@
 /**
- * `sete play` — renderer de consola.
+ * `septet play` — renderer de consola.
  *
  * **É um instrumento de medição, não um jogo.** Existe para responder ao risco
  * nº 1 do plano §8, que nenhuma métrica da fase 5 responde:
@@ -18,8 +18,8 @@
 import { appendFile, readFile } from "node:fs/promises";
 import { createInterface } from "node:readline";
 
-import type { Group, Level, Packed } from "@sete/engine";
-import { generate, pieceCount, toLevel } from "@sete/engine";
+import type { Group, Level, Packed } from "@septet/engine";
+import { generate, pieceCount, toLevel } from "@septet/engine";
 
 import { bandById } from "./bands";
 import { avaliar } from "./candidate";

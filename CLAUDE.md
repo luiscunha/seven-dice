@@ -1,4 +1,4 @@
-# CLAUDE.md — Sete (seven-dice)
+# CLAUDE.md — Septet (seven-dice)
 
 Puzzle de faces de dado: elimina grupos ortogonalmente conexos cuja soma seja
 exatamente **7**, até o tabuleiro ficar vazio.
@@ -9,8 +9,8 @@ Versionados neste repo, em `documentation/`:
 
 | Ficheiro | O que decide |
 |---|---|
-| `plano-modelo-jogo-sete.md` | Regras, modos, progressão, monetização |
-| `spec-motor-sete.md` | Arquitetura do motor. **A fonte de verdade para código** |
+| `plano-modelo-jogo-septet.md` | Regras, modos, progressão, monetização |
+| `spec-motor-septet.md` | Arquitetura do motor. **A fonte de verdade para código** |
 | `plano-implementacao.md` | Ordem de construção, fases, critérios de aceitação |
 
 Em caso de conflito com este ficheiro, a spec ganha. Este documento é um resumo

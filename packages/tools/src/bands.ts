@@ -9,8 +9,8 @@
  * dificuldade, só a deslocam em distribuição. Quem decide é a medição.
  */
 
-import type { GeneratorParams } from "@sete/engine";
-import { COMPOSITIONS } from "@sete/engine";
+import type { GeneratorParams } from "@septet/engine";
+import { COMPOSITIONS } from "@septet/engine";
 
 /** Pesos que só deixam passar composições até `max` peças. */
 const ateNPecas = (max: number): number[] =>
