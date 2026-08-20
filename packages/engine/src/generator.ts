@@ -55,6 +55,15 @@ export interface GeneratorParams {
   /** Perfil de alturas alvo, opcional. É uma preferência, não uma garantia. */
   readonly silhouetteProfile?: readonly number[];
 
+  /**
+   * Proporção altura/largura desejada. 1 dá um tabuleiro aproximadamente
+   * quadrado com recorte irregular no topo, que é a silhueta de `[M 3.2]`.
+   *
+   * Não é decoração. Sem isto o gerador constrói torres — ver a nota em
+   * `amostrarPosicao`.
+   */
+  readonly aspectRatio?: number;
+
   /** Ativa a colocação de um joker (spec §6.4). No máximo um por tabuleiro. */
   readonly includeJoker?: boolean;
 
@@ -84,6 +93,7 @@ export interface GeneratorParams {
 const OMISSAO = {
   newColumnProbability: 0.35,
   insertionDepthBias: 0,
+  aspectRatio: 1,
   maxPositionAttempts: 40,
   maxBacktracks: 30,
   maxRestarts: 3,
@@ -206,6 +216,37 @@ const tocaNoGrupo = (tm: TabuleiroMarcado, pos: Posicao): boolean =>
 
 /* ─── Escolha de posição ───────────────────────────────────────────────────── */
 
+/**
+ * Altura a partir da qual uma coluna deixa de atrair inserções.
+ *
+ * Deriva do tamanho alvo e da proporção pedida: para 36 peças e proporção 1, dá
+ * seis linhas — um tabuleiro de seis por seis, que é o que `[M 7]` pede às fases
+ * altas.
+ */
+function alturaAlvo(params: GeneratorParams): number {
+  const proporcao = params.aspectRatio ?? OMISSAO.aspectRatio;
+  return Math.max(2, Math.round(Math.sqrt(params.targetPieceCount * proporcao)));
+}
+
+/**
+ * ── Por que a escolha de coluna **não** é ponderada pela altura ──
+ *
+ * A primeira versão pesava cada coluna por `(altura + 1)^insertionDepthBias`,
+ * lendo `[E 6.5]` — "preferir o fundo de colunas altas" — como se falasse da
+ * escolha da coluna. É um ciclo de realimentação: quanto mais alta a coluna,
+ * mais atrai, mais alta fica. Com bias 3, uma coluna de dez linhas pesa 1331
+ * contra 1 de uma coluna nova.
+ *
+ * O resultado passou nas métricas todas — a taxa de sobrevivência não olha para
+ * a forma — e só se viu ao **desenhar** um tabuleiro no renderer de consola: a
+ * banda de perito produzia em média 11 colunas por 32 linhas, com máximos de 42.
+ * Torres, não os "6x6+ e silhuetas" que `[M 7]` pede.
+ *
+ * A leitura certa de `[E 6.5]` é que o enviesamento é da **linha** dentro da
+ * coluna, não da coluna. A profundidade cria dependências; a altura descontrolada
+ * só cria uma torre. A escolha de coluna passa a ser uniforme, travada por uma
+ * altura alvo derivada do tamanho.
+ */
 function amostrarPosicao(
   tm: TabuleiroMarcado,
   rng: Rng,
@@ -216,12 +257,24 @@ function amostrarPosicao(
 
   if (largura === 0) return { tipo: "nova", c: 0 };
 
+  const alvo = alturaAlvo(params);
   let probNova = params.newColumnProbability ?? OMISSAO.newColumnProbability;
 
   // O perfil é uma preferência: empurra a largura para o comprimento alvo em vez
   // de a impor.
   if (perfil !== undefined) {
     probNova = largura < perfil.length ? Math.min(1, probNova * 2.5) : probNova * 0.1;
+  } else {
+    /*
+     * A probabilidade de abrir coluna aplica-se **por célula inserida**, portanto
+     * num tabuleiro grande acumula: sem travão, 49 peças davam vinte colunas por
+     * seis linhas — o oposto da torre, e igualmente longe do "6x6+" de `[M 7]`.
+     *
+     * A correção é simétrica: empurra para cima enquanto o tabuleiro é estreito
+     * de mais, e trava assim que chega à largura que o tamanho pede.
+     */
+    const larguraAlvo = Math.max(2, Math.round(params.targetPieceCount / alvo));
+    probNova = largura < larguraAlvo ? Math.min(1, probNova * 2) : probNova * 0.1;
   }
 
   if (rng() < probNova) {
@@ -233,13 +286,15 @@ function amostrarPosicao(
   const pesos = tm.map((col, c) => {
     if (col.length >= MAX_ROWS) return 0;
 
-    // Colunas altas atraem mais quando o bias sobe: é assim que se criam
-    // dependências mais profundas (spec §6.5).
-    let peso = Math.pow(col.length + 1, bias);
+    // Uniforme até à altura alvo, e a decair depressa acima dela. É isto que dá
+    // o recorte irregular no topo em vez de uma torre.
+    let peso = col.length <= alvo ? 1 : 1 / (1 + (col.length - alvo) ** 2);
 
     if (perfil !== undefined) {
-      const alvo = perfil[c];
-      if (alvo !== undefined) peso *= col.length < alvo ? 3 : 0.3;
+      const alturaPerfil = perfil[c];
+      if (alturaPerfil !== undefined) {
+        peso *= col.length < alturaPerfil ? 3 : 0.3;
+      }
     }
 
     return peso;

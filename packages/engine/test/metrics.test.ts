@@ -163,11 +163,17 @@ describe("piso de justiça (spec §7.4)", () => {
   });
 
   it("um limite curto dá inconclusive, não uma exceção", () => {
-    const nivel = generate(11, { targetPieceCount: 30 });
+    // Um tabuleiro grande o suficiente para a fronteira à profundidade 3 não
+    // estar vazia — é aí que o solver corre, e é ele que atinge o limite.
+    let nivel;
+    for (let seed = 0; seed < 50 && nivel === undefined; seed++) {
+      nivel = generate(seed, { targetPieceCount: 30 });
+    }
 
-    expect(fairnessFloor(nivel?.board ?? [], 3, { maxStates: 1 })).toBe(
-      "inconclusive",
-    );
+    expect(nivel).toBeDefined();
+    if (nivel === undefined) return;
+
+    expect(fairnessFloor(nivel.board, 3, { maxStates: 1 })).toBe("inconclusive");
   });
 
   it("greedy-safe implica passar o piso a qualquer profundidade", () => {

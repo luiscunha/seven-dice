@@ -17,6 +17,15 @@ import type { TarefaWorker } from "./worker";
 
 const URL_WORKER = new URL("./worker.ts", import.meta.url);
 
+/**
+ * Corre uma fatia num worker e **espera que ele morra** antes de resolver.
+ *
+ * `terminate()` é assíncrono: resolver sem o esperar devolve o controlo ao
+ * chamador com o worker ainda vivo. Não se observou nenhum sintoma disso — o
+ * bloqueio que motivou esta revisão veio de outro lado — mas um pool que promete
+ * ter acabado e ainda tem threads a correr é uma armadilha que só aparece sob
+ * carga, e a espera custa nada.
+ */
 function correrFatia(tarefa: TarefaWorker): Promise<Avaliacao[]> {
   return new Promise((resolve, reject) => {
     /*
@@ -34,15 +43,26 @@ function correrFatia(tarefa: TarefaWorker): Promise<Avaliacao[]> {
       execArgv: ["--import", "tsx"],
     });
 
+    let respondeu = false;
+
     worker.once("message", (m: Avaliacao[]) => {
-      void worker.terminate();
-      resolve(m);
+      respondeu = true;
+      // `terminate()` rejeita raramente; em qualquer dos casos o resultado já
+      // está em mãos e o que interessa é não resolver antes de o worker sair.
+      void worker.terminate().then(
+        () => resolve(m),
+        () => resolve(m),
+      );
     });
 
-    worker.once("error", reject);
+    worker.once("error", (erro) => {
+      if (!respondeu) reject(erro);
+    });
 
     worker.once("exit", (code) => {
-      if (code !== 0) reject(new Error(`worker terminou com código ${code}`));
+      if (!respondeu && code !== 0) {
+        reject(new Error(`worker terminou com código ${code}`));
+      }
     });
   });
 }

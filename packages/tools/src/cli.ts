@@ -16,6 +16,7 @@ import type { Level } from "@sete/engine";
 import { applyMove, isValidGroup, pieceCount, totalSum } from "@sete/engine";
 
 import { BANDS, bandById } from "./bands";
+import { comandoPlay } from "./play";
 import { construirBanda } from "./pipeline";
 
 const log = (msg: string): void => {
@@ -184,11 +185,27 @@ const codigo = await (async (): Promise<number> => {
       return comandoVerify(resto);
     case "bands":
       return comandoBands();
+    case "play": {
+      const { values } = parseArgs({
+        args: resto,
+        options: {
+          pack: { type: "string" },
+          band: { type: "string" },
+          id: { type: "string" },
+          seed: { type: "string" },
+          log: { type: "string" },
+          passos: { type: "boolean", default: false },
+        },
+      });
+      return comandoPlay(values);
+    }
     default:
-      log("uso: sete <build|bands|verify>");
+      log("uso: sete <build|bands|play|verify>");
       log("");
       log("  build   [--band <id>] [--count <n>] [--runs <n>] [--out <dir>]");
       log("  bands   lista as bandas e os seus critérios");
+      log("  play    [--band <id>] [--id <levelId>] [--seed <n>]");
+      log("          [--pack <ficheiro>] [--log <ficheiro>] [--passos]");
       log("  verify  <ficheiro.json>  reverifica um level pack");
       return comando === undefined ? 0 : 1;
   }
