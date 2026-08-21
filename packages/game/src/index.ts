@@ -1,5 +1,5 @@
 /**
- * `@sete/game` — UI web (DOM + transições CSS, spec §1.4) e camada de sessão.
+ * `@septet/game` — UI web (DOM + transições CSS, spec §1.4) e camada de sessão.
  *
  * Tudo o que a engine deliberadamente não sabe vive aqui: modo, relógio,
  * pontuação, combos, undo, progressão (spec §1.1, §4.3).
@@ -12,22 +12,22 @@
 
 export type {
   GameState,
+  JokerValue,
   HintResult,
   HintSource,
   TapRejection,
 } from "./session/GameSession";
 export {
+  JOKER_VALUES,
   clearSelection,
-  commit,
   hint,
   isFinished,
-  isPending,
-  jokerInSelection,
-  jokerRequiredValue,
   restart,
   selectionHasJoker,
   selectionSum,
   startGame,
+  remainingToTarget,
+  selectionTotal,
   tap,
   undo,
 } from "./session/GameSession";
@@ -74,9 +74,19 @@ export type { LevelProgress, Profile, ProfileStorage } from "./session/progress"
 export {
   PROFILE_KEY,
   PROFILE_VERSION,
+  countCompleted,
   emptyProfile,
   load,
+  markJokerTutorialSeen,
   recordLevel,
   recordTimeAttack,
   save,
 } from "./session/progress";
+
+export type { ContaDoJoker } from "./session/tutorial";
+export {
+  NIVEIS_COM_ANDAIME,
+  NIVEL_TUTORIAL_JOKER,
+  contaDoJoker,
+  mostraSomaDasFaces,
+} from "./session/tutorial";

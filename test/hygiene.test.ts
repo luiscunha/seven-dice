@@ -36,7 +36,7 @@ describe("higiene do repositório", () => {
       const pkg = readPkg(`${consumidor}/package.json`);
       const deps = (pkg["dependencies"] ?? {}) as Record<string, string>;
 
-      expect(deps["@sete/engine"]).toBe("workspace:*");
+      expect(deps["@septet/engine"]).toBe("workspace:*");
     }
   });
 });

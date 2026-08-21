@@ -1,7 +1,7 @@
-# Plano de Implementação — "Sete"
+# Plano de Implementação — "Septet"
 
-> Companheiro operacional de `plano-modelo-jogo-sete.md` (modelo de jogo) e
-> `spec-motor-sete.md` (motor). Referências `[M x.y]` apontam para o plano do
+> Companheiro operacional de `plano-modelo-jogo-septet.md` (modelo de jogo) e
+> `spec-motor-septet.md` (motor). Referências `[M x.y]` apontam para o plano do
 > modelo; `[E x.y]` para a spec do motor.
 >
 > Este documento responde a *como e por que ordem se constrói*. Não redefine
@@ -646,7 +646,7 @@ duvidoso é a direção segura.
 | `tools/src/worker.ts` | Playouts em `worker_threads` |
 | `tools/src/pipeline.ts` | gerar → medir → filtrar → exportar `[E 7.5]` |
 | `tools/src/bands.ts` | Bandas de `[M 5.1]` e `[M 7]` |
-| `tools/src/cli.ts` | `sete generate`, `sete measure`, `sete export` |
+| `tools/src/cli.ts` | `septet generate`, `septet measure`, `septet export` |
 
 ### Notas de implementação
 
@@ -685,7 +685,7 @@ duvidoso é a direção segura.
 - **`firstFatalDepth` é `number | null`.** Num tabuleiro greedy-safe não há
   profundidade fatal, e zero seria mentira.
 - **`--import tsx` no worker, não só no processo principal.** Um `Worker` do Node
-  arranca sem herdar o loader de quem o criou. Sob `pnpm sete` o tsx chegaria por
+  arranca sem herdar o loader de quem o criou. Sob `pnpm septet` o tsx chegaria por
   acaso; sob o Vitest não, porque aí quem transforma o TypeScript é o Vite e o
   worker corre em Node puro. Pedir o loader explicitamente é o que torna este
   código testável em vez de só executável à mão.
@@ -764,7 +764,7 @@ Duas notas de método:
 ### Critério de aceitação — verificado
 
 **240 níveis exportados em 8 bandas, 30 por banda, 0 falhas na reverificação
-independente** (`sete verify`, que reaplica a solução de cada nível sem confiar
+independente** (`septet verify`, que reaplica a solução de cada nível sem confiar
 em nada do que está no ficheiro).
 
 | Banda | Aceitação | Sobrevivência observada (p10 / mediana / p90) | Tempo |
@@ -806,7 +806,7 @@ São poucas horas de trabalho antes de existir uma única linha de UI, e respond
 
 ### Entregáveis
 
-`tools/src/play.ts` — `sete play <levelId | seed>`: desenha o tabuleiro em texto,
+`tools/src/play.ts` — `septet play <levelId | seed>`: desenha o tabuleiro em texto,
 aceita seleção por coordenadas, mostra a soma corrente, aplica ao chegar a 7, e
 suporta `undo`, `restart`, `hint`, `groups` (realce dos grupos válidos).
 
@@ -919,12 +919,15 @@ O tabuleiro não bloqueia nessa jogada: fica insolúvel em silêncio e só falha
 fim. Três reinícios seguidos sem perceber porquê, num nível resolvido à primeira
 depois da correção.
 
-Não é um defeito da consola — é do **modelo de interação**, e a UI da fase 8
-herda-o inteiro se o repetir. A seleção com joker passa a exigir confirmação
-explícita (`x`), e sem joker o disparo automático mantém-se: as faces são >= 1 e o
-alvo é exato, logo um grupo válido nunca é prefixo de outro. Só com joker é que
-várias seleções diferentes são todas válidas — e é só aí que existe uma decisão a
-proteger.
+Não é um defeito da consola — é do **modelo de interação**. A correção feita aqui
+foi exigir confirmação explícita (`x`) na seleção com joker.
+
+> **Corrigido outra vez na fase 8, e melhor.** A confirmação era a solução errada
+> para o problema certo: o teto estava em 6 — a condição que o motor aceita — em
+> vez de estar em `7 − valor do joker`, que é a única soma correta das fixas. Com
+> o teto certo não há ambiguidade nenhuma a resolver, e o joker acumula-se e
+> elimina como qualquer outro grupo. A tecla `x` desapareceu. Ver
+> `desenho-fase-8.md` §5.2.
 
 ### O valor do joker não se descobre a jogar
 
@@ -934,8 +937,12 @@ pergunta do jogador, ao quarto nível com joker, foi literalmente *"o joker tem 
 valor fixo?"*.
 
 O renderer passou a mostrar `joker = N` no cabeçalho, recalculado a cada jogada.
-Isso resolve a consola, mas para o jogo é a confirmação de que **o tutorial
-dedicado de `[M 2.6]` deixa de ser opcional**.
+
+> **Revisto na fase 8.** A conclusão foi tirada com o defeito acima ainda
+> presente, portanto a medição está contaminada: boa parte da dificuldade era o
+> joker gastar-se sozinho ao valor errado, não a dedução ser difícil. Com o teto
+> em `7 − valor`, saber o número deixou de ser preciso — o jogo não deixa errar —
+> e o `joker = N` foi retirado do cabeçalho.
 
 Consequência para o protocolo: com o valor à vista, a pergunta do playtest do
 joker deixa de ser "consegues deduzir quanto vale" — está respondida — e passa a

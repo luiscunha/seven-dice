@@ -19,7 +19,7 @@ pnpm check
 ```
 
 Node ≥ 20, pnpm 11.22.0 (fixado em `packageManager`). O `pnpm check` corre
-lint + typecheck + testes: **249 testes, ~15 s**. Se demorar muito mais do que
+lint + typecheck + testes: **269 testes, ~20 s**. Se demorar muito mais do que
 isso, ver "Armadilhas" no fim.
 
 Leituras, por esta ordem:
@@ -31,7 +31,7 @@ Leituras, por esta ordem:
    foram verificados.
 3. Este ficheiro.
 
-Os documentos de origem — `spec-motor-sete.md` e `plano-modelo-jogo-sete.md` —
+Os documentos de origem — `spec-motor-septet.md` e `plano-modelo-jogo-septet.md` —
 mantêm-se como estavam. **Não foram corrigidos**, e em quatro pontos estão
 contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 
@@ -49,7 +49,7 @@ contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 | 5 | Métricas e pipeline | ✅ |
 | 6 | Renderer de consola | ✅ **gate fechado a Verde** |
 | 7 | Camada de sessão | ✅ |
-| 8 | UI web | por começar ← **é aqui que se avança** |
+| 8 | UI web | 🔨 **em curso** — tabuleiro e tutorial do joker feitos; falta lista de níveis, modo tempo e meta-jogo |
 | 9 | Empacotamento | por começar |
 
 O motor está completo e é puro: `packages/engine/src/` não importa nada de Node,
@@ -92,37 +92,196 @@ Como cada jogada remove exatamente 7, qualquer tabuleiro limpo leva sempre
 
 ### Os dois achados que mudam a Fase 8
 
-**A eliminação automática é incompatível com o joker.** O modelo de interação do
-plano §3.1 — tocar-a-acumular, elimina ao chegar a 7 — gasta o joker com a
-primeira peça que lhe encostem, ao valor que essa peça deixar, porque
-`isValidGroup` aceita qualquer soma fixa entre 1 e 6. O tabuleiro fica insolúvel
-em silêncio e só falha no fim. A consola passou a exigir confirmação (`x`) quando
-há joker na seleção; **a UI da Fase 8 herda o problema inteiro se repetir o
-modelo**.
+**O valor do joker escolhe-se ao tocar nele.**
 
-**O valor do joker não se descobre a jogar.** O plano §2.6 supõe que a dedução é
-descobrível com o tutorial certo; medido, não é descoberta sem ele. A consola
-mostra `joker = N` no cabeçalho, recalculado a cada jogada. Para o jogo, o
-tutorial dedicado do §2.6 deixa de ser opcional.
+O modelo de interação do plano §3.1 — tocar-a-acumular, elimina ao chegar a 7 —
+não encaixa no joker sem ajuda: como ele preenche o que faltar, a seleção fica
+válida logo à primeira peça encostada, e o joker gasta-se ao valor que essa peça
+deixar. A Fase 8 tentou três desenhos:
+
+| Tentativa | Porque falhou |
+|---|---|
+| Disparo automático | O jogador nunca chegava a escolher o valor |
+| Botão de confirmação | Obrigava a sair do tabuleiro; a razão do botão não se lia |
+| Teto em `7 − valor obrigatório` | Removia a possibilidade de errar — ver abaixo |
+
+**A terceira foi a mais instrutiva, e a mais perigosa.** Impedir o valor errado
+parecia uma simplificação elegante: sem botão, sem números, sem tutorial. Mas
+medido depois, exaustivamente, num tabuleiro de 12 peças da banda `denso`:
+
+| Conjunto de jogadas | Sequências | Bloqueiam |
+|---|---|---|
+| Com o joker livre | 1175 | **77,0%** |
+| Com o joker forçado ao valor certo | 279 | **3,2%** |
+
+E na banda inteira, a sobrevivência passava de 0,141 para **0,957**. Toda a
+dificuldade das bandas com joker vinha da possibilidade de o gastar mal — é a
+medição nº 3 acima, lida ao contrário.
+
+**A solução é escolher o valor no momento do toque.** Um seletor com as seis
+faces abre em cima da peça; escolhido o valor, o joker comporta-se como uma peça
+normal e elimina sozinho ao chegar a 7. A ambiguidade morre na origem, não é
+preciso botão, e **a liberdade de errar mantém-se intacta**.
+
+O valor obrigatório nunca aparece no ecrã: descobri-lo é o puzzle. E o tutorial
+dedicado do §2.6 continua a fazer falta — ensina a regra, não a resposta.
+
+**Lição de método:** a segunda medição do gate da Fase 6 — "o valor do joker não
+se descobre a jogar" — foi tirada com um defeito presente e está contaminada.
+Quando uma conclusão de playtest vier de uma sessão onde algo estava partido,
+remede-se antes de a tratar como facto.
 
 ## O que se segue
 
-A **Fase 8** — UI web. A Fase 7 está feita: `packages/game/src/session/` tem
-`GameSession`, os dois modos, combos, pontuação e perfil, sem uma linha de DOM e
-sem uma leitura do relógio do sistema.
+A **Fase 8**, a meio. O tabuleiro joga-se ponta a ponta — seleção, animação em
+três tempos, undo, reinício, dicas, joker e fim de nível com selo — e o tutorial
+do joker está feito. Falta a lista de níveis, o modo tempo e o meta-jogo.
 
-Três coisas que a UI vai consumir e convém não redescobrir:
+```bash
+pnpm dev     # localhost:5173
+```
 
-- **`tap` não elimina automaticamente quando há joker na seleção** — `commit`
-  fecha-a. Repetir o disparo automático na UI reintroduz o defeito da Fase 6.
-- **`jokerInSelection`** devolve o par *valor que o joker toma* / *valor que tem
-  de valer*. É o que permite avisar antes de o jogador matar o tabuleiro.
-- **`isPending`** distingue um convite de um erro. Na consola isso foi a
-  diferença entre `▸` e `⚠`, e foi o que destravou o jogador.
+Enquanto não há lista, escolhe-se por query: `?banda=denso&nivel=20`.
 
-O tempo entra por parâmetro e o armazenamento por interface (`ProfileStorage`,
-que o `localStorage` satisfaz tal como está) — a Fase 9 troca-o por armazenamento
-nativo sem tocar na sessão.
+O critério de aceitação da fase é *campanha inicial jogável ponta a ponta, com os
+dois modos, num link partilhável*. Contra ele falta, por ordem:
+
+| | | |
+|---|---|---|
+| 1 | Tutorial do joker | ✅ |
+| 2 | Lista de níveis por banda, com os selos | por fazer |
+| 3 | Modo tempo — `TimeAttackSession` existe desde a Fase 7 e **nenhuma linha de UI o usa** | por fazer |
+| 4 | Link partilhável, para o playtest externo | por fazer |
+
+O mapa de progressão, o perfil, as definições e o puzzle diário ficam **depois**
+da marca do playtest (desenho §8) e não bloqueiam a Fase 9.
+
+Uma coisa por resolver, que veio de jogar e ainda não tem decisão. É mais barata
+antes do playtest externo do que depois — regerar bandas depois de alguém jogar
+invalida o que essa pessoa jogou:
+
+- **A dificuldade chega sempre aos ~78% do jogo**, em todas as bandas. No
+  `perito` são 15 jogadas com a primeira fatal à décima segunda. Não é afinável:
+  em 250 candidatos, o melhor está nos 65%. A ramificação de 33 grupos por jogada
+  não deixa errar cedo. Ver "O que fica por decidir".
+
+---
+
+## O tutorial do joker — feito
+
+O plano §2.6 chama-lhe obrigatório, e é a mitigação nomeada do risco *"joker mal
+usado mata o tabuleiro"*. Ficou mais necessário do que estava: com o joker livre
+restaurado, voltou a ser possível matar o tabuleiro em silêncio, e sem tutorial
+isso lê-se como defeito e não como puzzle.
+
+**É um tabuleiro a sério, de quatro peças** — `[[0, 4], [5, 3]]`, joker a valer 2,
+duas jogadas. Tem duas saídas boas e uma má: gastar o joker com o 4 soma 7, o
+jogo aceita, e sobram 5 e 3 — soma 8, zero grupos, sem joker para corrigir. Morre
+numa jogada, à frente do jogador, e o ecrã nomeia o que aconteceu sem o
+repreender.
+
+A conta aparece **com números, uma vez**: `as faces somam 12` · `faltam 2 para 14`
+· `que é 7 × 2 → ✳ = 2`.
+
+**O andaime.** Aplicar a regra exige a soma do tabuleiro, e somar 27 faces de
+cabeça no telemóvel não é um puzzle, é trabalho. O cabeçalho mostra
+`faces somam N` nos **três primeiros níveis com joker que o jogador completar**, e
+nunca mais — nem no `denso`, que é dedução pura. O número não dá a resposta:
+continua a ser o jogador a fechar a conta.
+
+Detalhes de desenho e o porquê de cada um: `desenho-fase-8.md` §5.4.
+`packages/game/test/tutorial.test.ts` verifica contra a engine as três coisas que
+o tabuleiro promete ensinar.
+
+---
+
+## A forma dos tabuleiros — metade cheios
+
+Até aqui os tabuleiros nunca enchiam: preenchimento de 65–73% em todas as bandas,
+silhueta sempre recortada, e a forma média do `perito` era 6,9 × 9,0 — mais alta
+do que larga. Nunca saía um 7×7.
+
+O `silhouetteProfile` existia no gerador desde a Fase 4 e **nenhuma banda o
+usava**. Passou a usar-se, e metade dos níveis de cada banda são agora retângulos
+cheios.
+
+### O que a medição decidiu
+
+Três medições, a 2026-08-21, antes de mexer numa linha de banda.
+
+**Encher não custa dificuldade.** Comparando o mesmo tamanho com e sem perfil, a
+sobrevivência mediana é a mesma dentro do ruído — e se pende, pende para mais
+difícil:
+
+| | com perfil | sem perfil |
+|---|---|---|
+| `meio` 5×5 | 0,497 | 0,520 |
+| `meio` 6×6 | 0,287 | 0,323 |
+| `perito` 7×7 | 0,113 | 0,127 |
+
+**Encher não custa aceitação.** Sete configurações, 300 candidatos cada: média de
+**16,3% de aceites sem perfil contra 15,0% com**. Quem rejeita a maioria dos
+tabuleiros cheios é o piso de justiça — e rejeita qualquer tabuleiro na mesma
+medida. Era a hipótese que faltava excluir.
+
+**Sem perfil não há nada a filtrar.** Zero tabuleiros cheios em 300 candidatos em
+cinco das sete configurações. Não é uma preferência que se satisfaça filtrando o
+que já se gerava.
+
+**O custo é a raridade da forma, e depende do número de colunas** — o gerador
+constrói coluna a coluna, e quantas menos houver mais fácil é fechá-las todas à
+mesma altura. Daí que `perito` 5×7 saia quatro vezes mais que 7×5, com as mesmas
+35 peças:
+
+| Colunas | Cheios em 200 candidatos |
+|---|---|
+| 3 | ~96 |
+| 4 | ~45 |
+| 5 | ~25 |
+| 6 | ~8 |
+| 7 | ~6 |
+
+### O que ficou no pack
+
+| Banda | Cheios | Formas |
+|---|---|---|
+| `inicio` | 15/30 | 4×4 ·7 · 4×5 ·8 |
+| `meio` | 15/30 | 5×5 ·7 · 5×6 ·8 |
+| `meio-joker` | 15/30 | 4×6 ·7 · 5×5 ·8 |
+| `avancado` | 15/30 | 5×6 ·7 · 6×6 ·8 |
+| `perito` | 15/30 | 5×7 ·5 · 6×7 ·5 · **7×7 ·5** |
+| `denso` | 15/30 | 3×4 ·7 · 3×5 ·8 |
+
+`tutorial` e `tempo` ficaram como estavam: exigem sobrevivência de 100% e prova
+exaustiva de greedy-safe, e é aí que encher luta mais contra a aceitação —
+1 aceite em 91 tabuleiros cheios do tutorial, contra 6% de base.
+
+### As duas peças que isto obrigou a existir
+
+**A rejeição por forma.** O perfil é uma *preferência* do gerador, não uma
+garantia. Sem verificar que o tabuleiro saiu mesmo cheio, "metade cheios"
+degenerava em "metade tentados, quase todos recortados" — e o pack ficaria igual
+ao antigo. É a sexta razão de rejeição, e corre antes da ida-e-volta e de
+qualquer playout, portanto é barata. Não toca em nenhuma garantia: a
+resolubilidade continua a vir da ida-e-volta e do piso de justiça.
+
+**A quota por forma.** Cada banda constrói-se agora em várias passagens — uma de
+forma livre e uma por cada forma cheia, cada uma com a sua faixa de seeds, porque
+a seed é a identidade do nível. Misturar as seeds e deixar a proporção ao acaso
+dava um pack dominado pelas formas baratas: um `denso` 3×4 custa 12 candidatos e
+um `perito` 7×7 custa 150, e é precisamente o 7×7 que se quer garantido.
+
+### O que a geração corrigiu das medições
+
+**O `meio-joker` 5×5 dá.** No funil tinha dado zero aceites em 27 tabuleiros
+cheios. Ficou na rotação por o zero ser amostra pequena, e saíram os oito. Era
+ruído.
+
+**O `inicio` é três vezes mais caro do que estimado** — ~400 candidatos por nível
+cheio, não ~150. A razão está nos seus próprios números: os tabuleiros cheios
+desta banda têm mediana de sobrevivência **0,42**, e a banda exige **0,55 para
+cima**. Foi preciso dar-lhe seis vezes mais orçamento, e daí vem o `--max` do
+`septet build`.
 
 ---
 
@@ -168,6 +327,34 @@ refletem a medição, não a tabela original.
 A severidade escala com ramificação^profundidade. Em tabuleiros com forma
 correta, a profundidade 3 rejeitava **1840 em 1856**. Todas as bandas usam
 `fairnessDepth: 2` (a `tempo` usa 0), que o plano §6.2 permite explicitamente.
+
+### 5. As faces não aparecem todas com a mesma frequência, nem de perto
+
+Notado a jogar — *"porque nunca aparece a face 6?"* — e medido no pack:
+
+| Face | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| Frequência | **36,0%** | 21,3% | 20,1% | 10,9% | 6,7% | **4,0%** |
+
+São **duas causas independentes**, e convém não as confundir:
+
+**Estrutural.** Das 14 composições de 7, só `[1,6]` contém um 6 — e as
+composições longas são feitas de 1 e 2, contribuindo muitas células cada vez que
+saem. Com pesos uniformes, o previsto é 56,6% de uns e 1,9% de seises.
+
+**O filtro da banda.** Um 6 tem um único parceiro, portanto tabuleiros com seises
+são rígidos e sobrevivem menos. Medido na `inicio`, que exige sobrevivência
+≥ 0,55: **6,1% de seises nos gerados, 0,9% nos aceites.** Não é defeito — é a
+alavanca de dificuldade a funcionar.
+
+Corolário contraintuitivo: **a banda onde se veem mais seises é o `tutorial`**, com
+16,6% e distribuição perfeitamente igual entre as seis faces. Só tem pares, e os
+pares que somam 7 são `1+6`, `2+5`, `3+4` — cada face uma vez.
+
+Isto expôs um defeito de contabilidade no `facesAltas()` das bandas `avancado` e
+`perito`: pesava composições e não células, portanto `[1,1,1,1,1,1,1]` saía com o
+mesmo peso de `[1,6]`. O rótulo "faces altas" não se cumpria no tabuleiro — a
+`perito` tinha 42,9% de uns. Corrigido a dividir o peso por `length`.
 
 ---
 
@@ -280,9 +467,11 @@ Duas ressalvas honestas:
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 249 testes
-pnpm sete bands                               # as bandas e os seus critérios
-pnpm sete play --id inicio-000296 --log p.jsonl # jogar um nível na consola
-pnpm sete verify                              # revalida o pack todo
-pnpm sete build --count 30 --runs 1000        # reconstrói o pack (--pre 0 desliga o pré-filtro)
+pnpm check                                    # lint + typecheck + 288 testes
+pnpm septet bands                               # as bandas e os seus critérios
+pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
+pnpm septet verify                              # revalida o pack todo
+pnpm septet build --count 30 --runs 1000        # reconstrói o pack (--pre 0 desliga o pré-filtro)
+pnpm septet build --band inicio --max 1200      # mais orçamento por nível: as formas cheias caras precisam
+pnpm septet export                              # parte o pack por banda para game/public/levels
 ```

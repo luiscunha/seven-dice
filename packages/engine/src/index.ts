@@ -1,5 +1,5 @@
 /**
- * `@sete/engine` — motor puro do jogo "Sete".
+ * `@septet/engine` — motor puro do jogo "Septet".
  *
  * Determinístico, imutável e sem conhecimento de modo (spec §1.1). Toda a
  * aleatoriedade entra por uma seed explícita; `Math.random()` está proibido

@@ -1,0 +1,494 @@
+/*
+ * Ecrã de jogo.
+ *
+ * Todas as cores e medidas vêm de `theme.css`. Se aparecer aqui um valor
+ * literal que não seja geometria pura, está no sítio errado.
+ */
+
+.ecra {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 12px 16px 16px;
+}
+
+/* ─── Cabeçalho ───────────────────────────────────────────────────────────── */
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-height: 40px;
+}
+
+.topo h1 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.topo .meta {
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.topo .espaco {
+  flex: 1;
+}
+
+/* ─── Tabuleiro ───────────────────────────────────────────────────────────── */
+
+.palco {
+  /* Contexto de posicionamento do seletor do joker, que ancora à peça. */
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  background: var(--tray);
+  border-radius: var(--raio);
+  padding: clamp(8px, 2vw, 20px);
+}
+
+.tabuleiro {
+  position: relative;
+  /* A caixa não encolhe a meio do nível: o tabuleiro perde peças, não âncora. */
+  flex: none;
+}
+
+.peca {
+  --lado-real: var(--lado, 48px);
+
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--lado-real);
+  height: var(--lado-real);
+  border-radius: calc(var(--lado-real) * var(--raio-peca));
+
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  padding: calc(var(--lado-real) * 0.15);
+
+  transform: translate(
+    calc(var(--c) * (var(--lado-real) + var(--gap-peca))),
+    calc(-1 * var(--r) * (var(--lado-real) + var(--gap-peca)))
+  );
+
+  /*
+   * O anel de 1 px não é enfeite: a face 1 tem contraste 1,17 contra o papel, e
+   * sem contorno as peças mais claras dissolvem-se no fundo.
+   */
+  box-shadow:
+    inset 0 0 0 1px rgb(18 63 58 / 0.18),
+    inset 0 calc(var(--lado-real) * -0.055) 0 rgb(0 0 0 / 0.14),
+    inset 0 calc(var(--lado-real) * 0.035) 0 rgb(255 255 255 / 0.17);
+
+  cursor: pointer;
+  transition:
+    transform var(--t-gravidade) var(--suavizacao),
+    opacity var(--t-saida) linear,
+    scale var(--t-saida) var(--suavizacao);
+}
+
+.peca[data-valor="1"] { background: var(--face-1); --tinta: var(--ink-1); }
+.peca[data-valor="2"] { background: var(--face-2); --tinta: var(--ink-2); }
+.peca[data-valor="3"] { background: var(--face-3); --tinta: var(--ink-3); }
+.peca[data-valor="4"] { background: var(--face-4); --tinta: var(--ink-4); }
+.peca[data-valor="5"] { background: var(--face-5); --tinta: var(--ink-5); }
+.peca[data-valor="6"] { background: var(--face-6); --tinta: var(--ink-6); }
+.peca[data-valor="0"] { background: var(--face-joker); --tinta: var(--ink-joker); }
+
+.pinta {
+  align-self: center;
+  justify-self: center;
+  width: calc(var(--lado-real) * 0.155);
+  height: calc(var(--lado-real) * 0.155);
+  border-radius: 50%;
+  background: var(--tinta);
+}
+
+.glifo {
+  grid-area: 1 / 1 / 4 / 4;
+  align-self: center;
+  justify-self: center;
+  font-size: calc(var(--lado-real) * 0.5);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--tinta);
+}
+
+/*
+ * A seleção não pode ser uma cor: a rampa ocupa todo o azul-verde da marca, e
+ * qualquer matiz entraria em conflito com alguma face. É um anel duplo — claro
+ * por dentro, escuro por fora — e um dos dois destaca-se sempre.
+ */
+.peca.selecionada {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 5px #08221e,
+    inset 0 0 0 1px rgb(18 63 58 / 0.18),
+    inset 0 calc(var(--lado-real) * -0.055) 0 rgb(0 0 0 / 0.14);
+  z-index: 2;
+}
+
+.peca.sugerida {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    inset 0 0 0 1px rgb(18 63 58 / 0.18);
+  z-index: 1;
+}
+
+/* Sair é desaparecer, não explodir. */
+.peca.a-sair {
+  opacity: 0;
+  scale: 0.82;
+  pointer-events: none;
+}
+
+/* Abaixo do piso de toque: assinala-se para não passar despercebido. */
+.tabuleiro.apertado .peca {
+  cursor: pointer;
+}
+
+/* ─── Rodapé: seleção, soma, ações ────────────────────────────────────────── */
+
+.rodape {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.linha-selecao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-height: 34px;
+  font-variant-numeric: tabular-nums;
+}
+
+.soma {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.soma .parcelas {
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+
+/* Um convite, não um aviso. O triângulo fica reservado a erros a sério. */
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.aviso[data-tipo="convite"] {
+  color: var(--ink);
+}
+
+.aviso[data-tipo="erro"] {
+  color: var(--ink-muted);
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background var(--t-ui) linear,
+    border-color var(--t-ui) linear;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--ink-muted);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.btn.primario {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.btn .contador {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.btn.primario .contador {
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* ─── Fim de nível ────────────────────────────────────────────────────────── */
+
+.fim {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--raio);
+}
+
+.fim .selo {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.fim .detalhe {
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── O seletor do joker ──────────────────────────────────────────────────── */
+
+/*
+ * Abre colado à peça, porque é aí que os olhos estão. A alternativa — um botão
+ * de confirmação noutro sítio do ecrã — obrigava o jogador a sair do tabuleiro
+ * para fechar uma decisão que é sobre o tabuleiro.
+ */
+.joker-picker {
+  position: absolute;
+  z-index: 10;
+  padding: 10px 12px 12px;
+  border-radius: var(--raio);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--sombra);
+}
+
+.joker-picker-titulo {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.joker-picker-grelha {
+  display: grid;
+  grid-template-columns: repeat(6, auto);
+  gap: 6px;
+}
+
+.joker-opcao {
+  display: grid;
+  place-items: center;
+  padding: 3px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--t-ui) linear;
+}
+
+.joker-opcao:hover {
+  background: var(--surface-alt);
+}
+
+.joker-opcao[aria-current="true"] {
+  background: var(--surface-alt);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.joker-opcao .peca {
+  position: static;
+  transform: none;
+  cursor: pointer;
+}
+
+/* Em ecrãs estreitos as seis faces não cabem numa linha. */
+@media (max-width: 420px) {
+  .joker-picker-grelha {
+    grid-template-columns: repeat(3, auto);
+  }
+}
+
+/*
+ * O joker com valor escolhido mostra-o. Sem isto o jogador escolhe 5, junta
+ * peças, e a meio já não se lembra do que escolheu — que é justamente a decisão
+ * de que o nível depende.
+ */
+.peca.joker-escolhido::before {
+  content: attr(data-joker-as);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--lado-real) * 0.44);
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.peca.joker-escolhido .glifo {
+  opacity: 0.25;
+  transform: translate(28%, -28%) scale(0.42);
+}
+
+/* ─── Botão redondo do cabeçalho ──────────────────────────────────────────── */
+
+/*
+ * O `?` que reabre o tutorial do joker. Fica no topo e não no rodapé porque não
+ * é uma ação de jogo — não pertence à mesma família que Desfazer e Dica.
+ */
+.btn.redondo {
+  width: 40px;
+  padding: 0;
+  border-radius: 50%;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+/* ─── Tutorial do joker ───────────────────────────────────────────────────── */
+
+/*
+ * Abre por cima do nível, com o tabuleiro a jogar visível por trás. É um véu e
+ * não um ecrã à parte: o tutorial não interrompe o jogo, prepara-o.
+ */
+.tutorial {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overflow-y: auto;
+  background: rgb(18 63 58 / 0.42);
+}
+
+.tutorial-caixa {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(420px, 100%);
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.tutorial-cabecalho h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.tutorial-cabecalho p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+/*
+ * A conta em três passos, cada um numa linha. Uma expressão numa linha só —
+ * `12 + 2 = 14 = 7 × 2` — lê-se como fórmula; em passos lê-se como raciocínio,
+ * que é o que se pretende que fique.
+ */
+.tutorial-conta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px;
+  background: var(--surface-alt);
+  border-radius: var(--raio);
+  font-variant-numeric: tabular-nums;
+}
+
+.tutorial-passo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 12px;
+  background: var(--surface);
+}
+
+.tutorial-passo:first-child {
+  border-radius: calc(var(--raio) - 3px) calc(var(--raio) - 3px) 0 0;
+}
+
+.tutorial-passo:last-child {
+  border-radius: 0 0 calc(var(--raio) - 3px) calc(var(--raio) - 3px);
+}
+
+.tutorial-passo .rotulo {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.tutorial-passo .valor {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* A última linha é a conclusão, e é a única que muda de cor. */
+.tutorial-passo:last-child .valor {
+  color: var(--accent);
+}
+
+.tutorial-palco {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 132px;
+  padding: 12px;
+  background: var(--tray);
+  border-radius: var(--raio);
+}
+
+.tutorial-estado {
+  margin: 0;
+  min-height: 3.6em;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+/*
+ * No caminho fatal a frase é a lição inteira, e passa a ser o texto principal
+ * do ecrã. Não leva vermelho nem triângulo: o jogador não fez nada de errado do
+ * ponto de vista das regras — fez exatamente o que o jogo permite.
+ */
+.tutorial[data-fase="morto"] .tutorial-estado,
+.tutorial[data-fase="limpo"] .tutorial-estado {
+  color: var(--ink);
+}

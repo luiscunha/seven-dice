@@ -7,7 +7,7 @@
  * legítima para voltar atrás.
  */
 
-import type { Level } from "@sete/engine";
+import type { Level } from "@septet/engine";
 
 import type { GameState, HintResult } from "./GameSession";
 import { hint, isFinished, restart, startGame, undo } from "./GameSession";

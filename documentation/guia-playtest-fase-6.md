@@ -26,15 +26,15 @@ faz **agora**, antes de existir uma linha de UI, e não depois.
 ## Como correr
 
 ```bash
-pnpm sete play --band tutorial --log playtest.jsonl
+pnpm septet play --band tutorial --log playtest.jsonl
 ```
 
 Outras formas de escolher o tabuleiro:
 
 ```bash
-pnpm sete play --band meio-joker      # primeira da banda
-pnpm sete play --id perito-000526     # um nível concreto
-pnpm sete play --seed 77 --band denso # gera na hora, mesmo que a banda o rejeite
+pnpm septet play --band meio-joker      # primeira da banda
+pnpm septet play --id perito-000526     # um nível concreto
+pnpm septet play --seed 77 --band denso # gera na hora, mesmo que a banda o rejeite
 ```
 
 `--log` acrescenta uma linha JSON por sessão. **Usa sempre** — é isso que
@@ -46,7 +46,7 @@ transforma a tarde em dados.
 |---|---|
 | `b2` | toca na peça — coluna por letra, linha **a partir da base** |
 | `b2 c2 c3` | toca em várias de uma vez |
-| `x` | elimina a seleção pendente — só é preciso com joker |
+| `a1=5` | no joker, escolhe o valor que ele toma nesta jogada |
 | `z` | desfaz: primeiro a última peça tocada, depois a última jogada |
 | `c` | limpa a seleção |
 | `r` | reinicia |
@@ -100,16 +100,14 @@ contra a planear.
 
 ### 5. O joker — 3 níveis de `meio-joker` ou `denso`
 
-O joker aparece como `*`. O valor obrigatório dele está no cabeçalho, como
-`joker = 3`, recalculado a cada jogada.
+O joker aparece como `*`, e **é o jogador que escolhe quanto ele vale**. Na
+consola escreve-se `a1=5`; na UI abre-se um seletor com as seis faces em cima da
+peça. Escolhido o valor, acumula-se e elimina como qualquer outro grupo.
 
-> **Isto mudou depois da primeira tarde de playtest.** A pergunta original era
-> "descobriste sozinho quanto vale?", e a resposta medida foi **não** — o valor
-> passou a estar à vista por isso. A pergunta que resta é a outra.
-
-A seleção com joker **não elimina sozinha**: fica pendente e fecha-se com `x`.
-Sem isso o joker gastava-se com a primeira peça que lhe encostasse, ao valor que
-essa peça deixasse.
+> **Isto mudou três vezes desde a primeira tarde de playtest**, e a terceira foi
+> a lição: forçar o joker ao valor certo dispensava botões e tutoriais, mas
+> levava a sobrevivência da banda `denso` de 0,141 para 0,957. Toda a
+> dificuldade dela vinha de se poder gastar o joker mal.
 
 A pergunta:
 

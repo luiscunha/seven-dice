@@ -5,7 +5,7 @@
  * usa a engine, que é pura. É esta função que o pool paraleliza (spec §7.2).
  */
 
-import type { Level } from "@sete/engine";
+import type { Board, Level } from "@septet/engine";
 import {
   applyMove,
   fairnessFloor,
@@ -16,12 +16,14 @@ import {
   pieceCount,
   reachablePieceCounts,
   toLevel,
-} from "@sete/engine";
+} from "@septet/engine";
 
-import type { BandSpec } from "./bands";
+import type { BandSpec, Forma } from "./bands";
+import { pecasDe, perfilDe } from "./bands";
 
 export type Rejeicao =
   | "geracao"
+  | "forma"
   | "ida-e-volta"
   | "sobrevivencia"
   | "greedy-safe"
@@ -57,6 +59,29 @@ function tamanhoParaSeed(seed: number, band: BandSpec): number {
 }
 
 /**
+ * A forma que este candidato tem de ter, ou `undefined` para forma livre.
+ *
+ * Uma banda com `formas` produz **só** tabuleiros cheios: é o `comandoBuild` que
+ * faz a mistura, correndo a banda duas vezes — uma sem `formas` e outra com uma
+ * quota por forma. Misturar aqui dentro não daria a proporção pedida, porque as
+ * formas cheias e as livres têm taxas de aceitação muito diferentes: metade das
+ * seeds daria muito menos de metade dos níveis.
+ */
+function formaParaSeed(seed: number, band: BandSpec): Forma | undefined {
+  const formas = band.formas;
+  if (formas === undefined || formas.length === 0) return undefined;
+
+  return formas[Math.abs(Math.imul(seed, 0x9e3779b1)) % formas.length];
+}
+
+/** Cheio, e exatamente nesta forma: nem uma coluna a mais nem um recorte. */
+function temForma(board: Board, [colunas, linhas]: Forma): boolean {
+  return (
+    board.length === colunas && board.every((col) => col.length === linhas)
+  );
+}
+
+/**
  * Margem com que **cada extremo** da banda é alargado no pré-filtro: três erros
  * padrão da proporção, calculados no próprio extremo.
  *
@@ -83,12 +108,32 @@ export function avaliar(
   /** Playouts do pré-filtro. `0` desliga-o. */
   preRuns = 0,
 ): Avaliacao {
-  const gerado = generate(seed, {
-    ...band.params,
-    targetPieceCount: tamanhoParaSeed(seed, band),
-  });
+  const forma = formaParaSeed(seed, band);
+
+  const gerado = generate(
+    seed,
+    forma === undefined
+      ? { ...band.params, targetPieceCount: tamanhoParaSeed(seed, band) }
+      : {
+          ...band.params,
+          targetPieceCount: pecasDe(forma),
+          silhouetteProfile: perfilDe(forma),
+        },
+  );
 
   if (gerado === undefined) return { seed, rejeicao: "geracao" };
+
+  /*
+   * O perfil é uma **preferência** do gerador, não uma garantia — e sem esta
+   * verificação "metade dos níveis cheios" degenerava em "metade tentados,
+   * quase todos recortados". Medido: com perfil plano, entre 3% e 55% dos
+   * candidatos saem mesmo cheios, conforme o número de colunas.
+   *
+   * Rejeitar aqui é barato: acontece antes da ida-e-volta e de qualquer playout.
+   */
+  if (forma !== undefined && !temForma(gerado.board, forma)) {
+    return { seed, rejeicao: "forma" };
+  }
 
   /*
    * Ida-e-volta antes de qualquer medição (spec §9.3). É barato e é a garantia

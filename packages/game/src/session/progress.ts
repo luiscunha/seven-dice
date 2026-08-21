@@ -12,7 +12,15 @@
 
 import type { Seal } from "./PuzzleSession";
 
-export const PROFILE_VERSION = 1;
+/**
+ * 2 desde o tutorial do joker, que trouxe `sawJokerTutorial`.
+ *
+ * `load` devolve perfil vazio a qualquer versão que não conheça — portanto subir
+ * este número apaga os perfis antigos. É deliberado enquanto o jogo não estiver
+ * publicado: migrar formatos que nunca chegaram a ninguém é código que só serve
+ * para envelhecer. A partir da fase 9 deixa de o ser.
+ */
+export const PROFILE_VERSION = 2;
 
 export interface LevelProgress {
   readonly seal: Seal;
@@ -28,6 +36,16 @@ export interface Profile {
   readonly bestTimeAttackScore: number;
   /** Melhor número de tabuleiros limpos numa corrida. */
   readonly bestBoardsCleared: number;
+
+  /**
+   * O tutorial do joker já correu uma vez.
+   *
+   * É uma bandeira própria e não «já completou algum nível com joker» porque as
+   * duas divergem no caso que interessa: quem abre o primeiro nível com joker,
+   * não o consegue, e volta no dia seguinte. Esse já viu o tutorial, e voltar a
+   * impor-lho lê-se como o jogo não estar a prestar atenção.
+   */
+  readonly sawJokerTutorial: boolean;
 }
 
 export const emptyProfile = (): Profile => ({
@@ -35,7 +53,23 @@ export const emptyProfile = (): Profile => ({
   levels: {},
   bestTimeAttackScore: 0,
   bestBoardsCleared: 0,
+  sawJokerTutorial: false,
 });
+
+export const markJokerTutorialSeen = (profile: Profile): Profile =>
+  profile.sawJokerTutorial ? profile : { ...profile, sawJokerTutorial: true };
+
+/**
+ * Quantos dos níveis dados já foram completados.
+ *
+ * Serve o andaime da soma das faces (`tutorial.ts`), que conta **níveis
+ * distintos** e não sessões: repetir o mesmo nível com joker três vezes não
+ * ensina a regra três vezes.
+ */
+export const countCompleted = (
+  profile: Profile,
+  ids: readonly string[],
+): number => ids.filter((id) => profile.levels[id] !== undefined).length;
 
 /** O mínimo que o jogo precisa. `localStorage` satisfá-lo tal como está. */
 export interface ProfileStorage {
@@ -43,7 +77,7 @@ export interface ProfileStorage {
   setItem(key: string, value: string): void;
 }
 
-export const PROFILE_KEY = "sete.profile";
+export const PROFILE_KEY = "septet.profile";
 
 /** Ordem dos selos, do menos exigente para o mais. */
 const SEAL_RANK: Readonly<Record<Seal, number>> = {
@@ -120,6 +154,7 @@ export function load(storage: ProfileStorage): Profile {
     levels: sanitizeLevels(p.levels),
     bestTimeAttackScore: finiteOrZero(p.bestTimeAttackScore),
     bestBoardsCleared: finiteOrZero(p.bestBoardsCleared),
+    sawJokerTutorial: p.sawJokerTutorial === true,
   };
 }
 

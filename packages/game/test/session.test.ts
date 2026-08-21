@@ -9,16 +9,15 @@
 
 import { describe, expect, it } from "vitest";
 
-import type { Board, Group, Level } from "@sete/engine";
-import { boardKey, packed } from "@sete/engine";
+import type { Board, Group, Level } from "@septet/engine";
+import { boardKey, packed } from "@septet/engine";
 
 import {
   clearSelection,
-  commit,
   hint,
   isFinished,
-  isPending,
-  jokerInSelection,
+  remainingToTarget,
+  selectionTotal,
   restart,
   startGame,
   tap,
@@ -45,6 +44,7 @@ import { breakCombo, registerMove, startCombo } from "../src/session/combos";
 import { comboMultiplier, moveScore } from "../src/session/scoring";
 import {
   PROFILE_KEY,
+  PROFILE_VERSION,
   emptyProfile,
   load,
   recordLevel,
@@ -123,45 +123,113 @@ describe("GameSession", () => {
    * seleções diferentes são todas válidas, e eliminar à primeira rouba ao
    * jogador a única decisão que o joker oferece.
    */
-  describe("seleção com joker", () => {
+  /*
+   * O joker não precisa de tratamento especial na interação, e é isso que se
+   * fixa aqui.
+   *
+   * O valor dele está globalmente determinado (spec §2.6), logo também está
+   * determinada a soma que as fixas do grupo têm de atingir: `7 − valor`. Com o
+   * teto aí, o joker acumula-se e elimina como qualquer outro grupo — não há
+   * botão de confirmação, não é preciso mostrar o valor, e **não há maneira de o
+   * gastar mal**.
+   *
+   * A versão anterior punha o teto em 6, que é o que o motor aceita, e por isso
+   * a seleção ficava válida logo à primeira peça encostada ao joker.
+   */
+  /*
+   * O joker é a única peça cujo valor o jogador escolhe (`[M 2.6]`), e é dessa
+   * escolha que vem a dificuldade das bandas com joker: **só um valor esvazia o
+   * tabuleiro, e o jogo deixa escolher qualquer um**. Escolher mal não bloqueia
+   * na hora — o tabuleiro fica insolúvel em silêncio e só falha no fim.
+   *
+   * Escolher no momento do toque é o que dispensa um botão de confirmação: com o
+   * valor fixado, a seleção volta a ter alvo exato e elimina sozinha.
+   */
+  describe("o joker", () => {
+    // fixas 2 + 2 = 4; com o joker a 3, o total fecha em 7.
     const JOKER_BOARD: Board = [[0, 2], [2]];
 
-    it("fica pendente em vez de eliminar", () => {
+    it("não entra na seleção sem valor escolhido", () => {
+      const s = tap(startGame(level(JOKER_BOARD)), packed(0, 0));
+
+      expect(s.selection).toEqual([]);
+      expect(s.rejection).toBe("joker-needs-value");
+    });
+
+    it("com valor escolhido, conta como uma peça normal", () => {
+      const s = tap(startGame(level(JOKER_BOARD)), packed(0, 0), 3);
+
+      expect(s.selection).toHaveLength(1);
+      expect(s.jokerAs).toBe(3);
+      expect(selectionTotal(s)).toBe(3);
+      expect(remainingToTarget(s)).toBe(4);
+    });
+
+    it("elimina sozinho ao chegar a 7, sem confirmação", () => {
       let s = startGame(level(JOKER_BOARD));
 
-      s = tap(s, packed(0, 0)); // joker
-      s = tap(s, packed(0, 1)); // +2 → já seria grupo válido
-
+      s = tap(s, packed(0, 0), 3);
+      s = tap(s, packed(0, 1)); // +2
       expect(s.moves).toBe(0);
-      expect(isPending(s)).toBe(true);
-    });
 
-    it("diz o que o joker toma e o que tem de valer", () => {
-      let s = startGame(level(JOKER_BOARD));
-
-      s = tap(s, packed(0, 0));
-      s = tap(s, packed(0, 1));
-      expect(jokerInSelection(s)).toEqual({ taking: 5, required: 3 });
-
-      s = tap(s, packed(1, 0));
-      expect(jokerInSelection(s)).toEqual({ taking: 3, required: 3 });
-    });
-
-    it("`commit` fecha a seleção pendente", () => {
-      let s = startGame(level(JOKER_BOARD));
-
-      s = tap(s, packed(0, 0));
-      s = tap(s, packed(0, 1));
-      s = tap(s, packed(1, 0));
-      s = commit(s);
+      s = tap(s, packed(1, 0)); // +2 → 3+2+2 = 7
 
       expect(s.moves).toBe(1);
       expect(isFinished(s)).toBe(true);
     });
 
-    it("`commit` sem seleção válida não faz nada", () => {
-      const s = startGame(level(JOKER_BOARD));
-      expect(commit(tap(s, packed(0, 0))).moves).toBe(0);
+    /*
+     * A propriedade que sustenta a dificuldade: **o valor errado é jogável**. Se
+     * o jogo o recusasse, a banda `denso` passava de 14% de sobrevivência para
+     * 96% — medido — e deixava de haver decisão nenhuma.
+     */
+    it("deixa escolher o valor errado, e a jogada acontece", () => {
+      let s = startGame(level(JOKER_BOARD));
+
+      s = tap(s, packed(0, 0), 5); // devia ser 3
+      s = tap(s, packed(0, 1)); // +2 → 5+2 = 7
+
+      expect(s.moves).toBe(1);
+      // O tabuleiro esvaziou-se cedo de mais: sobra um 2 sem parceiro possível.
+      expect(isFinished(s)).toBe(false);
+    });
+
+    it("tocar outra vez no joker troca o valor sem desfazer a seleção", () => {
+      let s = startGame(level(JOKER_BOARD));
+
+      s = tap(s, packed(0, 0), 5);
+      s = tap(s, packed(0, 0), 3);
+
+      expect(s.selection).toHaveLength(1);
+      expect(s.jokerAs).toBe(3);
+    });
+
+    it("recusa a peça que passaria de 7", () => {
+      let s = startGame(level([[0, 5], [6]] as Board));
+
+      s = tap(s, packed(0, 0), 6);
+      s = tap(s, packed(0, 1)); // +5 → 11
+
+      expect(s.selection).toHaveLength(1);
+      expect(s.rejection).toBe("over-target");
+    });
+
+    it("o valor escolhido não sobrevive à jogada nem ao desfazer", () => {
+      let s = startGame(level(JOKER_BOARD));
+
+      s = tap(s, packed(0, 0), 3);
+      expect(s.jokerAs).toBe(3);
+
+      s = undo(s);
+      expect(s.jokerAs).toBeUndefined();
+      expect(s.selection).toEqual([]);
+    });
+
+    it("limpar a seleção também limpa o valor", () => {
+      let s = tap(startGame(level(JOKER_BOARD)), packed(0, 0), 4);
+      s = clearSelection(s);
+
+      expect(s.jokerAs).toBeUndefined();
     });
   });
 
@@ -556,7 +624,7 @@ describe("progresso", () => {
 
     it("níveis com campos de outro tipo são descartados um a um", () => {
       const raw = JSON.stringify({
-        version: 1,
+        version: PROFILE_VERSION,
         levels: {
           bom: { seal: "clean", bestMoves: 4 },
           mau: { seal: "inventado", bestMoves: 4 },
@@ -575,6 +643,6 @@ describe("progresso", () => {
   });
 
   it("a chave é estável — mudá-la apaga o progresso de toda a gente", () => {
-    expect(PROFILE_KEY).toBe("sete.profile");
+    expect(PROFILE_KEY).toBe("septet.profile");
   });
 });

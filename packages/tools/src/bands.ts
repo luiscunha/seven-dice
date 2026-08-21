@@ -9,8 +9,8 @@
  * dificuldade, só a deslocam em distribuição. Quem decide é a medição.
  */
 
-import type { GeneratorParams } from "@sete/engine";
-import { COMPOSITIONS } from "@sete/engine";
+import type { GeneratorParams } from "@septet/engine";
+import { COMPOSITIONS } from "@septet/engine";
 
 /** Pesos que só deixam passar composições até `max` peças. */
 const ateNPecas = (max: number): number[] =>
@@ -20,13 +20,64 @@ const ateNPecas = (max: number): number[] =>
  * Favorece composições com faces de 3 para cima. São as peças com poucos
  * parceiros — um 5 só se junta a um 2 ou a `1+1` — e é daí que vem a rigidez que
  * a fase de perito quer (plano §4.4).
+ *
+ * **A divisão pelo número de células não é detalhe.** A primeira versão pesava
+ * composições e não peças, e por isso o rótulo "faces altas" não se cumpria no
+ * tabuleiro: `[1,1,1,1,1,1,1]` saía com o mesmo peso de `[1,6]` e despejava sete
+ * uns de cada vez. Medido no pack, a banda `perito` tinha 42,9% de uns e **4,3%
+ * de seises** — praticamente o mesmo que uma banda sem preferência nenhuma.
+ *
+ * Um peso é a probabilidade de escolher a composição; o que se vê no tabuleiro é
+ * a contagem de células. Dividir por `length` converte um no outro.
  */
 const facesAltas = (): number[] =>
-  COMPOSITIONS.map((c) => 1 + c.filter((v) => v >= 3).length * 2);
+  COMPOSITIONS.map((c) => (1 + c.filter((v) => v >= 3).length * 2) / c.length);
+
+/**
+ * Um retângulo cheio: colunas × linhas, sem um único recorte no topo.
+ *
+ * O número de peças fica determinado — é o produto — e é essa a razão de a forma
+ * viver aqui e não em `GeneratorParams`: pedir uma forma é pedir um tamanho.
+ */
+export type Forma = readonly [colunas: number, linhas: number];
+
+export const perfilDe = ([colunas, linhas]: Forma): readonly number[] =>
+  Array.from({ length: colunas }, () => linhas);
+
+export const pecasDe = ([colunas, linhas]: Forma): number => colunas * linhas;
 
 export interface BandSpec {
   readonly id: string;
   readonly label: string;
+
+  /**
+   * Formas cheias desta banda. **Metade dos níveis publicados sai daqui**, com
+   * uma quota por forma — ver `comandoBuild`.
+   *
+   * Só entram formas que provaram dar níveis publicáveis no funil completo
+   * (medido a 2026-08-21, 200 candidatos por configuração). O `perito` 6×6 e o
+   * `meio-joker` 5×5 ficaram de fora por darem **zero** aceites em 17 e 27
+   * tabuleiros cheios — não é prova de impossibilidade com amostras destas, mas
+   * chega para preferir as formas que já se sabe que dão.
+   *
+   * ── O que a medição decidiu ──
+   *
+   * O perfil plano **não custa aceitação**: média de 16,3% sem perfil contra
+   * 15,0% com, em sete configurações de 300 candidatos. Quem rejeita a maioria
+   * dos tabuleiros cheios é o piso de justiça, e rejeita qualquer tabuleiro na
+   * mesma medida.
+   *
+   * O que custa é a raridade da forma. Candidatos por nível cheio publicável:
+   *
+   * | `denso` 3×4 | 12 |
+   * | `meio` 5×6 · `perito` 5×7 | ~43 |
+   * | `avancado` 6×6 · `meio-joker` 4×6 | ~50 |
+   * | `inicio` 4×4 · `perito` 7×7 | ~150 |
+   *
+   * E sem perfil não há nada a filtrar: **zero tabuleiros cheios em 300
+   * candidatos** em cinco das sete configurações.
+   */
+  readonly formas?: readonly Forma[];
 
   /** Parâmetros de geração. `targetPieceCount` varia dentro de `pieces`. */
   readonly params: Omit<GeneratorParams, "targetPieceCount">;
@@ -98,6 +149,10 @@ export const BANDS: readonly BandSpec[] = [
     label: "Início — pares e trios, relaxante",
     params: { compositionWeights: ateNPecas(3), newColumnProbability: 0.4 },
     pieces: [16, 25],
+    formas: [
+      [4, 4],
+      [4, 5],
+    ],
     accept: { survival: [0.55, 1], fairnessDepth: 2 },
   },
   /*
@@ -122,6 +177,10 @@ export const BANDS: readonly BandSpec[] = [
       insertionDepthBias: 1,
     },
     pieces: [25, 36],
+    formas: [
+      [5, 5],
+      [5, 6],
+    ],
     accept: { survival: [0.3, 0.55], fairnessDepth: 2 },
   },
   {
@@ -135,6 +194,10 @@ export const BANDS: readonly BandSpec[] = [
       jokerProgress: 0.3,
     },
     pieces: [22, 30],
+    formas: [
+      [4, 6],
+      [5, 5],
+    ],
     accept: { survival: [0.02, 0.15], fairnessDepth: 2, fairnessSkipsJoker: true },
   },
   {
@@ -146,6 +209,10 @@ export const BANDS: readonly BandSpec[] = [
       insertionDepthBias: 2,
     },
     pieces: [30, 42],
+    formas: [
+      [5, 6],
+      [6, 6],
+    ],
     accept: { survival: [0.2, 0.45], fairnessDepth: 2 },
   },
   {
@@ -157,6 +224,11 @@ export const BANDS: readonly BandSpec[] = [
       insertionDepthBias: 3,
     },
     pieces: [35, 50],
+    formas: [
+      [5, 7],
+      [6, 7],
+      [7, 7],
+    ],
     accept: { survival: [0.03, 0.22], fairnessDepth: 2 },
   },
   /*
@@ -186,6 +258,10 @@ export const BANDS: readonly BandSpec[] = [
       jokerProgress: 0.3,
     },
     pieces: [10, 15],
+    formas: [
+      [3, 4],
+      [3, 5],
+    ],
     accept: { survival: [0.03, 0.2], fairnessDepth: 2, fairnessSkipsJoker: true },
   },
   {

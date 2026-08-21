@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import type { Board, Level } from "@sete/engine";
+import type { Board, Level } from "@septet/engine";
 import { escreverGrupo } from "../src/render";
 import {
   desenharTabuleiro,
@@ -20,18 +20,17 @@ import {
 import {
   desfazer,
   dica,
-  eliminar,
   iniciar,
   reiniciar,
-  selecaoPendente,
   selo,
   terminado,
   tocar,
+  somaTotal,
   valorDoJoker,
 } from "../src/session";
 import { avaliar } from "../src/candidate";
 import { bandById } from "../src/bands";
-import { packed } from "@sete/engine";
+import { packed } from "@septet/engine";
 
 const TABULEIRO: Board = [
   [1, 2],
@@ -159,85 +158,61 @@ describe("seleção tocar-a-acumular", () => {
     expect(s.mensagem).toContain("9");
   });
 
-  it("com joker o teto das fixas é 6, e diz-se porquê", () => {
-    let s = iniciar(nivel([[0, 1, 6], [1]]));
 
-    s = tocar(s, packed(0, 0)); // joker
-    s = tocar(s, packed(0, 1)); // +1 → fixas 1
-    s = tocar(s, packed(0, 2)); // +6 → fixas 7, acima do teto de 6
-
-    expect(s.selecao).toHaveLength(2);
-    expect(s.mensagem).toContain("6");
-  });
 
   /*
-   * O joker não dispara sozinho — encontrado a jogar `meio-joker-000013`.
+   * O joker é a única peça cujo valor o jogador escolhe (plano §2.6), e na
+   * consola escreve-se `a1=5`. Escolher no momento do toque é o que dispensa uma
+   * tecla de confirmação: com o valor fixado, a seleção tem alvo exato.
    *
-   * Como `isValidGroup` aceita qualquer soma fixa entre 1 e 6, a eliminação
-   * automática gastava o joker com a primeira peça que lhe encostasse, ao valor
-   * que essa peça deixasse. O valor dele está globalmente determinado (plano
-   * §2.6), portanto isso não é uma jogada alternativa: é matar o tabuleiro.
+   * **O valor errado é jogável de propósito** — é daí que vem a dificuldade das
+   * bandas com joker.
    */
-  describe("seleção com joker (plano §2.6)", () => {
-    it("fica pendente em vez de eliminar, e avisa que o valor está errado", () => {
-      let s = iniciar(nivel([[0, 2], [2]]));
+  describe("o joker (plano §2.6)", () => {
+    it("não entra na seleção sem valor", () => {
+      const s = tocar(iniciar(nivel([[0, 2], [2]])), packed(0, 0));
 
-      s = tocar(s, packed(0, 0)); // joker
-      s = tocar(s, packed(0, 1)); // +2 → fixas 2, já seria grupo válido
-
-      expect(s.jogadas).toBe(0);
-      expect(s.selecao).toHaveLength(2);
-      expect(s.mensagem).toContain("5"); // 7 − 2, o que o joker tomaria
-      expect(s.mensagem).toContain("tem de valer 3");
-      expect(selecaoPendente(s)).toBe(true);
-    });
-
-    it("no valor obrigatório, a mensagem confirma em vez de sugerir mais peças", () => {
-      let s = iniciar(nivel([[0, 2], [2]]));
-
-      s = tocar(s, packed(0, 0)); // joker
-      s = tocar(s, packed(0, 1)); // +2
-      s = tocar(s, packed(1, 0)); // +2 → fixas 4, joker a 3
-
-      expect(s.jogadas).toBe(0);
-      expect(s.selecao).toHaveLength(3);
-      expect(s.mensagem).toContain("valor certo");
-      // O conselho que empurrava para o erro não pode reaparecer aqui.
-      expect(s.mensagem).not.toContain("junta");
-    });
-
-    it("`x` elimina a seleção pendente", () => {
-      let s = iniciar(nivel([[0, 2], [2]]));
-
-      s = tocar(s, packed(0, 0));
-      s = tocar(s, packed(0, 1));
-      s = tocar(s, packed(1, 0));
-      s = eliminar(s);
-
-      expect(s.jogadas).toBe(1);
       expect(s.selecao).toEqual([]);
-      expect(terminado(s)).toBe(true); // as três peças eram o tabuleiro todo
+      expect(s.mensagem).toContain("precisa de valor");
     });
 
-    it("`x` recusa uma seleção que ainda não faz grupo", () => {
+    it("com valor escolhido, conta para a soma", () => {
+      const s = tocar(iniciar(nivel([[0, 2], [2]])), packed(0, 0), 3);
+
+      expect(s.selecao).toHaveLength(1);
+      expect(s.jokerAs).toBe(3);
+      expect(somaTotal(s)).toBe(3);
+    });
+
+    it("elimina sozinho ao chegar a 7", () => {
       let s = iniciar(nivel([[0, 2], [2]]));
 
-      s = tocar(s, packed(0, 0)); // só o joker — nunca forma grupo sozinho
-      s = eliminar(s);
-
-      expect(s.jogadas).toBe(0);
-      expect(s.mensagem).toContain("ainda não");
-    });
-
-    it("sem joker o disparo automático mantém-se", () => {
-      let s = iniciar(nivel(TABULEIRO));
-
-      s = tocar(s, packed(0, 0));
+      s = tocar(s, packed(0, 0), 3);
       s = tocar(s, packed(0, 1));
       s = tocar(s, packed(1, 0));
 
       expect(s.jogadas).toBe(1);
-      expect(selecaoPendente(s)).toBe(false);
+      expect(terminado(s)).toBe(true);
+    });
+
+    it("deixa escolher o valor errado", () => {
+      let s = iniciar(nivel([[0, 2], [2]]));
+
+      s = tocar(s, packed(0, 0), 5); // devia ser 3
+      s = tocar(s, packed(0, 1)); // 5 + 2 = 7
+
+      expect(s.jogadas).toBe(1);
+      expect(terminado(s)).toBe(false); // sobrou um 2 sem parceiro
+    });
+
+    it("recusa a peça que passaria de 7", () => {
+      let s = iniciar(nivel([[0, 5], [6]]));
+
+      s = tocar(s, packed(0, 0), 6);
+      s = tocar(s, packed(0, 1));
+
+      expect(s.selecao).toHaveLength(1);
+      expect(s.mensagem).toContain("passava de 7");
     });
   });
 
@@ -444,7 +419,7 @@ describe("uma partida completa, conduzida por guião", () => {
   }, 120_000);
 });
 
-describe("o comando `sete play` ponta a ponta", () => {
+describe("o comando `septet play` ponta a ponta", () => {
   it("carrega um nível, aceita jogadas e escreve o registo", () => {
     const log = `${process.env["TEMP"] ?? "."}/sete-play-teste.jsonl`;
 

@@ -1,9 +1,9 @@
 /**
  * CLI do pipeline offline.
  *
- *   sete build [--band <id>] [--count <n>] [--runs <n>] [--pre <n>] [--out <dir>]
- *   sete bands
- *   sete verify <ficheiro.json>
+ *   septet build [--band <id>] [--count <n>] [--runs <n>] [--pre <n>] [--max <n>] [--out <dir>]
+ *   septet bands
+ *   septet verify <ficheiro.json>
  *
  * Corre uma vez, fora do jogo (spec §7.5).
  */
@@ -12,12 +12,12 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
-import type { Level } from "@sete/engine";
-import { applyMove, isValidGroup, pieceCount, totalSum } from "@sete/engine";
+import type { Level } from "@septet/engine";
+import { applyMove, isValidGroup, pieceCount, totalSum } from "@septet/engine";
 
 import { BANDS, bandById } from "./bands";
 import { comandoPlay } from "./play";
-import { construirBanda } from "./pipeline";
+import { construirBanda, passagensDe } from "./pipeline";
 
 const log = (msg: string): void => {
   process.stdout.write(`${msg}\n`);
@@ -48,6 +48,15 @@ async function comandoBuild(args: string[]): Promise<number> {
       pre: { type: "string", default: "100" },
       out: { type: "string", default: "packages/tools/out" },
       workers: { type: "string" },
+      /*
+       * Candidatos a avaliar por cada nível pedido, antes de desistir.
+       *
+       * As formas cheias custam muito mais do que a forma livre, e o custo varia
+       * uma ordem de grandeza entre bandas: um `denso` 3×4 sai em 12 candidatos,
+       * um `inicio` 4×4 em cerca de 400 — os tabuleiros cheios dessa banda têm
+       * mediana de sobrevivência 0,42 e a banda exige 0,55 para cima.
+       */
+      max: { type: "string", default: "200" },
     },
   });
 
@@ -70,35 +79,39 @@ async function comandoBuild(args: string[]): Promise<number> {
   for (const band of bandas) {
     const t0 = Date.now();
 
-    const r = await construirBanda({
-      band,
-      alvo,
-      runs,
-      preRuns,
-      ...(values.workers === undefined
-        ? {}
-        : { workers: Number(values.workers) }),
-    });
+    for (const passagem of passagensDe(band, alvo)) {
+      const r = await construirBanda({
+        band: passagem.band,
+        alvo: passagem.alvo,
+        seedInicial: passagem.seedInicial,
+        maxCandidatos: passagem.alvo * Number(values.max),
+        runs,
+        preRuns,
+        ...(values.workers === undefined
+          ? {}
+          : { workers: Number(values.workers) }),
+      });
 
-    const segundos = ((Date.now() - t0) / 1000).toFixed(1);
-    const rej = Object.entries(r.rejeicoes)
-      .filter(([, n]) => n > 0)
-      .map(([k, n]) => `${k}=${n}`)
-      .join(" ");
+      const rej = Object.entries(r.rejeicoes)
+        .filter(([, n]) => n > 0)
+        .map(([k, n]) => `${k}=${n}`)
+        .join(" ");
 
-    log(
-      `${band.id.padEnd(10)} ${String(r.levels.length).padStart(4)}/${alvo} aceites  ` +
-        `${String(r.avaliados).padStart(6)} avaliados  ` +
-        `${pct(r.levels.length / Math.max(1, r.avaliados)).padStart(6)} aceitação  ` +
-        `${segundos}s`,
-    );
-    log(`           rejeições: ${rej || "nenhuma"}`);
-    log(
-      `           sobrevivência observada: p10=${percentil(r.taxas, 0.1).toFixed(2)} ` +
-        `mediana=${percentil(r.taxas, 0.5).toFixed(2)} p90=${percentil(r.taxas, 0.9).toFixed(2)}`,
-    );
+      log(
+        `${passagem.rotulo.padEnd(18)} ${String(r.levels.length).padStart(3)}/${String(passagem.alvo)} aceites  ` +
+          `${String(r.avaliados).padStart(6)} avaliados  ` +
+          `${pct(r.levels.length / Math.max(1, r.avaliados)).padStart(6)} aceitação`,
+      );
+      log(`                   rejeições: ${rej || "nenhuma"}`);
+      log(
+        `                   sobrevivência: p10=${percentil(r.taxas, 0.1).toFixed(2)} ` +
+          `mediana=${percentil(r.taxas, 0.5).toFixed(2)} p90=${percentil(r.taxas, 0.9).toFixed(2)}`,
+      );
 
-    pack.push(...r.levels);
+      pack.push(...r.levels);
+    }
+
+    log(`  ${band.id} em ${((Date.now() - t0) / 1000).toFixed(1)}s`);
   }
 
   const destino = resolve(values.out, "level-pack.json");
@@ -113,6 +126,85 @@ async function comandoBuild(args: string[]): Promise<number> {
   return pack.length === 0 ? 1 : 0;
 }
 
+/* ─── export ───────────────────────────────────────────────────────────────── */
+
+/**
+ * Parte o pack curado em um ficheiro por banda, para o jogo carregar a pedido.
+ *
+ * Duzentos e quarenta níveis num só ficheiro obrigariam a descarregar a campanha
+ * inteira para jogar o primeiro nível. O índice traz só o que a lista de níveis
+ * precisa de mostrar — id, peças, selo por conquistar — e o tabuleiro fica no
+ * ficheiro da banda.
+ *
+ * **A solução vai no ficheiro da banda**, porque é dela que saem as dicas
+ * (spec §4.3). Não é um segredo a proteger: quem quiser ler o JSON já podia
+ * resolver o nível com um solver em cinco linhas.
+ */
+async function comandoExport(args: string[]): Promise<number> {
+  const { values } = parseArgs({
+    args,
+    options: {
+      pack: { type: "string", default: "packages/tools/out/level-pack.json" },
+      out: { type: "string", default: "packages/game/public/levels" },
+    },
+  });
+
+  const pack = JSON.parse(await readFile(values.pack, "utf8")) as Level[];
+
+  if (pack.length === 0) {
+    log("o pack está vazio");
+    return 1;
+  }
+
+  await mkdir(values.out, { recursive: true });
+
+  const porBanda = new Map<string, Level[]>();
+  for (const nivel of pack) {
+    const banda = nivel.band ?? "sem-banda";
+    const lista = porBanda.get(banda) ?? [];
+    lista.push(nivel);
+    porBanda.set(banda, lista);
+  }
+
+  // A ordem do índice é a ordem das bandas em `BANDS`, que é a progressão
+  // desenhada — e não a ordem por que os níveis calharam no ficheiro.
+  const indice = BANDS.filter((b) => porBanda.has(b.id)).map((b) => {
+    const niveis = porBanda.get(b.id) ?? [];
+    return {
+      id: b.id,
+      label: b.label,
+      niveis: niveis.map((n) => ({
+        id: n.id,
+        pieces: n.metrics?.pieces ?? 0,
+        // O jogo precisa disto no arranque, para saber quando abrir o tutorial
+        // do joker e durante quantos níveis manter o andaime da soma. Sem estar
+        // no índice, obrigava a carregar as bandas todas para o descobrir.
+        joker: n.joker !== undefined,
+      })),
+    };
+  });
+
+  for (const [banda, niveis] of porBanda) {
+    const destino = resolve(values.out, `${banda}.json`);
+    await writeFile(destino, `${JSON.stringify(niveis)}\n`, "utf8");
+  }
+
+  await writeFile(
+    resolve(values.out, "index.json"),
+    `${JSON.stringify(indice, null, 1)}\n`,
+    "utf8",
+  );
+
+  log(
+    `${pack.length} níveis em ${porBanda.size} bandas → ${resolve(values.out)}`,
+  );
+  for (const b of indice) {
+    log(`  ${b.id.padEnd(11)} ${String(b.niveis.length).padStart(3)} níveis`);
+  }
+
+  return 0;
+}
+
 /* ─── verify ───────────────────────────────────────────────────────────────── */
 
 /**
@@ -124,7 +216,7 @@ async function comandoBuild(args: string[]): Promise<number> {
 async function comandoVerify(args: string[]): Promise<number> {
   const caminho = args[0];
   if (caminho === undefined) {
-    log("uso: sete verify <ficheiro.json>");
+    log("uso: septet verify <ficheiro.json>");
     return 1;
   }
 
@@ -204,14 +296,17 @@ const codigo = await (async (): Promise<number> => {
       });
       return comandoPlay(values);
     }
+    case "export":
+      return comandoExport(resto);
     default:
-      log("uso: sete <build|bands|play|verify>");
+      log("uso: septet <build|bands|play|verify|export>");
       log("");
-      log("  build   [--band <id>] [--count <n>] [--runs <n>] [--out <dir>]");
+      log("  build   [--band <id>] [--count <n>] [--runs <n>] [--max <n>] [--out <dir>]");
       log("  bands   lista as bandas e os seus critérios");
       log("  play    [--band <id>] [--id <levelId>] [--seed <n>]");
       log("          [--pack <ficheiro>] [--log <ficheiro>] [--passos]");
       log("  verify  <ficheiro.json>  reverifica um level pack");
+      log("  export  [--pack <ficheiro>] [--out <dir>]  parte o pack por banda");
       return comando === undefined ? 0 : 1;
   }
 })();
