@@ -15,6 +15,11 @@
   </mask></defs>
   <g transform="translate(160 160)">
   <polygon points="0,-130 112.583,-65 112.583,65 0,130 -112.583,65 -112.583,-65" fill="url(#verde)" stroke="url(#verde)" stroke-width="24" stroke-linejoin="round"/>
+  <g stroke="#f1f2f0" stroke-width="9" stroke-linecap="round" fill="none">
+    <path d="M 0,0 L 0,-130"/>
+    <path d="M 0,0 L 112.583,65"/>
+    <path d="M 0,0 L -112.583,65"/>
+  </g>
   <path d="M -62,-76 L 62,-76 L 20,88 L -26,88 L 4,-36 L -62,-36 Z" fill="#f1f2f0" stroke="#f1f2f0" stroke-width="10" stroke-linejoin="round"/>
   </g>
 </svg>

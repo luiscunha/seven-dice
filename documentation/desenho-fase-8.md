@@ -615,8 +615,8 @@ para sete. O símbolo diz a regra.
 | `logo-cartao.svg` | Apresentação: papel claro e vinheta |
 | `icone.svg` | Só o símbolo, transparente. É o que a Home mostra |
 | `icone-app.svg` · `-escuro` | Ícone de aplicação, **sem cantos redondos** |
-| `icone-solido.svg` | Uma cor só, para carimbo e impressão a um tom |
-| `favicon.svg` | Silhueta e 7, mais nada |
+| `icone-solido.svg` | **Marca reduzida** a uma cor, para carimbo e um tom |
+| `favicon.svg` | **Marca reduzida** com o degradê da marca |
 | `icone-180/192/512.png` | Rasterizações de `icone-app.svg` |
 
 Duas dessas linhas são regras, não formatos:
@@ -625,9 +625,17 @@ Duas dessas linhas são regras, não formatos:
 do PWA aplicam cada um a sua própria máscara. Arredondar aqui deixava uma orla da
 cor do fundo a aparecer por fora da máscara do sistema.
 
-**O favicon é uma versão à parte, simplificada.** A 16px as pintas e as juntas do
-cubo viram lama. É a silhueta e o 7, em contraste alto — nada mais sobrevive a
-esse tamanho.
+**A marca reduzida mantém o cubo.** As duas últimas linhas são o **mesmo
+desenho**, e só mudam de tinta. Abaixo dos 40px as pintas viram lama e as juntas
+das meias-faces cruzam a diagonal do 7 e parecem um vidro partido — caem as duas.
+
+Mas **o Y das três arestas fica**. São três traços, e são eles que separam um
+cubo de um hexágono. A primeira versão cortava-os também, e o resultado era um 7
+dentro de uma forma qualquer: os dados, que dão o nome ao jogo, desapareciam.
+Deixava de ser a marca reduzida e passava a ser outra marca.
+
+Medido, e é o que decide: `icone.svg` deixa de se ler aos 32px; a reduzida
+aguenta até aos 16.
 
 O PNG existe porque o iOS não aceita SVG em `apple-touch-icon`, e é esse o ícone
 que aparece quando alguém do playtest põe o jogo no ecrã principal do telemóvel.
