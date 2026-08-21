@@ -469,7 +469,7 @@
  },
  {
   "id": "meio-joker",
-  "label": "Meio — o nível de estrangulamento, construído à volta do joker",
+  "label": "Meio com joker — o nível de estrangulamento",
   "niveis": [
    {
     "id": "meio-joker-000003",
@@ -1094,6 +1094,7 @@
  {
   "id": "tempo",
   "label": "Modo tempo — greedy-safe, sem joker",
+  "modo": "tempo",
   "niveis": [
    {
     "id": "tempo-000002",

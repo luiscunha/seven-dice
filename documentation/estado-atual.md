@@ -49,7 +49,7 @@ contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 | 5 | Métricas e pipeline | ✅ |
 | 6 | Renderer de consola | ✅ **gate fechado a Verde** |
 | 7 | Camada de sessão | ✅ |
-| 8 | UI web | 🔨 **em curso** — tabuleiro e tutorial do joker feitos; falta lista de níveis, modo tempo e meta-jogo |
+| 8 | UI web | 🔨 **em curso** — jogável ponta a ponta nos dois modos; falta o deploy para o playtest externo |
 | 9 | Empacotamento | por começar |
 
 O motor está completo e é puro: `packages/engine/src/` não importa nada de Node,
@@ -133,15 +133,19 @@ remede-se antes de a tratar como facto.
 
 ## O que se segue
 
-A **Fase 8**, a meio. O tabuleiro joga-se ponta a ponta — seleção, animação em
-três tempos, undo, reinício, dicas, joker e fim de nível com selo — e o tutorial
-do joker está feito. Falta a lista de níveis, o modo tempo e o meta-jogo.
+A **Fase 8**, quase fechada. O jogo tem Home, campanha por bandas, grelha de
+níveis com selos, definições e modo tempo. **Falta o deploy** — e com ele o
+playtest externo, que é o critério de aceitação da fase.
 
 ```bash
 pnpm dev     # localhost:5173
 ```
 
-Enquanto não há lista, escolhe-se por query: `?banda=denso&nivel=20`.
+As rotas vivem no fragmento — `#/niveis/perito`, `#/jogo/perito/27`, `#/tempo`.
+É o que faz o jogo publicado correr em alojamento estático sem uma linha de
+reescritas, e o que dá endereço a cada ecrã: no playtest, um link leva a pessoa
+exatamente ao nível de que se está a falar. A forma antiga, `?banda=…&nivel=…`,
+continua a funcionar.
 
 O critério de aceitação da fase é *campanha inicial jogável ponta a ponta, com os
 dois modos, num link partilhável*. Contra ele falta, por ordem:
@@ -149,9 +153,10 @@ dois modos, num link partilhável*. Contra ele falta, por ordem:
 | | | |
 |---|---|---|
 | 1 | Tutorial do joker | ✅ |
-| 2 | Lista de níveis por banda, com os selos | por fazer |
-| 3 | Modo tempo — `TimeAttackSession` existe desde a Fase 7 e **nenhuma linha de UI o usa** | por fazer |
-| 4 | Link partilhável, para o playtest externo | por fazer |
+| 2 | Forma dos tabuleiros — metade cheios | ✅ |
+| 3 | Home, lista de níveis por banda, definições | ✅ |
+| 4 | Modo tempo | ✅ |
+| 5 | Link partilhável, para o playtest externo | por fazer |
 
 O mapa de progressão, o perfil, as definições e o puzzle diário ficam **depois**
 da marca do playtest (desenho §8) e não bloqueiam a Fase 9.
@@ -467,7 +472,7 @@ Duas ressalvas honestas:
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 288 testes
+pnpm check                                    # lint + typecheck + 308 testes
 pnpm septet bands                               # as bandas e os seus critérios
 pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm septet verify                              # revalida o pack todo

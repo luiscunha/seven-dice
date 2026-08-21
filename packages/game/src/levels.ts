@@ -21,6 +21,8 @@ export interface NivelNoIndice {
 export interface BandaNoIndice {
   readonly id: string;
   readonly label: string;
+  /** `"tempo"` fica de fora da campanha — é o corpus do outro modo. */
+  readonly modo?: "tempo";
   readonly niveis: readonly NivelNoIndice[];
 }
 

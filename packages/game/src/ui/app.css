@@ -361,20 +361,6 @@
   transform: translate(28%, -28%) scale(0.42);
 }
 
-/* ─── Botão redondo do cabeçalho ──────────────────────────────────────────── */
-
-/*
- * O `?` que reabre o tutorial do joker. Fica no topo e não no rodapé porque não
- * é uma ação de jogo — não pertence à mesma família que Desfazer e Dica.
- */
-.btn.redondo {
-  width: 40px;
-  padding: 0;
-  border-radius: 50%;
-  font-weight: 600;
-  color: var(--ink-muted);
-}
-
 /* ─── Tutorial do joker ───────────────────────────────────────────────────── */
 
 /*
@@ -491,4 +477,359 @@
 .tutorial[data-fase="morto"] .tutorial-estado,
 .tutorial[data-fase="limpo"] .tutorial-estado {
   color: var(--ink);
+}
+
+/* ─── Ecrãs de navegação ──────────────────────────────────────────────────── */
+
+/*
+ * Um ecrã de lista é `auto 1fr`: cabeçalho fixo e conteúdo que rola. O ecrã de
+ * jogo é `auto 1fr auto` e fica com a regra de cima — não se toca.
+ */
+.ecra:not(.home) > .rolo {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ecra:has(> .rolo) {
+  grid-template-rows: auto 1fr;
+}
+
+/*
+ * O `‹` de voltar e o `?` da ajuda. Ficam no topo e não no rodapé porque não são
+ * ações de jogo — não pertencem à mesma família que Desfazer e Dica.
+ */
+.btn.redondo {
+  width: 40px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+/* ─── Home ────────────────────────────────────────────────────────────────── */
+
+.ecra.home {
+  grid-template-rows: 1fr auto auto auto;
+  place-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.home-marca {
+  align-self: end;
+}
+
+.home-titulo {
+  margin: 0;
+  font-size: clamp(34px, 9vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+}
+
+.home-lema {
+  margin: 6px 0 0;
+  font-size: 15px;
+  color: var(--ink-muted);
+}
+
+.home-modos {
+  display: grid;
+  gap: 10px;
+  width: min(340px, 100%);
+}
+
+.home-modo {
+  display: grid;
+  gap: 2px;
+  padding: 16px 20px;
+  font: inherit;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--raio);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background var(--t-ui) linear,
+    border-color var(--t-ui) linear;
+}
+
+.home-modo:hover {
+  border-color: var(--ink-muted);
+}
+
+.home-modo.primario {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.home-modo-titulo {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.home-modo-legenda {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.home-resumo {
+  display: grid;
+  gap: 2px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.home-resumo p {
+  margin: 0;
+}
+
+.home-rodape {
+  align-self: start;
+}
+
+/* ─── Lista de bandas ─────────────────────────────────────────────────────── */
+
+.bandas {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.banda {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  font: inherit;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--raio);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color var(--t-ui) linear;
+}
+
+.banda:hover {
+  border-color: var(--ink-muted);
+}
+
+.banda-texto {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.banda-nome {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.banda-descricao {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.banda-conta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: none;
+  font-size: 14px;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.banda-perfeitos {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ─── Grelha de níveis ────────────────────────────────────────────────────── */
+
+.grelha-niveis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.nivel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--line);
+  border-radius: var(--raio);
+  background: var(--surface);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition:
+    border-color var(--t-ui) linear,
+    background var(--t-ui) linear;
+}
+
+.nivel:hover {
+  border-color: var(--ink-muted);
+}
+
+/* Um nível jogado lê-se antes de se ler o número. */
+.nivel[data-selo] {
+  color: var(--ink);
+  background: var(--surface-alt);
+}
+
+.nivel[data-selo="perfect"] {
+  border-color: var(--accent);
+}
+
+.nivel-selo {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+.nivel[data-selo="perfect"] .nivel-selo {
+  color: var(--accent);
+}
+
+/* ─── Definições ──────────────────────────────────────────────────────────── */
+
+.definicao {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.definicao:last-child {
+  border-bottom: 0;
+}
+
+.definicao h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.definicao .nota {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  max-width: 52ch;
+}
+
+.segmentado {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  background: var(--surface-alt);
+  border-radius: 10px;
+}
+
+.btn.segmento {
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  min-height: 34px;
+  color: var(--ink-muted);
+}
+
+.btn.segmento[aria-checked="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/*
+ * O único botão do jogo com cor de aviso. A paleta não tem vermelho — é toda
+ * azul-verde — portanto o destaque faz-se pelo contorno e pelo peso, não por uma
+ * matiz que destoaria de tudo o resto.
+ */
+.btn.perigo {
+  border-color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.btn.perigo:hover:not(:disabled) {
+  background: var(--surface-alt);
+}
+
+/* ─── Modo tempo ──────────────────────────────────────────────────────────── */
+
+.tempo-topo {
+  align-items: baseline;
+}
+
+/*
+ * O relógio domina o cabeçalho porque é a única coisa que o jogador tem de
+ * vigiar sem parar de olhar para o tabuleiro (desenho §5.3).
+ */
+.relogio {
+  font-size: 32px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  min-width: 3ch;
+}
+
+.relogio.a-acabar {
+  color: var(--accent);
+}
+
+/* O prémio sobe do sítio onde foi ganho, e desvanece. */
+.ganho {
+  position: absolute;
+  z-index: 5;
+  transform: translate(-50%, -100%);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  pointer-events: none;
+  animation: subir 900ms var(--suavizacao) forwards;
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    translate: 0 -34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ganho {
+    animation-duration: 600ms;
+  }
+
+  @keyframes subir {
+    from,
+    20% {
+      opacity: 1;
+      translate: 0 0;
+    }
+    to {
+      opacity: 0;
+      translate: 0 0;
+    }
+  }
 }

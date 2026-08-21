@@ -173,6 +173,9 @@ async function comandoExport(args: string[]): Promise<number> {
     return {
       id: b.id,
       label: b.label,
+      // A campanha não lista a banda do modo tempo. Sem este campo o jogo teria
+      // de a reconhecer pelo id, que é adivinhar.
+      ...(b.modo === undefined ? {} : { modo: b.modo }),
       niveis: niveis.map((n) => ({
         id: n.id,
         pieces: n.metrics?.pieces ?? 0,
