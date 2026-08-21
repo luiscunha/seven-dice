@@ -521,9 +521,26 @@
   align-self: end;
 }
 
+/*
+ * O símbolo. Encolhe com o ecrã porque é a única coisa da Home que pode ceder
+ * espaço sem custo — os dois modos e o rodapé não podem.
+ */
+.home-simbolo {
+  display: block;
+  width: clamp(72px, 21vw, 104px);
+  height: auto;
+  margin: 0 auto 12px;
+}
+
+/*
+ * O tamanho mínimo é para o nome, e o nome tem onze letras.
+ *
+ * Com o mínimo em 34px, "DiceToSeven" ocupava 304 de 320 e ficava a tocar nas
+ * margens num iPhone SE. É a diferença entre um título e um título entalado.
+ */
 .home-titulo {
   margin: 0;
-  font-size: clamp(34px, 9vw, 52px);
+  font-size: clamp(28px, 8.5vw, 48px);
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--accent);
@@ -878,7 +895,7 @@
 
   /* Numa Home estreita, o lema rouba a linha aos modos. */
   .home-lema {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .grelha-niveis {

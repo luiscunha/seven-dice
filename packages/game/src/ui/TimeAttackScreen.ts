@@ -16,8 +16,8 @@
  * por parâmetro — é o que a torna testável — e é este ecrã que lho dá.
  */
 
-import type { Group, Level, Packed } from "@septet/engine";
-import { colOf, mulberry32, rowOf, shuffled } from "@septet/engine";
+import type { Group, Level, Packed } from "@dicetoseven/engine";
+import { colOf, mulberry32, rowOf, shuffled } from "@dicetoseven/engine";
 
 import { selectionTotal } from "../session/GameSession";
 import type {

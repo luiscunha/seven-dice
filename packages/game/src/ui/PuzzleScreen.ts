@@ -16,8 +16,8 @@
  *   aritmética e não dá a resposta.
  */
 
-import type { Group, Level, Packed } from "@septet/engine";
-import { JOKER, cellAt, colOf, jokerAt, rowOf, totalSum } from "@septet/engine";
+import type { Group, Level, Packed } from "@dicetoseven/engine";
+import { JOKER, cellAt, colOf, jokerAt, rowOf, totalSum } from "@dicetoseven/engine";
 
 import type { PuzzleState } from "../session/PuzzleSession";
 import {

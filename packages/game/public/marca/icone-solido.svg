@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" role="img" aria-label="DiceToSeven">
+  <title>DiceToSeven</title>
+  <defs>
+  <linearGradient id="cinza" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#e2e7e8"/>
+    <stop offset="0.45" stop-color="#b9c2c4"/>
+    <stop offset="1" stop-color="#7f8b8e"/>
+  </linearGradient>
+  <linearGradient id="verde" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0" stop-color="#3ebb94"/>
+    <stop offset="1" stop-color="#1b6b62"/>
+  </linearGradient>
+  <mask id="cubo" maskUnits="userSpaceOnUse" x="-200" y="-200" width="400" height="400">
+    <polygon points="0,-130 112.583,-65 112.583,65 0,130 -112.583,65 -112.583,-65" fill="#fff" stroke="#fff" stroke-width="24" stroke-linejoin="round"/>
+  </mask></defs>
+  <g transform="translate(160 160)">
+  <polygon points="0,-130 112.583,-65 112.583,65 0,130 -112.583,65 -112.583,-65" fill="#1b6b62" stroke="#1b6b62" stroke-width="24" stroke-linejoin="round"/>
+  <g stroke="#f1f2f0" stroke-width="9" stroke-linecap="round" fill="none">
+    <path d="M 0,0 L 0,-130"/>
+    <path d="M 0,0 L 112.583,65"/>
+    <path d="M 0,0 L -112.583,65"/>
+  </g>
+  <path d="M -62,-76 L 62,-76 L 20,88 L -26,88 L 4,-36 L -62,-36 Z" fill="#f1f2f0" stroke="#f1f2f0" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+</svg>

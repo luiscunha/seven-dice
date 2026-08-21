@@ -26,15 +26,15 @@ faz **agora**, antes de existir uma linha de UI, e não depois.
 ## Como correr
 
 ```bash
-pnpm septet play --band tutorial --log playtest.jsonl
+pnpm dice7 play --band tutorial --log playtest.jsonl
 ```
 
 Outras formas de escolher o tabuleiro:
 
 ```bash
-pnpm septet play --band meio-joker      # primeira da banda
-pnpm septet play --id perito-000526     # um nível concreto
-pnpm septet play --seed 77 --band denso # gera na hora, mesmo que a banda o rejeite
+pnpm dice7 play --band meio-joker      # primeira da banda
+pnpm dice7 play --id perito-000526     # um nível concreto
+pnpm dice7 play --seed 77 --band denso # gera na hora, mesmo que a banda o rejeite
 ```
 
 `--log` acrescenta uma linha JSON por sessão. **Usa sempre** — é isso que

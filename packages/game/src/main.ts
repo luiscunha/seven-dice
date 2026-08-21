@@ -10,7 +10,7 @@
  * o que precisam e devolvem intenções; nenhum deles sabe gravar nada.
  */
 
-import type { Level } from "@septet/engine";
+import type { Level } from "@dicetoseven/engine";
 
 import type { Capitulo, NivelDoCapitulo } from "./capitulos";
 import { CAPITULOS, capituloDaBanda, capituloPorId, montarCapitulo } from "./capitulos";

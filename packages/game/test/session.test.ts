@@ -9,8 +9,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import type { Board, Group, Level } from "@septet/engine";
-import { boardKey, packed } from "@septet/engine";
+import type { Board, Group, Level } from "@dicetoseven/engine";
+import { boardKey, packed } from "@dicetoseven/engine";
 
 import {
   clearSelection,
@@ -643,6 +643,6 @@ describe("progresso", () => {
   });
 
   it("a chave é estável — mudá-la apaga o progresso de toda a gente", () => {
-    expect(PROFILE_KEY).toBe("septet.profile");
+    expect(PROFILE_KEY).toBe("dicetoseven.profile");
   });
 });

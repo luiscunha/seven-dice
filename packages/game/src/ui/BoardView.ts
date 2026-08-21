@@ -20,8 +20,8 @@
  * saber que isso aconteceu.
  */
 
-import type { Board, Cell, Group, Packed } from "@septet/engine";
-import { applyMove, colOf, packed, rowOf, width } from "@septet/engine";
+import type { Board, Cell, Group, Packed } from "@dicetoseven/engine";
+import { applyMove, colOf, packed, rowOf, width } from "@dicetoseven/engine";
 
 import type { PieceMove } from "../session/transition";
 import { midpointOf, transition } from "../session/transition";

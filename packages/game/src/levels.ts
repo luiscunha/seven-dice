@@ -2,14 +2,14 @@
  * Carregamento dos níveis.
  *
  * **O jogo em produção nunca gera nem mede nada** (spec §7.5). Lê JSON estático
- * produzido offline por `septet export`, e mais nada.
+ * produzido offline por `dicetoseven export`, e mais nada.
  *
  * Um ficheiro por banda, carregado a pedido: 240 níveis num só ficheiro
  * obrigariam a descarregar a campanha inteira para jogar o primeiro nível. O
  * índice traz só o que a lista precisa de mostrar.
  */
 
-import type { Level } from "@septet/engine";
+import type { Level } from "@dicetoseven/engine";
 
 export interface NivelNoIndice {
   readonly id: string;

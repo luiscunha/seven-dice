@@ -10,7 +10,7 @@
  * é o que torna o undo uma pilha de tabuleiros e nada mais (spec §1.1).
  */
 
-import type { Board, Group, Level, Packed } from "@septet/engine";
+import type { Board, Group, Level, Packed } from "@dicetoseven/engine";
 import {
   JOKER,
   TARGET,
@@ -21,7 +21,7 @@ import {
   isEmpty,
   isValidGroup,
   toGroup,
-} from "@septet/engine";
+} from "@dicetoseven/engine";
 
 
 /** Porque é que uma peça tocada não entrou na seleção. */

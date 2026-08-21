@@ -17,7 +17,7 @@
 import type { ProfileStorage } from "./progress";
 
 export const SETTINGS_VERSION = 1;
-export const SETTINGS_KEY = "septet.settings";
+export const SETTINGS_KEY = "dicetoseven.settings";
 
 /**
  * `sistema` segue o `prefers-color-scheme` e é a omissão. Os outros dois são o

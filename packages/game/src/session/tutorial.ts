@@ -12,8 +12,8 @@
  * exceção, e é uma exceção medida.
  */
 
-import type { Board, Level } from "@septet/engine";
-import { TARGET, totalSum } from "@septet/engine";
+import type { Board, Level } from "@dicetoseven/engine";
+import { TARGET, totalSum } from "@dicetoseven/engine";
 
 /**
  * Quatro peças, duas jogadas, e um caminho que mata.

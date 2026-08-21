@@ -1,9 +1,9 @@
 /**
  * CLI do pipeline offline.
  *
- *   septet build [--band <id>] [--count <n>] [--runs <n>] [--pre <n>] [--max <n>] [--out <dir>]
- *   septet bands
- *   septet verify <ficheiro.json>
+ *   dicetoseven build [--band <id>] [--count <n>] [--runs <n>] [--pre <n>] [--max <n>] [--out <dir>]
+ *   dicetoseven bands
+ *   dicetoseven verify <ficheiro.json>
  *
  * Corre uma vez, fora do jogo (spec §7.5).
  */
@@ -12,8 +12,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
-import type { Level } from "@septet/engine";
-import { applyMove, isValidGroup, pieceCount, totalSum } from "@septet/engine";
+import type { Level } from "@dicetoseven/engine";
+import { applyMove, isValidGroup, pieceCount, totalSum } from "@dicetoseven/engine";
 
 import { BANDS, bandById } from "./bands";
 import { comandoPlay } from "./play";
@@ -222,7 +222,7 @@ async function comandoExport(args: string[]): Promise<number> {
 async function comandoVerify(args: string[]): Promise<number> {
   const caminho = args[0];
   if (caminho === undefined) {
-    log("uso: septet verify <ficheiro.json>");
+    log("uso: dicetoseven verify <ficheiro.json>");
     return 1;
   }
 
@@ -305,7 +305,7 @@ const codigo = await (async (): Promise<number> => {
     case "export":
       return comandoExport(resto);
     default:
-      log("uso: septet <build|bands|play|verify|export>");
+      log("uso: dice7 <build|bands|play|verify|export>");
       log("");
       log("  build   [--band <id>] [--count <n>] [--runs <n>] [--max <n>] [--out <dir>]");
       log("  bands   lista as bandas e os seus critérios");

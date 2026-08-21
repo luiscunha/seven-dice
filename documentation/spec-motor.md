@@ -1,6 +1,6 @@
-# Especificação do Motor — "Septet"
+# Especificação do Motor — "DiceToSeven"
 
-> Companheiro de `plano-modelo-jogo-septet.md`. Referências entre parênteses
+> Companheiro de `plano-modelo-jogo.md`. Referências entre parênteses
 > apontam para secções desse documento.
 >
 > **Stack: TypeScript.** Ver secção 1.2 para a justificação.

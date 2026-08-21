@@ -8,7 +8,7 @@
  * (plano §6.2).
  */
 
-import type { Board, Group, Level, Packed } from "@septet/engine";
+import type { Board, Group, Level, Packed } from "@dicetoseven/engine";
 import {
   applyMove,
   cellAt,
@@ -19,7 +19,7 @@ import {
   toGroup,
   JOKER,
   TARGET,
-} from "@septet/engine";
+} from "@dicetoseven/engine";
 
 export type OrigemDaDica = "guardada" | "calculada" | "nenhuma";
 

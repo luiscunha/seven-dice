@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "septet",
+      "name": "dice-to-seven",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@septet/game", "dev"],
+      "runtimeArgs": ["--filter", "@dicetoseven/game", "dev"],
       "port": 5173
     }
   ]

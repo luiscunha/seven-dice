@@ -17,7 +17,7 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 
-import type { Board, Group } from "@septet/engine";
+import type { Board, Group } from "@dicetoseven/engine";
 import {
   applyMove,
   findSolution,
@@ -27,7 +27,7 @@ import {
   jokerValue,
   packed,
   totalSum,
-} from "@septet/engine";
+} from "@dicetoseven/engine";
 
 import {
   NIVEIS_COM_ANDAIME,
