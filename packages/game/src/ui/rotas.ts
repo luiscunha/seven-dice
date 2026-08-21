@@ -15,7 +15,7 @@
 export type Rota =
   | { readonly ecra: "home" }
   | { readonly ecra: "bandas" }
-  | { readonly ecra: "niveis"; readonly banda: string }
+  | { readonly ecra: "niveis"; readonly capitulo: string }
   | { readonly ecra: "jogo"; readonly banda: string; readonly nivel: number }
   | { readonly ecra: "tempo" }
   | { readonly ecra: "definicoes" };
@@ -29,7 +29,7 @@ export function paraHash(r: Rota): string {
     case "bandas":
       return "#/niveis";
     case "niveis":
-      return `#/niveis/${encodeURIComponent(r.banda)}`;
+      return `#/niveis/${encodeURIComponent(r.capitulo)}`;
     case "jogo":
       return `#/jogo/${encodeURIComponent(r.banda)}/${String(r.nivel)}`;
     case "tempo":
@@ -57,9 +57,15 @@ export function deHash(hash: string): Rota {
   if (primeira === "niveis") {
     return segunda === undefined
       ? { ecra: "bandas" }
-      : { ecra: "niveis", banda: segunda };
+      : { ecra: "niveis", capitulo: segunda };
   }
 
+  /*
+   * A rota do jogo identifica o nível pela **banda e pelo índice nela**, não
+   * pela posição no capítulo. É o par que identifica o nível no pack, portanto
+   * um link continua a valer se a cadência de intercalação mudar — e é o que
+   * mantém os links antigos a funcionar sem tradução nenhuma.
+   */
   if (primeira === "jogo" && segunda !== undefined) {
     const n = Number.parseInt(terceira ?? "0", 10);
     return {

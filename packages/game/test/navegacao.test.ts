@@ -12,6 +12,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Level } from "@septet/engine";
 
+import type { NivelDoCapitulo } from "../src/capitulos";
+import {
+  CADENCIA_JOKER,
+  CAPITULOS,
+  capituloDaBanda,
+  capituloPorId,
+  montarCapitulo,
+} from "../src/capitulos";
+import type { BandaNoIndice } from "../src/levels";
+
 import {
   SETTINGS_KEY,
   aplicarTema,
@@ -34,7 +44,7 @@ describe("rotas", () => {
   const TODAS: readonly Rota[] = [
     { ecra: "home" },
     { ecra: "bandas" },
-    { ecra: "niveis", banda: "perito" },
+    { ecra: "niveis", capitulo: "perito" },
     { ecra: "jogo", banda: "meio-joker", nivel: 12 },
     { ecra: "tempo" },
     { ecra: "definicoes" },
@@ -65,9 +75,9 @@ describe("rotas", () => {
     });
   });
 
-  it("nomes de banda com caracteres especiais sobrevivem", () => {
-    const r: Rota = { ecra: "niveis", banda: "meio-joker" };
-    expect(paraHash(r)).toBe("#/niveis/meio-joker");
+  it("nomes com hífen sobrevivem à codificação", () => {
+    const r: Rota = { ecra: "niveis", capitulo: "avancado" };
+    expect(paraHash(r)).toBe("#/niveis/avancado");
     expect(deHash(paraHash(r))).toEqual(r);
   });
 
@@ -282,5 +292,123 @@ describe("modo tempo", () => {
     // Sem `destruir` a limpar o intervalo e o ouvinte, isto terminava uma
     // corrida de um ecrã que já não existe.
     expect(terminou).toBeUndefined();
+  });
+});
+
+/* ─── Capítulos ─────────────────────────────────────────────────────────────
+ *
+ * A campanha mostra cinco capítulos, e não as oito bandas do pipeline. As bandas
+ * não se fundem porque não podem — a `meio` aceita sobrevivência de 30–55% e a
+ * `meio-joker` de 2–15%, e nenhum tabuleiro cumpre as duas. É uma restrição de
+ * geração, e a apresentação não a tem.
+ *
+ * O que aqui se protege é a intercalação: **um em cada três**, determinística, e
+ * a consumir a banda base toda.
+ */
+
+describe("capítulos", () => {
+  const banda = (id: string, n: number): BandaNoIndice => ({
+    id,
+    label: id,
+    niveis: Array.from({ length: n }, (_, i) => ({
+      id: `${id}-${String(i)}`,
+      pieces: 12,
+    })),
+  });
+
+  const BANDAS: readonly BandaNoIndice[] = [
+    banda("meio", 30),
+    banda("meio-joker", 30),
+    banda("avancado", 30),
+    banda("denso", 30),
+    banda("perito", 30),
+    banda("tutorial", 30),
+    banda("inicio", 30),
+  ];
+
+  const montar = (id: string): readonly NivelDoCapitulo[] => {
+    const c = capituloPorId(id);
+    if (c === undefined) throw new Error(`sem capítulo ${id}`);
+    return montarCapitulo(c, BANDAS);
+  };
+
+  it("são cinco, e nenhum se chama como uma banda de joker", () => {
+    expect(CAPITULOS).toHaveLength(5);
+    expect(CAPITULOS.map((c) => c.nome)).toEqual([
+      "Tutorial",
+      "Iniciado",
+      "Médio",
+      "Avançado",
+      "Perito",
+    ]);
+  });
+
+  it("um capítulo sem joker é a banda tal e qual", () => {
+    const perito = montar("perito");
+
+    expect(perito).toHaveLength(30);
+    expect(perito.every((n) => n.banda === "perito")).toBe(true);
+    expect(perito.map((n) => n.indice)).toEqual(
+      Array.from({ length: 30 }, (_, i) => i),
+    );
+  });
+
+  it("um capítulo com joker intercala um em cada três", () => {
+    const medio = montar("medio");
+
+    expect(medio).toHaveLength(45);
+
+    medio.forEach((n, i) => {
+      const esperada = (i + 1) % CADENCIA_JOKER === 0 ? "meio-joker" : "meio";
+      expect(n.banda).toBe(esperada);
+    });
+  });
+
+  /* A base é quem define o comprimento: não pode ficar um nível por jogar. */
+  it("consome a banda base toda, e sem repetir", () => {
+    for (const id of ["medio", "avancado"]) {
+      const niveis = montar(id);
+      const capitulo = capituloPorId(id);
+
+      const daBase = niveis.filter((n) => n.banda === capitulo?.base);
+      expect(daBase).toHaveLength(30);
+      expect(daBase.map((n) => n.indice)).toEqual(
+        Array.from({ length: 30 }, (_, i) => i),
+      );
+
+      expect(new Set(niveis.map((n) => n.id)).size).toBe(niveis.length);
+    }
+  });
+
+  /*
+   * Sobram 15 de cada banda com joker. Está assumido — são o corpo natural do
+   * puzzle diário — mas se um dia deixar de ser verdade, é aqui que se vê.
+   */
+  it("deixa metade dos níveis com joker por usar, e é assumido", () => {
+    const comJoker = montar("medio").filter((n) => n.banda === "meio-joker");
+    expect(comJoker).toHaveLength(15);
+  });
+
+  it("é determinística — «o nível 12 do Médio» quer dizer sempre o mesmo", () => {
+    expect(montar("medio")).toEqual(montar("medio"));
+  });
+
+  it("cada banda da campanha sabe a que capítulo pertence", () => {
+    expect(capituloDaBanda("meio")?.id).toBe("medio");
+    expect(capituloDaBanda("meio-joker")?.id).toBe("medio");
+    expect(capituloDaBanda("denso")?.id).toBe("avancado");
+    expect(capituloDaBanda("perito")?.id).toBe("perito");
+
+    // A do modo tempo não pertence a nenhum: o corpus dos dois modos é oposto.
+    expect(capituloDaBanda("tempo")).toBeUndefined();
+  });
+
+  it("uma banda que falte no índice não rebenta o capítulo", () => {
+    const capitulo = capituloPorId("medio");
+    if (capitulo === undefined) throw new Error("sem capítulo");
+
+    const soBase = montarCapitulo(capitulo, [banda("meio", 30)]);
+    expect(soBase).toHaveLength(30);
+    expect(soBase.every((n) => n.banda === "meio")).toBe(true);
   });
 });

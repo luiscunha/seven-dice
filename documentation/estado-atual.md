@@ -154,7 +154,7 @@ dois modos, num link partilhável*. Contra ele falta, por ordem:
 |---|---|---|
 | 1 | Tutorial do joker | ✅ |
 | 2 | Forma dos tabuleiros — metade cheios | ✅ |
-| 3 | Home, lista de níveis por banda, definições | ✅ |
+| 3 | Home, campanha em capítulos, definições | ✅ |
 | 4 | Modo tempo | ✅ |
 | 5 | Link partilhável, para o playtest externo | por fazer |
 
@@ -287,6 +287,40 @@ cheio, não ~150. A razão está nos seus próprios números: os tabuleiros chei
 desta banda têm mediana de sobrevivência **0,42**, e a banda exige **0,55 para
 cima**. Foi preciso dar-lhe seis vezes mais orçamento, e daí vem o `--max` do
 `septet build`.
+
+---
+
+## Bandas e capítulos são coisas diferentes
+
+Estavam a ser a mesma, e isso pôs sete entradas na lista de níveis — duas delas,
+`meio-joker` e `denso`, bandas **inteiras** de joker. O plano §7 diz o
+contrário: o joker "aparece esporadicamente — não em todos os tabuleiros".
+
+A campanha passa a mostrar **cinco capítulos**, com o joker intercalado um em
+cada três níveis:
+
+| Capítulo | Base | Joker intercalado | Níveis |
+|---|---|---|---|
+| Tutorial | `tutorial` | — | 30 |
+| Iniciado | `inicio` | — | 30 |
+| Médio | `meio` | `meio-joker` | 45 |
+| Avançado | `avancado` | `denso` | 45 |
+| Perito | `perito` | — | 30 |
+
+**As bandas não se fundem, e não é preguiça.** A `meio` aceita sobrevivência de
+30–55% e a `meio-joker` de 2–15%; nenhum tabuleiro cumpre as duas, porque um
+joker sozinho leva a sobrevivência de 0,83 para 0,20. A separação é uma restrição
+de *geração*. A apresentação não a tem — daí viver em `capitulos.ts` e as bandas
+continuarem oito no pipeline.
+
+A rota do jogo continua a ser `#/jogo/<banda>/<índice>`, e não a posição no
+capítulo: é o par que identifica o nível no pack, portanto um link sobrevive a
+mudar a cadência de intercalação — e os links antigos continuam a funcionar sem
+tradução nenhuma.
+
+**Sobram 15 níveis de cada banda com joker**, 30 ao todo, gerados e por jogar. É
+assumido, e há um teste que o vigia: são o corpo natural do puzzle diário
+(desenho §8, passo 10).
 
 ---
 
@@ -472,7 +506,7 @@ Duas ressalvas honestas:
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 308 testes
+pnpm check                                    # lint + typecheck + 316 testes
 pnpm septet bands                               # as bandas e os seus critérios
 pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm septet verify                              # revalida o pack todo

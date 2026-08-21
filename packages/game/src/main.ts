@@ -12,6 +12,8 @@
 
 import type { Level } from "@septet/engine";
 
+import type { Capitulo, NivelDoCapitulo } from "./capitulos";
+import { CAPITULOS, capituloDaBanda, capituloPorId, montarCapitulo } from "./capitulos";
 import type { BandaNoIndice } from "./levels";
 import { carregarBanda, carregarIndice } from "./levels";
 import {
@@ -33,7 +35,8 @@ import {
   saveSettings,
 } from "./session/settings";
 import { mostraSomaDasFaces } from "./session/tutorial";
-import { BandasScreen } from "./ui/BandasScreen";
+import type { CapituloNaLista } from "./ui/CapitulosScreen";
+import { CapitulosScreen } from "./ui/CapitulosScreen";
 import { DefinicoesScreen } from "./ui/DefinicoesScreen";
 import { elemento } from "./ui/dom";
 import { HomeScreen } from "./ui/HomeScreen";
@@ -62,14 +65,19 @@ aplicarTema(document.documentElement, preferencias.tema);
 let bandas: readonly BandaNoIndice[] = [];
 
 /**
- * As que a campanha lista.
+ * A campanha, já em capítulos.
  *
- * O corpus do modo tempo é o oposto do da campanha (plano §6.1) e não tem nada
- * que fazer na lista de bandas — nem no total de níveis da Home.
+ * Cinco entradas e não oito bandas: uma banda é uma receita de geração, e o
+ * jogador não tem que saber que existem duas maneiras de fazer um nível médio
+ * (ver `capitulos.ts`). A banda do modo tempo não entra em nenhum capítulo —
+ * o corpus dos dois modos é oposto por desenho (plano §6.1).
  */
-let campanha: readonly BandaNoIndice[] = [];
+let campanha: readonly CapituloNaLista[] = [];
 
 let idsComJoker: readonly string[] = [];
+
+const niveisDoCapitulo = (id: string): readonly NivelDoCapitulo[] =>
+  campanha.find((c) => c.capitulo.id === id)?.niveis ?? [];
 
 /** O ecrã montado. Só um de cada vez, e é sempre este que se destrói. */
 let atual: { destruir: () => void } | undefined;
@@ -113,7 +121,7 @@ async function mostrar(rota: Rota): Promise<void> {
     case "home":
       atual = new HomeScreen(app as HTMLElement, {
         perfil,
-        totalNiveis: campanha.reduce((n, b) => n + b.niveis.length, 0),
+        totalNiveis: campanha.reduce((n, c) => n + c.niveis.length, 0),
         aoEscolherNiveis: voltarA({ ecra: "bandas" }),
         aoEscolherTempo: voltarA({ ecra: "tempo" }),
         aoEscolherDefinicoes: voltarA({ ecra: "definicoes" }),
@@ -121,11 +129,11 @@ async function mostrar(rota: Rota): Promise<void> {
       return;
 
     case "bandas":
-      atual = new BandasScreen(app as HTMLElement, {
-        bandas: campanha,
+      atual = new CapitulosScreen(app as HTMLElement, {
+        capitulos: campanha,
         perfil,
-        aoEscolher: (banda) => {
-          ir({ ecra: "niveis", banda });
+        aoEscolher: (capitulo) => {
+          ir({ ecra: "niveis", capitulo });
         },
         aoVoltar: voltarA({ ecra: "home" }),
       });
@@ -148,7 +156,7 @@ async function mostrar(rota: Rota): Promise<void> {
       return;
 
     case "niveis":
-      return mostrarNiveis(rota.banda);
+      return mostrarNiveis(rota.capitulo);
 
     case "jogo":
       return mostrarJogo(rota.banda, rota.nivel);
@@ -163,17 +171,18 @@ function bandaPorId(id: string): BandaNoIndice | undefined {
 }
 
 function mostrarNiveis(id: string): void {
-  const banda = bandaPorId(id);
-  if (banda === undefined) {
+  const capitulo = capituloPorId(id);
+  if (capitulo === undefined) {
     ir({ ecra: "bandas" });
     return;
   }
 
   atual = new NiveisScreen(app as HTMLElement, {
-    banda,
+    capitulo,
+    niveis: niveisDoCapitulo(id),
     perfil,
     aoEscolher: (nivel) => {
-      ir({ ecra: "jogo", banda: id, nivel });
+      ir({ ecra: "jogo", banda: nivel.banda, nivel: nivel.indice });
     },
     aoVoltar: voltarA({ ecra: "bandas" }),
   });
@@ -190,12 +199,30 @@ async function mostrarJogo(id: string, indice: number): Promise<void> {
   const nivel = niveis[indice];
 
   if (nivel === undefined) {
-    ir({ ecra: "niveis", banda: id });
+    const cap = capituloDaBanda(id);
+    ir(cap === undefined ? { ecra: "bandas" } : { ecra: "niveis", capitulo: cap.id });
     return;
   }
 
   const temJoker = nivel.joker !== undefined;
   const feitos = countCompleted(perfil, idsComJoker);
+
+  /*
+   * O capítulo é quem manda no «seguinte» e no «voltar». Uma banda com joker
+   * está intercalada noutra, portanto seguir a ordem da banda saltaria por cima
+   * de metade do capítulo — e a seta de voltar levaria a uma lista onde este
+   * nível nem aparece.
+   */
+  const capitulo: Capitulo | undefined = capituloDaBanda(id);
+  const sequencia = capitulo === undefined ? [] : niveisDoCapitulo(capitulo.id);
+  const posicao = sequencia.findIndex(
+    (n) => n.banda === id && n.indice === indice,
+  );
+
+  const paraALista: Rota =
+    capitulo === undefined
+      ? { ecra: "bandas" }
+      : { ecra: "niveis", capitulo: capitulo.id };
 
   atual = new PuzzleScreen(app as HTMLElement, nivel, {
     aoTerminar: ({ level, selo, pontos }) => {
@@ -203,11 +230,13 @@ async function mostrarJogo(id: string, indice: number): Promise<void> {
       guardarPerfil();
     },
     aoPedirSeguinte: () => {
-      // No último nível da banda, o seguinte é a própria lista.
-      if (indice + 1 >= niveis.length) ir({ ecra: "niveis", banda: id });
-      else ir({ ecra: "jogo", banda: id, nivel: indice + 1 });
+      const seguinte = posicao < 0 ? undefined : sequencia[posicao + 1];
+
+      // No último nível do capítulo, o seguinte é a própria lista.
+      if (seguinte === undefined) ir(paraALista);
+      else ir({ ecra: "jogo", banda: seguinte.banda, nivel: seguinte.indice });
     },
-    aoVoltar: voltarA({ ecra: "niveis", banda: id }),
+    aoVoltar: voltarA(paraALista),
     aoPedirAjuda: () => {
       abrirTutorial(true);
     },
@@ -266,7 +295,11 @@ function mostrarMensagem(texto: string): void {
 async function arrancar(): Promise<void> {
   try {
     bandas = await carregarIndice();
-    campanha = bandas.filter((b) => b.modo !== "tempo");
+
+    campanha = CAPITULOS.map((capitulo) => ({
+      capitulo,
+      niveis: montarCapitulo(capitulo, bandas),
+    })).filter((c) => c.niveis.length > 0);
 
     idsComJoker = bandas.flatMap((b) =>
       b.niveis.filter((n) => n.joker === true).map((n) => n.id),
