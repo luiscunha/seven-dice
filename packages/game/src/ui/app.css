@@ -833,3 +833,65 @@
     }
   }
 }
+
+/* ─── Telemóvel ───────────────────────────────────────────────────────────── */
+
+/*
+ * O cromado aperta e o tabuleiro cresce. Não é uma folha à parte para telemóvel:
+ * é a mesma, com menos enchimento onde não há ecrã para o gastar.
+ *
+ * O piso de toque de 44px é o que decide os números aqui. Medido a 375px: um 7×7
+ * passa de 41px por peça para 46. Tabuleiros de nove e onze colunas continuam
+ * abaixo — é largura que falta, e essa não se recupera com enchimento.
+ */
+@media (max-width: 480px) {
+  .ecra {
+    gap: 8px;
+    padding: 8px 8px 10px;
+  }
+
+  .palco {
+    padding: 6px;
+  }
+
+  .topo h1 {
+    font-size: 15px;
+  }
+
+  .topo .meta {
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  /* Os botões continuam nos 40px de altura: são eles o piso de toque do rodapé. */
+  .btn {
+    padding: 8px 12px;
+  }
+
+  .rodape {
+    gap: 8px;
+  }
+
+  .linha-selecao {
+    min-height: 28px;
+  }
+
+  /* Numa Home estreita, o lema rouba a linha aos modos. */
+  .home-lema {
+    font-size: 14px;
+  }
+
+  .grelha-niveis {
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+    gap: 6px;
+  }
+
+  /*
+   * O relógio do Contra-Relógio encolhe, mas continua a ser a coisa maior do
+   * ecrã. É o único elemento que o jogador tem de vigiar sem parar de olhar para
+   * o tabuleiro.
+   */
+  .relogio {
+    font-size: 26px;
+  }
+}
