@@ -567,9 +567,75 @@ Decidido por mim porque a direção já os determina. Se algum estiver errado,
   `Sumfall`, `Alea`, `Cairn` e `Tessera` estavam todos ocupados — a categoria
   esgotou os nomes que descrevem a mecânica. `DiceToSeven` está livre e diz o que
   distingue este jogo dos que somam sete com dígitos: são **dados**.
-  - **O logótipo desenha o `T` como um `7`.** O nome escreve-se com T em todo o
-    lado — lojas, URL, código — porque ninguém escreve um `7` de ouvido. A graça
-    fica no desenho, onde não custa buscas.
-  - Fica por decidir a tipografia (§10 continua a valer) e o desenho em si.
+  - **O logótipo está feito**, em `packages/game/public/marca/`. Ver abaixo.
+  - Fica por decidir a tipografia do lettering, que é a mesma questão da
+    tipografia do jogo, dois pontos acima.
 - **O conflito das nove colunas em telemóvel** (§2.3), que não é preciso resolver
   antes da Fase 9 mas não pode ser esquecido.
+
+---
+
+## 11. A marca
+
+Os ficheiros vivem em `packages/game/public/marca/`. São SVG escritos à mão a
+partir de geometria, não exportações de um editor — dá para abrir um e mudar uma
+cor.
+
+### 11.1 O símbolo
+
+Um cubo isométrico feito de doze meias-faces de dado, com um **7** cinzento
+atravessado ao meio.
+
+A construção é a que torna o desenho editável: um cubo visto pelo vértice de topo
+projeta-se num hexágono regular, e cada uma das três faces visíveis é um losango
+— a imagem do quadrado unitário por uma matriz afim. Trabalhar **dentro** dessa
+matriz é o que permite desenhar as pintas como círculos: a projeção transforma-os
+em elipses sozinha. Sem isso, cada pinta era uma elipse rodada calculada à mão.
+
+Três decisões que não são decorativas:
+
+- **As peças são peças do jogo.** Cada meia-face tem uma cor da rampa de
+  `theme.css` e a tinta de pintas correspondente. O logótipo e o tabuleiro usam a
+  mesma tabela; mudar a paleta muda os dois.
+- **O cubo continua a ler-se como cubo** porque cada face leva um véu — branco a
+  20% no topo, verde-escuro a 17% na esquerda, nada na direita. A cor por valor
+  sozinha não dava volume.
+- **Cada face soma 14**, dois setes, e as doze peças somam 42. Ninguém vai contar.
+  É o género de coisa que faz o desenho aguentar-se.
+
+O 7 é cinzento porque no jogo o cinzento é o joker — a peça que vale o que falta
+para sete. O símbolo diz a regra.
+
+### 11.2 Os ficheiros
+
+| Ficheiro | Para quê |
+|---|---|
+| `logo.svg` | Símbolo, nome e lema. Fundo transparente. O que se usa. |
+| `logo-escuro.svg` | O mesmo, para fundos escuros |
+| `logo-cartao.svg` | Apresentação: papel claro e vinheta |
+| `icone.svg` | Só o símbolo, transparente. É o que a Home mostra |
+| `icone-app.svg` · `-escuro` | Ícone de aplicação, **sem cantos redondos** |
+| `icone-solido.svg` | Uma cor só, para carimbo e impressão a um tom |
+| `favicon.svg` | Silhueta e 7, mais nada |
+| `icone-180/192/512.png` | Rasterizações de `icone-app.svg` |
+
+Duas dessas linhas são regras, não formatos:
+
+**O ícone de aplicação não leva cantos redondos.** O iOS, o Android e o lançador
+do PWA aplicam cada um a sua própria máscara. Arredondar aqui deixava uma orla da
+cor do fundo a aparecer por fora da máscara do sistema.
+
+**O favicon é uma versão à parte, simplificada.** A 16px as pintas e as juntas do
+cubo viram lama. É a silhueta e o 7, em contraste alto — nada mais sobrevive a
+esse tamanho.
+
+O PNG existe porque o iOS não aceita SVG em `apple-touch-icon`, e é esse o ícone
+que aparece quando alguém do playtest põe o jogo no ecrã principal do telemóvel.
+
+### 11.3 O que falta
+
+- **O lettering.** O nome está posto com uma pilha de sem-serifas geométricas
+  (`Poppins`, `Montserrat`, `Century Gothic`), não com contornos. Um logótipo a
+  sério tem as letras em curvas, e isso é trabalho de quem desenha letras.
+- **Um `manifest.webmanifest`**, para o jogo instalar como aplicação. Os PNG já
+  lá estão; falta o manifesto e decidir se se quer.

@@ -30,6 +30,7 @@ export class HomeScreen {
 
     const marca = elemento("div", "home-marca");
     marca.append(
+      this.simbolo(),
       elemento("h1", "home-titulo", "DiceToSeven"),
       elemento(
         "p",
@@ -64,6 +65,26 @@ export class HomeScreen {
 
   destruir(): void {
     this.raiz.remove();
+  }
+
+  /**
+   * O símbolo da marca.
+   *
+   * `alt` vazio de propósito: é decoração. O nome vem já a seguir no `h1`, e um
+   * leitor de ecrã que anunciasse os dois dizia «DiceToSeven» duas vezes.
+   *
+   * O caminho resolve-se contra `document.baseURI`, como os packs de níveis em
+   * `levels.ts`. É o que faz o mesmo bundle servir de `/` e de
+   * `/dice-to-seven/` — o Vite não reescreve caminhos construídos em runtime.
+   */
+  private simbolo(): HTMLImageElement {
+    const img = document.createElement("img");
+    img.className = "home-simbolo";
+    img.src = new URL("marca/icone.svg", document.baseURI).href;
+    img.alt = "";
+    img.width = 320;
+    img.height = 320;
+    return img;
   }
 
   private cartao(
