@@ -239,3 +239,84 @@ describe("faces", () => {
     view.destruir();
   });
 });
+
+/* ─── Dimensionamento ───────────────────────────────────────────────────────
+ *
+ * O tabuleiro nunca pode sair da bandeja. É um defeito que só aparece em ecrãs
+ * baixos — num 7×7 a 1080×610 o palco tem 394px de altura e só 354 de espaço
+ * útil, e as peças transbordavam 19px por cima e por baixo.
+ *
+ * A causa era `getBoundingClientRect` devolver a caixa de **bordo**, com o
+ * padding lá dentro, e o cálculo dividir o tabuleiro por ela.
+ */
+
+describe("dimensionamento", () => {
+  /** jsdom não faz layout: a caixa e o padding entram à mão. */
+  const palcoDe = (largura: number, altura: number, padding: number): HTMLElement => {
+    const el = document.createElement("div");
+    el.style.padding = `${String(padding)}px`;
+    el.getBoundingClientRect = () =>
+      ({ width: largura, height: altura, top: 0, left: 0, right: largura, bottom: altura, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect;
+
+    document.body.appendChild(el);
+    return el;
+  };
+
+  const ladoDe = (view: BoardView, palco: HTMLElement): number => {
+    view.redimensionar();
+    const grelha = palco.querySelector<HTMLElement>(".tabuleiro");
+    return Number.parseFloat(grelha?.style.getPropertyValue("--lado") ?? "0");
+  };
+
+  /** Um tabuleiro cheio de `n` colunas por `n` linhas — o caso do `perito` 7×7. */
+  const quadrado = (n: number): Board =>
+    Array.from({ length: n }, () => Array.from({ length: n }, () => 1 as const));
+
+  it("o tabuleiro cabe no espaço útil, e não na caixa com padding", () => {
+    const padding = 20;
+    const palco = palcoDe(888, 394, padding);
+
+    const view = new BoardView(palco, { aoTocar: () => undefined });
+    view.dimensionarPara(quadrado(7));
+    view.montar(quadrado(7));
+
+    const lado = ladoDe(view, palco);
+    const gap = 0; // sem folha de estilos, `--gap-peca` resolve a zero
+    const alturaDaGrelha = 7 * (lado + gap) - gap;
+
+    expect(alturaDaGrelha).toBeLessThanOrEqual(394 - padding * 2);
+
+    view.destruir();
+  });
+
+  it("sem padding, aproveita a caixa toda", () => {
+    const semPadding = palcoDe(888, 394, 0);
+    const comPadding = palcoDe(888, 394, 20);
+
+    const a = new BoardView(semPadding, { aoTocar: () => undefined });
+    a.dimensionarPara(quadrado(7));
+    a.montar(quadrado(7));
+
+    const b = new BoardView(comPadding, { aoTocar: () => undefined });
+    b.dimensionarPara(quadrado(7));
+    b.montar(quadrado(7));
+
+    // A diferença é exatamente o padding vertical repartido pelas sete linhas.
+    expect(ladoDe(a, semPadding)).toBeGreaterThan(ladoDe(b, comPadding));
+
+    a.destruir();
+    b.destruir();
+  });
+
+  it("nunca passa do lado máximo, por muito espaço que haja", () => {
+    const palco = palcoDe(2000, 2000, 20);
+
+    const view = new BoardView(palco, { aoTocar: () => undefined });
+    view.dimensionarPara(quadrado(3));
+    view.montar(quadrado(3));
+
+    expect(ladoDe(view, palco)).toBeLessThanOrEqual(72);
+
+    view.destruir();
+  });
+});

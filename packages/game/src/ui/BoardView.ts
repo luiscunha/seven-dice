@@ -257,8 +257,22 @@ export class BoardView {
     const caixa = this.host.getBoundingClientRect();
     if (caixa.width === 0 || caixa.height === 0) return;
 
-    const porLargura = (caixa.width - gap * (this.colunas - 1)) / this.colunas;
-    const porAltura = (caixa.height - gap * (this.linhas - 1)) / this.linhas;
+    /*
+     * O espaço útil é a **caixa de conteúdo**, e `getBoundingClientRect` devolve
+     * a de bordo — com o padding lá dentro.
+     *
+     * Sem descontar, o tabuleiro é dimensionado para um espaço que não tem, e o
+     * `place-items: center` do palco reparte o excesso pelos dois lados: as peças
+     * saem por cima e por baixo da bandeja. Medido num 7×7 a 1080×610, com o
+     * palco a 888×394 e 20px de padding: davam peças de 51px e uma grelha de
+     * 393px onde só cabem 354.
+     */
+    const espaco = this.paddingDoHost();
+    const largura = caixa.width - espaco.horizontal;
+    const altura = caixa.height - espaco.vertical;
+
+    const porLargura = (largura - gap * (this.colunas - 1)) / this.colunas;
+    const porAltura = (altura - gap * (this.linhas - 1)) / this.linhas;
 
     const lado = Math.max(
       12,
@@ -321,6 +335,26 @@ export class BoardView {
       el.dataset["pos"] = String(m.to);
       this.pecas.set(m.to, el);
     }
+  }
+
+  /**
+   * O padding do palco, nos dois eixos.
+   *
+   * Em jsdom `getComputedStyle` devolve string vazia para estas propriedades e
+   * `parseFloat` dá `NaN` — que envenenaria o cálculo inteiro em silêncio. Zero é
+   * a resposta certa aí: sem layout a sério, não há padding a descontar.
+   */
+  private paddingDoHost(): { horizontal: number; vertical: number } {
+    const estilo = getComputedStyle(this.host);
+    const px = (v: string): number => {
+      const n = Number.parseFloat(v);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    return {
+      horizontal: px(estilo.paddingLeft) + px(estilo.paddingRight),
+      vertical: px(estilo.paddingTop) + px(estilo.paddingBottom),
+    };
   }
 
   private varNum(nome: string): number {
