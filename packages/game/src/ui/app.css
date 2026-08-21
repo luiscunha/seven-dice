@@ -5,6 +5,19 @@
  * literal que não seja geometria pura, está no sítio errado.
  */
 
+/*
+ * O `hidden` tem de ganhar a qualquer `display` escrito aqui.
+ *
+ * A regra do browser é `[hidden] { display: none }`, e **qualquer** regra de
+ * autor a bate — a folha de autor ganha à do agente, independentemente da
+ * especificidade. Sem esta linha, `.fim { display: flex }` mantinha o painel de
+ * fim de nível no ecrã com o atributo `hidden` posto: uma caixa vazia com borda,
+ * debaixo dos botões, em todos os níveis.
+ */
+[hidden] {
+  display: none !important;
+}
+
 .ecra {
   height: 100%;
   display: grid;
@@ -273,6 +286,39 @@
   color: var(--ink-muted);
   font-size: 14px;
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Beco sem saída.
+ *
+ * A entrada anima-se porque **explica uma mudança de estado** — é o critério
+ * do §2.1, e é o mesmo que autoriza as três fases da jogada. Um painel que
+ * aparece do nada, num ecrã onde o jogador acabou de tocar numa peça e nada
+ * aconteceu, deixa a dúvida de se já lá estava.
+ *
+ * Aparece e assenta: 6px e 180ms, sem ressalto e sem escala. Celebrar uma
+ * derrota seria mau gosto, e celebrar seja o que for está fora desta direção.
+ */
+.fim[data-tipo="preso"] {
+  border-color: var(--face-joker);
+  animation: entrar-painel 180ms var(--suavizacao) both;
+}
+
+.fim[data-tipo="preso"] .selo {
+  color: var(--ink);
+}
+
+@keyframes entrar-painel {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fim[data-tipo="preso"] {
+    animation: none;
+  }
 }
 
 /* ─── O seletor do joker ──────────────────────────────────────────────────── */
