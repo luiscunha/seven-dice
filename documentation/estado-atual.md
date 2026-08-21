@@ -49,7 +49,7 @@ contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 | 5 | Métricas e pipeline | ✅ |
 | 6 | Renderer de consola | ✅ **gate fechado a Verde** |
 | 7 | Camada de sessão | ✅ |
-| 8 | UI web | 🔨 **em curso** — jogável ponta a ponta nos dois modos; falta o deploy para o playtest externo |
+| 8 | UI web | 🔨 **publicada** — falta só o playtest externo, que é o critério de aceitação |
 | 9 | Empacotamento | por começar |
 
 O motor está completo e é puro: `packages/engine/src/` não importa nada de Node,
@@ -133,9 +133,19 @@ remede-se antes de a tratar como facto.
 
 ## O que se segue
 
-A **Fase 8**, quase fechada. O jogo tem Home, **Puzzles** (campanha em cinco
-capítulos, com grelha e selos), **Contra-Relógio** e definições. **Falta o
-deploy** — e com ele o playtest externo, que é o critério de aceitação da fase.
+A **Fase 8** está construída e **publicada**:
+
+```
+https://luiscunha.github.io/seven-dice/
+```
+
+Home, **Puzzles** (campanha em cinco capítulos, com grelha e selos),
+**Contra-Relógio** e definições. Publica-se por botão em Actions → Publicar, e o
+`pnpm check` corre antes; se falhar, não publica.
+
+**Falta o playtest externo**, que é o que o critério de aceitação pede antes de
+qualquer trabalho de empacotamento. Confirmado a jogar num iPhone 17e: o 7×7 do
+Perito lê-se e toca-se bem num dos ecrãs mais estreitos que há.
 
 ```bash
 pnpm dev     # localhost:5173
@@ -157,7 +167,7 @@ dois modos, num link partilhável*. Contra ele falta, por ordem:
 | 2 | Forma dos tabuleiros — metade cheios | ✅ |
 | 3 | Home, campanha em capítulos, definições | ✅ |
 | 4 | Contra-Relógio | ✅ |
-| 5 | Link partilhável, para o playtest externo | por fazer |
+| 5 | Link partilhável, para o playtest externo | ✅ |
 
 O mapa de progressão, o perfil, as definições e o puzzle diário ficam **depois**
 da marca do playtest (desenho §8) e não bloqueiam a Fase 9.
