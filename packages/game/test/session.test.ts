@@ -15,6 +15,7 @@ import { boardKey, packed } from "@dicetoseven/engine";
 import {
   clearSelection,
   hint,
+  isBlocked,
   isFinished,
   remainingToTarget,
   selectionTotal,
@@ -349,6 +350,70 @@ describe("GameSession", () => {
       const r = hint(s);
       expect(r.source).toBe("none");
       expect(r.state.hints).toBe(0);
+    });
+  });
+
+  describe("beco sem saída", () => {
+    it("um tabuleiro com jogadas não está preso, e um vazio também não", () => {
+      const s = startGame(level(BOARD));
+      expect(isBlocked(s)).toBe(false);
+
+      let limpo = s;
+      for (const p of L_GROUP) limpo = tap(limpo, p);
+
+      expect(isFinished(limpo)).toBe(true);
+      // Ganhar não é encravar. São estados diferentes e o ecrã trata-os assim.
+      expect(isBlocked(limpo)).toBe(false);
+    });
+
+    it("sobram peças e nenhuma soma 7", () => {
+      // Exatamente o caso que o playtest reportou: sobra um 3 e um 2.
+      expect(isBlocked(startGame(level([[3], [2]])))).toBe(true);
+    });
+
+    it("peças que somam 7 mas não são vizinhas continuam presas", () => {
+      /*
+       * `[[3],[1],[4]]` some 8 na coluna do meio... não: 3+4 = 7, mas o 1 está
+       * entre eles e a conexão é ortogonal, portanto qualquer grupo que ligue o
+       * 3 ao 4 tem de levar o 1 e passa a somar 8. A soma sozinha nunca chega.
+       */
+      expect(isBlocked(startGame(level([[3], [1], [4]])))).toBe(true);
+    });
+
+    it("desfazer tira o jogador do beco", () => {
+      /*
+       * A única jogada é 3+4, e leva a um beco: sobram dois 5 que somam 10.
+       *
+       * Note-se que `[[3],[4],[5],[2]]` **não** serve para isto, por muito que
+       * pareça: tirar o 3 e o 4 colapsa as colunas e volta a encostar o 5 ao 2,
+       * que somam 7. O colapso reabre jogadas, e é por isso que o beco tem de
+       * ser lido no tabuleiro de chegada e nunca antecipado por contas.
+       */
+      const board: Board = [[3], [4], [5], [5]];
+      let s = startGame(level(board));
+
+      s = tap(s, packed(0, 0));
+      s = tap(s, packed(1, 0));
+
+      expect(s.moves).toBe(1);
+      expect(isBlocked(s)).toBe(true);
+
+      s = undo(s);
+      expect(isBlocked(s)).toBe(false);
+      expect(boardKey(s.board)).toBe(boardKey(board));
+    });
+
+    it("conta com o joker: um joker no tabuleiro é sempre uma saída", () => {
+      /*
+       * Joker mais um 2. As fixas somam 2, que está entre 1 e 6, portanto o
+       * joker vale 5 e o grupo é legítimo. Sem contar com o joker, isto seria
+       * lido como beco sem saída — e o `hasAnyGroup` conta.
+       */
+      const comJoker = level([[0], [2]]);
+      expect(isBlocked(startGame(comJoker))).toBe(false);
+
+      // O joker sozinho nunca forma grupo (spec §2.6).
+      expect(isBlocked(startGame(level([[0]])))).toBe(true);
     });
   });
 });
