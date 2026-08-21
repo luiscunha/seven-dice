@@ -13,7 +13,7 @@ import { applyMove, isGreedySafe, isValidGroup, pieceCount } from "@septet/engin
 import { BANDS, bandById } from "../src/bands";
 import { avaliar } from "../src/candidate";
 import { avaliarEmParalelo } from "../src/pool";
-import { construirBanda } from "../src/pipeline";
+import { construirBanda, passagensDe } from "../src/pipeline";
 
 const TUTORIAL = bandById("tutorial");
 const DENSO = bandById("denso");
@@ -100,6 +100,7 @@ describe("avaliação de um candidato", () => {
     for (const r of razoes) {
       expect([
         "geracao",
+        "forma",
         "ida-e-volta",
         "sobrevivencia",
         "greedy-safe",
@@ -219,4 +220,99 @@ describe("construção de uma banda", () => {
     expect(r.levels.length).toBeLessThan(5);
     expect(r.avaliados).toBeLessThanOrEqual(128);
   }, 120_000);
+});
+
+/* ─── Formas cheias ─────────────────────────────────────────────────────────
+ *
+ * A promessa é: **metade dos níveis publicados são retângulos cheios**. Tem duas
+ * metades a proteger, e nenhuma se vê a olho no pack.
+ *
+ * A primeira é que o perfil de silhueta é uma *preferência* do gerador, não uma
+ * garantia — sem a rejeição por forma, "metade cheios" degenerava em "metade
+ * tentados, quase todos recortados", e o pack passaria a parecer o antigo.
+ *
+ * A segunda é a quota. As formas têm custos muito diferentes — um `denso` 3×4
+ * custa 12 candidatos e um `perito` 7×7 custa 150 — portanto misturar seeds e
+ * deixar a proporção ao acaso dava um pack dominado pelas baratas, sem as caras.
+ * É precisamente o 7×7 que se quer garantir.
+ */
+
+describe("formas cheias", () => {
+  const soForma = (id: string, forma: readonly [number, number]) => {
+    const b = bandById(id);
+    if (b === undefined) throw new Error(`banda ${id} não existe`);
+    return { ...b, formas: [forma] };
+  };
+
+  it("um nível aceite com forma pedida está mesmo cheio", () => {
+    const banda = soForma("denso", [3, 4]);
+    let aceites = 0;
+
+    for (let seed = 1_000_000; seed < 1_000_120; seed++) {
+      const a = avaliar(seed, banda, 100);
+      if (a.level === undefined) continue;
+
+      aceites++;
+      expect(a.level.board).toHaveLength(3);
+      for (const coluna of a.level.board) expect(coluna).toHaveLength(4);
+      expect(pieceCount(a.level.board)).toBe(12);
+    }
+
+    expect(aceites).toBeGreaterThan(0);
+  }, 60_000);
+
+  it("os candidatos que saem recortados são rejeitados por forma", () => {
+    const banda = soForma("denso", [3, 5]);
+    let porForma = 0;
+
+    for (let seed = 2_000_000; seed < 2_000_120; seed++) {
+      if (avaliar(seed, banda, 100).rejeicao === "forma") porForma++;
+    }
+
+    // Medido: com perfil plano a 3 colunas, cerca de metade sai cheia. Se isto
+    // chegar a zero, ou o gerador passou a garantir a forma — e então a
+    // verificação é redundante — ou deixou de a tentar.
+    expect(porForma).toBeGreaterThan(0);
+  }, 60_000);
+
+  it("uma banda sem formas continua a ter uma passagem só", () => {
+    const tutorial = bandById("tutorial");
+    if (tutorial === undefined) throw new Error("sem tutorial");
+
+    const passagens = passagensDe(tutorial, 30);
+
+    expect(passagens).toHaveLength(1);
+    expect(passagens[0]?.alvo).toBe(30);
+    expect(passagens[0]?.band.formas).toBeUndefined();
+  });
+
+  it("as quotas somam o alvo, e metade é cheia", () => {
+    for (const band of BANDS) {
+      const passagens = passagensDe(band, 30);
+      const soma = passagens.reduce((n, p) => n + p.alvo, 0);
+
+      expect(soma).toBe(30);
+
+      if (band.formas === undefined) continue;
+
+      const cheias = passagens.filter((p) => p.band.formas !== undefined);
+      const pedidosCheios = cheias.reduce((n, p) => n + p.alvo, 0);
+
+      expect(pedidosCheios).toBe(15);
+      expect(cheias).toHaveLength(band.formas.length);
+
+      // Cada forma leva a sua quota, e nenhuma fica de fora — é isto que garante
+      // que o 7×7 do `perito` existe mesmo, sendo a forma mais cara do pack.
+      for (const forma of band.formas) {
+        expect(cheias.some((p) => p.band.formas?.[0] === forma)).toBe(true);
+      }
+    }
+  });
+
+  it("as passagens não colidem em seeds — a seed é a identidade do nível", () => {
+    for (const band of BANDS) {
+      const inicios = passagensDe(band, 30).map((p) => p.seedInicial);
+      expect(new Set(inicios).size).toBe(inicios.length);
+    }
+  });
 });

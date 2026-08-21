@@ -156,18 +156,14 @@ dois modos, num link partilhável*. Contra ele falta, por ordem:
 O mapa de progressão, o perfil, as definições e o puzzle diário ficam **depois**
 da marca do playtest (desenho §8) e não bloqueiam a Fase 9.
 
-Duas coisas por resolver, que vieram de jogar e ainda não têm decisão. Ambas são
-mais baratas antes do playtest externo do que depois — regerar bandas depois de
-alguém jogar invalida o que essa pessoa jogou:
+Uma coisa por resolver, que veio de jogar e ainda não tem decisão. É mais barata
+antes do playtest externo do que depois — regerar bandas depois de alguém jogar
+invalida o que essa pessoa jogou:
 
 - **A dificuldade chega sempre aos ~78% do jogo**, em todas as bandas. No
   `perito` são 15 jogadas com a primeira fatal à décima segunda. Não é afinável:
   em 250 candidatos, o melhor está nos 65%. A ramificação de 33 grupos por jogada
   não deixa errar cedo. Ver "O que fica por decidir".
-- **Os tabuleiros nunca enchem a base.** O preenchimento é 65–73% em todas as
-  bandas, e nunca sai um 7×7 cheio. O gerador já sabe fazê-lo — o parâmetro
-  `silhouetteProfile` existe desde a Fase 4 e **nenhuma banda o usa**. Com um
-  perfil plano, 120 candidatos dão até 100% de preenchimento.
 
 ---
 
@@ -196,6 +192,96 @@ continua a ser o jogador a fechar a conta.
 Detalhes de desenho e o porquê de cada um: `desenho-fase-8.md` §5.4.
 `packages/game/test/tutorial.test.ts` verifica contra a engine as três coisas que
 o tabuleiro promete ensinar.
+
+---
+
+## A forma dos tabuleiros — metade cheios
+
+Até aqui os tabuleiros nunca enchiam: preenchimento de 65–73% em todas as bandas,
+silhueta sempre recortada, e a forma média do `perito` era 6,9 × 9,0 — mais alta
+do que larga. Nunca saía um 7×7.
+
+O `silhouetteProfile` existia no gerador desde a Fase 4 e **nenhuma banda o
+usava**. Passou a usar-se, e metade dos níveis de cada banda são agora retângulos
+cheios.
+
+### O que a medição decidiu
+
+Três medições, a 2026-08-21, antes de mexer numa linha de banda.
+
+**Encher não custa dificuldade.** Comparando o mesmo tamanho com e sem perfil, a
+sobrevivência mediana é a mesma dentro do ruído — e se pende, pende para mais
+difícil:
+
+| | com perfil | sem perfil |
+|---|---|---|
+| `meio` 5×5 | 0,497 | 0,520 |
+| `meio` 6×6 | 0,287 | 0,323 |
+| `perito` 7×7 | 0,113 | 0,127 |
+
+**Encher não custa aceitação.** Sete configurações, 300 candidatos cada: média de
+**16,3% de aceites sem perfil contra 15,0% com**. Quem rejeita a maioria dos
+tabuleiros cheios é o piso de justiça — e rejeita qualquer tabuleiro na mesma
+medida. Era a hipótese que faltava excluir.
+
+**Sem perfil não há nada a filtrar.** Zero tabuleiros cheios em 300 candidatos em
+cinco das sete configurações. Não é uma preferência que se satisfaça filtrando o
+que já se gerava.
+
+**O custo é a raridade da forma, e depende do número de colunas** — o gerador
+constrói coluna a coluna, e quantas menos houver mais fácil é fechá-las todas à
+mesma altura. Daí que `perito` 5×7 saia quatro vezes mais que 7×5, com as mesmas
+35 peças:
+
+| Colunas | Cheios em 200 candidatos |
+|---|---|
+| 3 | ~96 |
+| 4 | ~45 |
+| 5 | ~25 |
+| 6 | ~8 |
+| 7 | ~6 |
+
+### O que ficou no pack
+
+| Banda | Cheios | Formas |
+|---|---|---|
+| `inicio` | 15/30 | 4×4 ·7 · 4×5 ·8 |
+| `meio` | 15/30 | 5×5 ·7 · 5×6 ·8 |
+| `meio-joker` | 15/30 | 4×6 ·7 · 5×5 ·8 |
+| `avancado` | 15/30 | 5×6 ·7 · 6×6 ·8 |
+| `perito` | 15/30 | 5×7 ·5 · 6×7 ·5 · **7×7 ·5** |
+| `denso` | 15/30 | 3×4 ·7 · 3×5 ·8 |
+
+`tutorial` e `tempo` ficaram como estavam: exigem sobrevivência de 100% e prova
+exaustiva de greedy-safe, e é aí que encher luta mais contra a aceitação —
+1 aceite em 91 tabuleiros cheios do tutorial, contra 6% de base.
+
+### As duas peças que isto obrigou a existir
+
+**A rejeição por forma.** O perfil é uma *preferência* do gerador, não uma
+garantia. Sem verificar que o tabuleiro saiu mesmo cheio, "metade cheios"
+degenerava em "metade tentados, quase todos recortados" — e o pack ficaria igual
+ao antigo. É a sexta razão de rejeição, e corre antes da ida-e-volta e de
+qualquer playout, portanto é barata. Não toca em nenhuma garantia: a
+resolubilidade continua a vir da ida-e-volta e do piso de justiça.
+
+**A quota por forma.** Cada banda constrói-se agora em várias passagens — uma de
+forma livre e uma por cada forma cheia, cada uma com a sua faixa de seeds, porque
+a seed é a identidade do nível. Misturar as seeds e deixar a proporção ao acaso
+dava um pack dominado pelas formas baratas: um `denso` 3×4 custa 12 candidatos e
+um `perito` 7×7 custa 150, e é precisamente o 7×7 que se quer garantido.
+
+### O que a geração corrigiu das medições
+
+**O `meio-joker` 5×5 dá.** No funil tinha dado zero aceites em 27 tabuleiros
+cheios. Ficou na rotação por o zero ser amostra pequena, e saíram os oito. Era
+ruído.
+
+**O `inicio` é três vezes mais caro do que estimado** — ~400 candidatos por nível
+cheio, não ~150. A razão está nos seus próprios números: os tabuleiros cheios
+desta banda têm mediana de sobrevivência **0,42**, e a banda exige **0,55 para
+cima**. Foi preciso dar-lhe seis vezes mais orçamento, e daí vem o `--max` do
+`septet build`.
 
 ---
 
@@ -381,9 +467,11 @@ Duas ressalvas honestas:
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 269 testes
+pnpm check                                    # lint + typecheck + 288 testes
 pnpm septet bands                               # as bandas e os seus critérios
 pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm septet verify                              # revalida o pack todo
 pnpm septet build --count 30 --runs 1000        # reconstrói o pack (--pre 0 desliga o pré-filtro)
+pnpm septet build --band inicio --max 1200      # mais orçamento por nível: as formas cheias caras precisam
+pnpm septet export                              # parte o pack por banda para game/public/levels
 ```

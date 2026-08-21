@@ -235,78 +235,78 @@
     "joker": false
    },
    {
-    "id": "inicio-000537",
-    "pieces": 21,
+    "id": "inicio-1000232",
+    "pieces": 16,
     "joker": false
    },
    {
-    "id": "inicio-000540",
+    "id": "inicio-1000354",
+    "pieces": 16,
+    "joker": false
+   },
+   {
+    "id": "inicio-1000877",
+    "pieces": 16,
+    "joker": false
+   },
+   {
+    "id": "inicio-1001248",
+    "pieces": 16,
+    "joker": false
+   },
+   {
+    "id": "inicio-1001717",
+    "pieces": 16,
+    "joker": false
+   },
+   {
+    "id": "inicio-1002190",
+    "pieces": 16,
+    "joker": false
+   },
+   {
+    "id": "inicio-1002311",
+    "pieces": 16,
+    "joker": false
+   },
+   {
+    "id": "inicio-2000105",
     "pieces": 20,
     "joker": false
    },
    {
-    "id": "inicio-000541",
-    "pieces": 23,
+    "id": "inicio-2000560",
+    "pieces": 20,
     "joker": false
    },
    {
-    "id": "inicio-000633",
-    "pieces": 23,
+    "id": "inicio-2000820",
+    "pieces": 20,
     "joker": false
    },
    {
-    "id": "inicio-000654",
-    "pieces": 16,
+    "id": "inicio-2001819",
+    "pieces": 20,
     "joker": false
    },
    {
-    "id": "inicio-000666",
-    "pieces": 22,
+    "id": "inicio-2001995",
+    "pieces": 20,
     "joker": false
    },
    {
-    "id": "inicio-000685",
-    "pieces": 23,
+    "id": "inicio-2002167",
+    "pieces": 20,
     "joker": false
    },
    {
-    "id": "inicio-000693",
-    "pieces": 21,
+    "id": "inicio-2002504",
+    "pieces": 20,
     "joker": false
    },
    {
-    "id": "inicio-000728",
-    "pieces": 18,
-    "joker": false
-   },
-   {
-    "id": "inicio-000735",
-    "pieces": 17,
-    "joker": false
-   },
-   {
-    "id": "inicio-000746",
-    "pieces": 16,
-    "joker": false
-   },
-   {
-    "id": "inicio-000747",
-    "pieces": 21,
-    "joker": false
-   },
-   {
-    "id": "inicio-000765",
-    "pieces": 19,
-    "joker": false
-   },
-   {
-    "id": "inicio-000781",
-    "pieces": 23,
-    "joker": false
-   },
-   {
-    "id": "inicio-000821",
-    "pieces": 25,
+    "id": "inicio-2002550",
+    "pieces": 20,
     "joker": false
    }
   ]
@@ -333,11 +333,6 @@
    {
     "id": "meio-000028",
     "pieces": 33,
-    "joker": false
-   },
-   {
-    "id": "meio-000045",
-    "pieces": 32,
     "joker": false
    },
    {
@@ -396,73 +391,78 @@
     "joker": false
    },
    {
-    "id": "meio-000126",
-    "pieces": 31,
+    "id": "meio-1000262",
+    "pieces": 25,
     "joker": false
    },
    {
-    "id": "meio-000134",
-    "pieces": 31,
+    "id": "meio-1000599",
+    "pieces": 25,
     "joker": false
    },
    {
-    "id": "meio-000144",
-    "pieces": 33,
+    "id": "meio-1000670",
+    "pieces": 25,
     "joker": false
    },
    {
-    "id": "meio-000149",
-    "pieces": 34,
+    "id": "meio-1001041",
+    "pieces": 25,
     "joker": false
    },
    {
-    "id": "meio-000153",
-    "pieces": 36,
+    "id": "meio-1001663",
+    "pieces": 25,
     "joker": false
    },
    {
-    "id": "meio-000157",
-    "pieces": 34,
+    "id": "meio-1001671",
+    "pieces": 25,
     "joker": false
    },
    {
-    "id": "meio-000159",
-    "pieces": 32,
+    "id": "meio-1001679",
+    "pieces": 25,
     "joker": false
    },
    {
-    "id": "meio-000166",
-    "pieces": 31,
-    "joker": false
-   },
-   {
-    "id": "meio-000177",
+    "id": "meio-2000063",
     "pieces": 30,
     "joker": false
    },
    {
-    "id": "meio-000183",
-    "pieces": 32,
-    "joker": false
-   },
-   {
-    "id": "meio-000187",
-    "pieces": 26,
-    "joker": false
-   },
-   {
-    "id": "meio-000190",
-    "pieces": 35,
-    "joker": false
-   },
-   {
-    "id": "meio-000193",
+    "id": "meio-2000102",
     "pieces": 30,
     "joker": false
    },
    {
-    "id": "meio-000202",
-    "pieces": 35,
+    "id": "meio-2000172",
+    "pieces": 30,
+    "joker": false
+   },
+   {
+    "id": "meio-2000180",
+    "pieces": 30,
+    "joker": false
+   },
+   {
+    "id": "meio-2000185",
+    "pieces": 30,
+    "joker": false
+   },
+   {
+    "id": "meio-2000200",
+    "pieces": 30,
+    "joker": false
+   },
+   {
+    "id": "meio-2000217",
+    "pieces": 30,
+    "joker": false
+   },
+   {
+    "id": "meio-2000226",
+    "pieces": 30,
     "joker": false
    }
   ]
@@ -547,77 +547,77 @@
     "joker": true
    },
    {
-    "id": "meio-joker-000091",
-    "pieces": 30,
-    "joker": true
-   },
-   {
-    "id": "meio-joker-000098",
-    "pieces": 30,
-    "joker": true
-   },
-   {
-    "id": "meio-joker-000109",
-    "pieces": 22,
-    "joker": true
-   },
-   {
-    "id": "meio-joker-000122",
-    "pieces": 27,
-    "joker": true
-   },
-   {
-    "id": "meio-joker-000127",
-    "pieces": 23,
-    "joker": true
-   },
-   {
-    "id": "meio-joker-000156",
-    "pieces": 28,
-    "joker": true
-   },
-   {
-    "id": "meio-joker-000207",
-    "pieces": 30,
-    "joker": true
-   },
-   {
-    "id": "meio-joker-000225",
+    "id": "meio-joker-1000045",
     "pieces": 24,
     "joker": true
    },
    {
-    "id": "meio-joker-000226",
-    "pieces": 26,
+    "id": "meio-joker-1000088",
+    "pieces": 24,
     "joker": true
    },
    {
-    "id": "meio-joker-000231",
-    "pieces": 30,
+    "id": "meio-joker-1000121",
+    "pieces": 24,
     "joker": true
    },
    {
-    "id": "meio-joker-000234",
-    "pieces": 26,
+    "id": "meio-joker-1000253",
+    "pieces": 24,
     "joker": true
    },
    {
-    "id": "meio-joker-000241",
-    "pieces": 29,
+    "id": "meio-joker-1000456",
+    "pieces": 24,
     "joker": true
    },
    {
-    "id": "meio-joker-000244",
+    "id": "meio-joker-1000504",
+    "pieces": 24,
+    "joker": true
+   },
+   {
+    "id": "meio-joker-1000680",
+    "pieces": 24,
+    "joker": true
+   },
+   {
+    "id": "meio-joker-2000055",
     "pieces": 25,
     "joker": true
    },
    {
-    "id": "meio-joker-000247",
-    "pieces": 30,
+    "id": "meio-joker-2000095",
+    "pieces": 25,
     "joker": true
    },
    {
-    "id": "meio-joker-000251",
+    "id": "meio-joker-2000128",
+    "pieces": 25,
+    "joker": true
+   },
+   {
+    "id": "meio-joker-2000257",
+    "pieces": 25,
+    "joker": true
+   },
+   {
+    "id": "meio-joker-2000407",
+    "pieces": 25,
+    "joker": true
+   },
+   {
+    "id": "meio-joker-2000454",
+    "pieces": 25,
+    "joker": true
+   },
+   {
+    "id": "meio-joker-2001039",
+    "pieces": 25,
+    "joker": true
+   },
+   {
+    "id": "meio-joker-2001086",
     "pieces": 25,
     "joker": true
    }
@@ -673,11 +673,6 @@
     "joker": false
    },
    {
-    "id": "avancado-000033",
-    "pieces": 40,
-    "joker": false
-   },
-   {
     "id": "avancado-000049",
     "pieces": 37,
     "joker": false
@@ -708,73 +703,78 @@
     "joker": false
    },
    {
-    "id": "avancado-000079",
-    "pieces": 39,
+    "id": "avancado-1000108",
+    "pieces": 30,
     "joker": false
    },
    {
-    "id": "avancado-000084",
-    "pieces": 38,
+    "id": "avancado-1000175",
+    "pieces": 30,
     "joker": false
    },
    {
-    "id": "avancado-000085",
-    "pieces": 31,
+    "id": "avancado-1000182",
+    "pieces": 30,
     "joker": false
    },
    {
-    "id": "avancado-000088",
-    "pieces": 42,
+    "id": "avancado-1000192",
+    "pieces": 30,
     "joker": false
    },
    {
-    "id": "avancado-000094",
-    "pieces": 37,
+    "id": "avancado-1000285",
+    "pieces": 30,
     "joker": false
    },
    {
-    "id": "avancado-000096",
-    "pieces": 34,
+    "id": "avancado-1000370",
+    "pieces": 30,
     "joker": false
    },
    {
-    "id": "avancado-000098",
-    "pieces": 38,
+    "id": "avancado-1000519",
+    "pieces": 30,
     "joker": false
    },
    {
-    "id": "avancado-000118",
-    "pieces": 34,
+    "id": "avancado-2000099",
+    "pieces": 36,
     "joker": false
    },
    {
-    "id": "avancado-000122",
-    "pieces": 33,
+    "id": "avancado-2000207",
+    "pieces": 36,
     "joker": false
    },
    {
-    "id": "avancado-000125",
-    "pieces": 37,
+    "id": "avancado-2000264",
+    "pieces": 36,
     "joker": false
    },
    {
-    "id": "avancado-000128",
-    "pieces": 41,
+    "id": "avancado-2000354",
+    "pieces": 36,
     "joker": false
    },
    {
-    "id": "avancado-000133",
-    "pieces": 42,
+    "id": "avancado-2000529",
+    "pieces": 36,
     "joker": false
    },
    {
-    "id": "avancado-000141",
-    "pieces": 34,
+    "id": "avancado-2000781",
+    "pieces": 36,
     "joker": false
    },
    {
-    "id": "avancado-000145",
-    "pieces": 41,
+    "id": "avancado-2001061",
+    "pieces": 36,
+    "joker": false
+   },
+   {
+    "id": "avancado-2001251",
+    "pieces": 36,
     "joker": false
    }
   ]
@@ -786,11 +786,6 @@
    {
     "id": "perito-000003",
     "pieces": 48,
-    "joker": false
-   },
-   {
-    "id": "perito-000010",
-    "pieces": 45,
     "joker": false
    },
    {
@@ -834,11 +829,6 @@
     "joker": false
    },
    {
-    "id": "perito-000052",
-    "pieces": 39,
-    "joker": false
-   },
-   {
     "id": "perito-000054",
     "pieces": 41,
     "joker": false
@@ -869,68 +859,78 @@
     "joker": false
    },
    {
-    "id": "perito-000080",
+    "id": "perito-1000010",
     "pieces": 35,
     "joker": false
    },
    {
-    "id": "perito-000086",
-    "pieces": 41,
+    "id": "perito-1000036",
+    "pieces": 35,
     "joker": false
    },
    {
-    "id": "perito-000090",
-    "pieces": 41,
+    "id": "perito-1000053",
+    "pieces": 35,
     "joker": false
    },
    {
-    "id": "perito-000091",
-    "pieces": 46,
+    "id": "perito-1000068",
+    "pieces": 35,
     "joker": false
    },
    {
-    "id": "perito-000094",
+    "id": "perito-1000227",
+    "pieces": 35,
+    "joker": false
+   },
+   {
+    "id": "perito-2000010",
+    "pieces": 42,
+    "joker": false
+   },
+   {
+    "id": "perito-2000059",
+    "pieces": 42,
+    "joker": false
+   },
+   {
+    "id": "perito-2000088",
+    "pieces": 42,
+    "joker": false
+   },
+   {
+    "id": "perito-2000134",
+    "pieces": 42,
+    "joker": false
+   },
+   {
+    "id": "perito-2000140",
+    "pieces": 42,
+    "joker": false
+   },
+   {
+    "id": "perito-3000051",
     "pieces": 49,
     "joker": false
    },
    {
-    "id": "perito-000098",
+    "id": "perito-3000204",
     "pieces": 49,
     "joker": false
    },
    {
-    "id": "perito-000099",
-    "pieces": 38,
+    "id": "perito-3000300",
+    "pieces": 49,
     "joker": false
    },
    {
-    "id": "perito-000104",
-    "pieces": 43,
+    "id": "perito-3000578",
+    "pieces": 49,
     "joker": false
    },
    {
-    "id": "perito-000109",
-    "pieces": 48,
-    "joker": false
-   },
-   {
-    "id": "perito-000116",
-    "pieces": 47,
-    "joker": false
-   },
-   {
-    "id": "perito-000117",
-    "pieces": 40,
-    "joker": false
-   },
-   {
-    "id": "perito-000126",
-    "pieces": 37,
-    "joker": false
-   },
-   {
-    "id": "perito-000129",
-    "pieces": 50,
+    "id": "perito-3000611",
+    "pieces": 49,
     "joker": false
    }
   ]
@@ -939,6 +939,11 @@
   "id": "denso",
   "label": "Denso — curto, de dedução pura, à volta do joker",
   "niveis": [
+   {
+    "id": "denso-000006",
+    "pieces": 14,
+    "joker": true
+   },
    {
     "id": "denso-000011",
     "pieces": 15,
@@ -975,13 +980,13 @@
     "joker": true
    },
    {
-    "id": "denso-000042",
+    "id": "denso-000044",
     "pieces": 12,
     "joker": true
    },
    {
-    "id": "denso-000044",
-    "pieces": 12,
+    "id": "denso-000046",
+    "pieces": 10,
     "joker": true
    },
    {
@@ -1010,83 +1015,78 @@
     "joker": true
    },
    {
-    "id": "denso-000060",
+    "id": "denso-1000003",
     "pieces": 12,
     "joker": true
    },
    {
-    "id": "denso-000064",
-    "pieces": 10,
-    "joker": true
-   },
-   {
-    "id": "denso-000065",
-    "pieces": 11,
-    "joker": true
-   },
-   {
-    "id": "denso-000069",
-    "pieces": 11,
-    "joker": true
-   },
-   {
-    "id": "denso-000077",
-    "pieces": 11,
-    "joker": true
-   },
-   {
-    "id": "denso-000078",
-    "pieces": 10,
-    "joker": true
-   },
-   {
-    "id": "denso-000082",
+    "id": "denso-1000004",
     "pieces": 12,
     "joker": true
    },
    {
-    "id": "denso-000107",
+    "id": "denso-1000008",
+    "pieces": 12,
+    "joker": true
+   },
+   {
+    "id": "denso-1000010",
+    "pieces": 12,
+    "joker": true
+   },
+   {
+    "id": "denso-1000011",
+    "pieces": 12,
+    "joker": true
+   },
+   {
+    "id": "denso-1000023",
+    "pieces": 12,
+    "joker": true
+   },
+   {
+    "id": "denso-1000045",
+    "pieces": 12,
+    "joker": true
+   },
+   {
+    "id": "denso-2000034",
     "pieces": 15,
     "joker": true
    },
    {
-    "id": "denso-000111",
-    "pieces": 13,
+    "id": "denso-2000079",
+    "pieces": 15,
     "joker": true
    },
    {
-    "id": "denso-000112",
-    "pieces": 14,
+    "id": "denso-2000201",
+    "pieces": 15,
     "joker": true
    },
    {
-    "id": "denso-000118",
-    "pieces": 10,
+    "id": "denso-2000210",
+    "pieces": 15,
     "joker": true
    },
    {
-    "id": "denso-000120",
-    "pieces": 14,
+    "id": "denso-2000261",
+    "pieces": 15,
     "joker": true
    },
    {
-    "id": "denso-000130",
-    "pieces": 12,
+    "id": "denso-2000281",
+    "pieces": 15,
     "joker": true
    },
    {
-    "id": "denso-000131",
-    "pieces": 11,
+    "id": "denso-2000313",
+    "pieces": 15,
     "joker": true
    },
    {
-    "id": "denso-000133",
-    "pieces": 13,
-    "joker": true
-   },
-   {
-    "id": "denso-000139",
-    "pieces": 11,
+    "id": "denso-2000367",
+    "pieces": 15,
     "joker": true
    }
   ]

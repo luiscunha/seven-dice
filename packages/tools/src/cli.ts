@@ -1,7 +1,7 @@
 /**
  * CLI do pipeline offline.
  *
- *   septet build [--band <id>] [--count <n>] [--runs <n>] [--pre <n>] [--out <dir>]
+ *   septet build [--band <id>] [--count <n>] [--runs <n>] [--pre <n>] [--max <n>] [--out <dir>]
  *   septet bands
  *   septet verify <ficheiro.json>
  *
@@ -17,7 +17,7 @@ import { applyMove, isValidGroup, pieceCount, totalSum } from "@septet/engine";
 
 import { BANDS, bandById } from "./bands";
 import { comandoPlay } from "./play";
-import { construirBanda } from "./pipeline";
+import { construirBanda, passagensDe } from "./pipeline";
 
 const log = (msg: string): void => {
   process.stdout.write(`${msg}\n`);
@@ -48,6 +48,15 @@ async function comandoBuild(args: string[]): Promise<number> {
       pre: { type: "string", default: "100" },
       out: { type: "string", default: "packages/tools/out" },
       workers: { type: "string" },
+      /*
+       * Candidatos a avaliar por cada nível pedido, antes de desistir.
+       *
+       * As formas cheias custam muito mais do que a forma livre, e o custo varia
+       * uma ordem de grandeza entre bandas: um `denso` 3×4 sai em 12 candidatos,
+       * um `inicio` 4×4 em cerca de 400 — os tabuleiros cheios dessa banda têm
+       * mediana de sobrevivência 0,42 e a banda exige 0,55 para cima.
+       */
+      max: { type: "string", default: "200" },
     },
   });
 
@@ -70,35 +79,39 @@ async function comandoBuild(args: string[]): Promise<number> {
   for (const band of bandas) {
     const t0 = Date.now();
 
-    const r = await construirBanda({
-      band,
-      alvo,
-      runs,
-      preRuns,
-      ...(values.workers === undefined
-        ? {}
-        : { workers: Number(values.workers) }),
-    });
+    for (const passagem of passagensDe(band, alvo)) {
+      const r = await construirBanda({
+        band: passagem.band,
+        alvo: passagem.alvo,
+        seedInicial: passagem.seedInicial,
+        maxCandidatos: passagem.alvo * Number(values.max),
+        runs,
+        preRuns,
+        ...(values.workers === undefined
+          ? {}
+          : { workers: Number(values.workers) }),
+      });
 
-    const segundos = ((Date.now() - t0) / 1000).toFixed(1);
-    const rej = Object.entries(r.rejeicoes)
-      .filter(([, n]) => n > 0)
-      .map(([k, n]) => `${k}=${n}`)
-      .join(" ");
+      const rej = Object.entries(r.rejeicoes)
+        .filter(([, n]) => n > 0)
+        .map(([k, n]) => `${k}=${n}`)
+        .join(" ");
 
-    log(
-      `${band.id.padEnd(10)} ${String(r.levels.length).padStart(4)}/${alvo} aceites  ` +
-        `${String(r.avaliados).padStart(6)} avaliados  ` +
-        `${pct(r.levels.length / Math.max(1, r.avaliados)).padStart(6)} aceitação  ` +
-        `${segundos}s`,
-    );
-    log(`           rejeições: ${rej || "nenhuma"}`);
-    log(
-      `           sobrevivência observada: p10=${percentil(r.taxas, 0.1).toFixed(2)} ` +
-        `mediana=${percentil(r.taxas, 0.5).toFixed(2)} p90=${percentil(r.taxas, 0.9).toFixed(2)}`,
-    );
+      log(
+        `${passagem.rotulo.padEnd(18)} ${String(r.levels.length).padStart(3)}/${String(passagem.alvo)} aceites  ` +
+          `${String(r.avaliados).padStart(6)} avaliados  ` +
+          `${pct(r.levels.length / Math.max(1, r.avaliados)).padStart(6)} aceitação`,
+      );
+      log(`                   rejeições: ${rej || "nenhuma"}`);
+      log(
+        `                   sobrevivência: p10=${percentil(r.taxas, 0.1).toFixed(2)} ` +
+          `mediana=${percentil(r.taxas, 0.5).toFixed(2)} p90=${percentil(r.taxas, 0.9).toFixed(2)}`,
+      );
 
-    pack.push(...r.levels);
+      pack.push(...r.levels);
+    }
+
+    log(`  ${band.id} em ${((Date.now() - t0) / 1000).toFixed(1)}s`);
   }
 
   const destino = resolve(values.out, "level-pack.json");
@@ -288,7 +301,7 @@ const codigo = await (async (): Promise<number> => {
     default:
       log("uso: septet <build|bands|play|verify|export>");
       log("");
-      log("  build   [--band <id>] [--count <n>] [--runs <n>] [--out <dir>]");
+      log("  build   [--band <id>] [--count <n>] [--runs <n>] [--max <n>] [--out <dir>]");
       log("  bands   lista as bandas e os seus critérios");
       log("  play    [--band <id>] [--id <levelId>] [--seed <n>]");
       log("          [--pack <ficheiro>] [--log <ficheiro>] [--passos]");
