@@ -18,6 +18,7 @@ import {
   boardKey,
   cellAt,
   findSolution,
+  hasAnyGroup,
   isEmpty,
   isValidGroup,
   toGroup,
@@ -68,6 +69,21 @@ export const startGame = (level: Level): GameState => ({
 });
 
 export const isFinished = (s: GameState): boolean => isEmpty(s.board);
+
+/**
+ * Sobram peças e já não há nenhuma jogada. O oposto de ganhar.
+ *
+ * **Não é um caso de fronteira, é o desfecho mais provável.** Num tabuleiro
+ * típico da banda `denso`, 77% das sequências acabam aqui — ver a nota do
+ * `jokerValue` mais abaixo. Não anunciar este estado deixava o jogador a tocar
+ * em peças à espera de que alguma coisa acontecesse.
+ *
+ * `hasAnyGroup` já conta com o joker, portanto isto vale nos dois casos. E é
+ * ler as regras, não medir nada: a proibição da spec §7.5 é ao gerador e às
+ * métricas, não à pergunta «ainda há jogada?».
+ */
+export const isBlocked = (s: GameState): boolean =>
+  !isEmpty(s.board) && !hasAnyGroup(s.board);
 
 /** Soma das faces fixas da seleção. O joker conta 0 (spec §3.2). */
 export function selectionSum(b: Board, selection: readonly Packed[]): number {

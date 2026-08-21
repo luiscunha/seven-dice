@@ -29,6 +29,7 @@ import {
 } from "../session/PuzzleSession";
 import type { JokerValue } from "../session/GameSession";
 import {
+  isBlocked,
   isFinished,
   remainingToTarget,
   selectionTotal,
@@ -159,6 +160,9 @@ export class PuzzleScreen {
 
     this.elFim = document.createElement("div");
     this.elFim.className = "fim";
+    // Anunciado por leitor de ecrã: quem não vê o painel aparecer também tem de
+    // saber que o tabuleiro encravou, senão fica a tocar em peças sem resposta.
+    this.elFim.setAttribute("role", "status");
     this.elFim.hidden = true;
 
     rodape.append(linha, acoes, this.elFim);
@@ -392,10 +396,18 @@ export class PuzzleScreen {
   private pintarFim(): void {
     const jogo = this.estado.game;
 
-    if (!isFinished(jogo)) {
-      this.elFim.hidden = true;
+    if (isBlocked(jogo)) {
+      this.pintarPreso();
       return;
     }
+
+    if (!isFinished(jogo)) {
+      this.elFim.hidden = true;
+      delete this.elFim.dataset["tipo"];
+      return;
+    }
+
+    this.elFim.dataset["tipo"] = "ganhou";
 
     const selo = seal(this.estado) ?? "completed";
 
@@ -428,6 +440,73 @@ export class PuzzleScreen {
       });
       this.elFim.appendChild(seguinte);
     }
+  }
+
+  /**
+   * O painel de beco sem saída.
+   *
+   * **Desfazer é o botão principal, e reiniciar o secundário** — ao contrário
+   * do que a sugestão pedia. Na campanha o undo é ilimitado e grátis, e é o
+   * único caminho que mostra *onde* é que a coisa correu mal: reiniciar deita
+   * fora o trabalho todo e não ensina nada. Com joker isto pesa ainda mais,
+   * porque a jogada fatal está quase sempre umas quantas atrás e foi invisível
+   * quando aconteceu.
+   *
+   * Não é um modal por cima do tabuleiro. O tabuleiro encravado **é** a lição,
+   * e tapá-lo para dizer que se encravou seria esconder a única coisa que há
+   * para ver. O painel é o mesmo do fim de nível, no mesmo sítio.
+   */
+  private pintarPreso(): void {
+    const jogo = this.estado.game;
+    const restantes = jogo.board.reduce((n, col) => n + col.length, 0);
+
+    this.elFim.dataset["tipo"] = "preso";
+    this.elFim.hidden = false;
+
+    const titulo = document.createElement("div");
+    titulo.className = "selo";
+    titulo.textContent = "Beco sem saída";
+
+    const detalhe = document.createElement("div");
+    detalhe.className = "detalhe";
+    detalhe.textContent =
+      restantes === 1
+        ? "Sobrou 1 peça, e já não há nenhum grupo que some 7."
+        : `Sobraram ${String(restantes)} peças, e já não há nenhum grupo que some 7.`;
+
+    this.elFim.replaceChildren(titulo, detalhe);
+
+    // Só nos níveis com joker, porque só aí o erro é invisível quando se comete.
+    if (jogo.level.joker !== undefined) {
+      const nota = document.createElement("div");
+      nota.className = "detalhe";
+      nota.textContent = "Com o joker, a jogada fatal costuma estar umas atrás.";
+      this.elFim.appendChild(nota);
+    }
+
+    const acoes = document.createElement("div");
+    acoes.className = "acoes";
+
+    // Um tabuleiro sem histórico começou encravado, o que seria um defeito de
+    // geração. Não se promete um desfazer que não existe.
+    if (jogo.history.length > 0) {
+      const desfazer = botao("Desfazer", "primario");
+      desfazer.addEventListener("click", () => {
+        this.desfazer();
+      });
+      acoes.appendChild(desfazer);
+    }
+
+    const reiniciar = botao(
+      "Reiniciar",
+      jogo.history.length > 0 ? undefined : "primario",
+    );
+    reiniciar.addEventListener("click", () => {
+      this.reiniciar();
+    });
+    acoes.appendChild(reiniciar);
+
+    this.elFim.appendChild(acoes);
   }
 }
 
