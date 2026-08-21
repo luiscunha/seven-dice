@@ -1,9 +1,9 @@
 {
-  "name": "septet",
+  "name": "dice-to-seven",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Septet — puzzle de faces de dado. Elimina grupos conexos cuja soma seja 7.",
+  "description": "DiceToSeven — puzzle de faces de dado. Elimina grupos conexos cuja soma seja 7.",
   "packageManager": "pnpm@11.22.0",
   "engines": {
     "node": ">=20"
@@ -14,9 +14,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
-    "septet": "tsx packages/tools/src/cli.ts",
-    "dev": "pnpm --filter @septet/game dev",
-    "build:game": "pnpm --filter @septet/game build"
+    "dice7": "tsx packages/tools/src/cli.ts",
+    "dev": "pnpm --filter @dicetoseven/game dev",
+    "build:game": "pnpm --filter @dicetoseven/game build"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

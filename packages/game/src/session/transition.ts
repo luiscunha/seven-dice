@@ -24,8 +24,8 @@
  * ao DOM — é aritmética sobre o tabuleiro, e tem de ser testável como tal.
  */
 
-import type { Board, Group, Packed } from "@septet/engine";
-import { colOf, packed, rowOf } from "@septet/engine";
+import type { Board, Group, Packed } from "@dicetoseven/engine";
+import { colOf, packed, rowOf } from "@dicetoseven/engine";
 
 export interface PieceMove {
   readonly from: Packed;

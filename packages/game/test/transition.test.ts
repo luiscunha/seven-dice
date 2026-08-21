@@ -9,7 +9,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import type { Board, Cell, Group, Packed } from "@septet/engine";
+import type { Board, Cell, Group, Packed } from "@dicetoseven/engine";
 import {
   applyMove,
   boardKey,
@@ -18,7 +18,7 @@ import {
   generate,
   packed,
   rowOf,
-} from "@septet/engine";
+} from "@dicetoseven/engine";
 
 import { midpointOf, transition } from "../src/session/transition";
 

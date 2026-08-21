@@ -10,8 +10,8 @@
  * leitura, não informação.
  */
 
-import type { Cell } from "@septet/engine";
-import { JOKER } from "@septet/engine";
+import type { Cell } from "@dicetoseven/engine";
+import { JOKER } from "@dicetoseven/engine";
 
 export type ModoFace = "pintas" | "digitos";
 

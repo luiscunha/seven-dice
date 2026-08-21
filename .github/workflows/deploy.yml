@@ -13,7 +13,7 @@
 # Não é preciso configurar caminho base nem reescritas de rotas:
 #
 # - `vite.config.ts` usa `base: "./"`, portanto o bundle funciona servido de uma
-#   subpasta como `/seven-dice/`;
+#   subpasta como `/dice-to-seven/`;
 # - as rotas vivem no fragmento (`#/puzzles/perito`), portanto o servidor só vê
 #   pedidos de `/` e nunca precisa de reescrever nada.
 
@@ -63,7 +63,7 @@ jobs:
         run: |
           for banda in packages/game/public/levels/*.json; do
             case "$banda" in */index.json) continue ;; esac
-            pnpm septet verify "$banda"
+            pnpm dice7 verify "$banda"
           done
 
       - name: Construir

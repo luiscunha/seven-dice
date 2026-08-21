@@ -12,8 +12,8 @@
 ## Arranque
 
 ```bash
-git clone https://github.com/luiscunha/seven-dice.git
-cd seven-dice
+git clone https://github.com/luiscunha/dice-to-seven.git
+cd dice-to-seven
 pnpm install
 pnpm check
 ```
@@ -31,7 +31,7 @@ Leituras, por esta ordem:
    foram verificados.
 3. Este ficheiro.
 
-Os documentos de origem — `spec-motor-septet.md` e `plano-modelo-jogo-septet.md` —
+Os documentos de origem — `spec-motor.md` e `plano-modelo-jogo.md` —
 mantêm-se como estavam. **Não foram corrigidos**, e em quatro pontos estão
 contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 
@@ -136,7 +136,7 @@ remede-se antes de a tratar como facto.
 A **Fase 8** está construída e **publicada**:
 
 ```
-https://luiscunha.github.io/seven-dice/
+https://luiscunha.github.io/dice-to-seven/
 ```
 
 Home, **Puzzles** (campanha em cinco capítulos, com grelha e selos),
@@ -297,7 +297,7 @@ ruído.
 cheio, não ~150. A razão está nos seus próprios números: os tabuleiros cheios
 desta banda têm mediana de sobrevivência **0,42**, e a banda exige **0,55 para
 cima**. Foi preciso dar-lhe seis vezes mais orçamento, e daí vem o `--max` do
-`septet build`.
+`dicetoseven build`.
 
 ---
 
@@ -568,10 +568,10 @@ Duas ressalvas honestas:
 
 ```bash
 pnpm check                                    # lint + typecheck + 323 testes
-pnpm septet bands                               # as bandas e os seus critérios
-pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
-pnpm septet verify                              # revalida o pack todo
-pnpm septet build --count 30 --runs 1000        # reconstrói o pack (--pre 0 desliga o pré-filtro)
-pnpm septet build --band inicio --max 1200      # mais orçamento por nível: as formas cheias caras precisam
-pnpm septet export                              # parte o pack por banda para game/public/levels
+pnpm dice7 bands                               # as bandas e os seus critérios
+pnpm dice7 play --id inicio-000296 --log p.jsonl # jogar um nível na consola
+pnpm dice7 verify                              # revalida o pack todo
+pnpm dice7 build --count 30 --runs 1000        # reconstrói o pack (--pre 0 desliga o pré-filtro)
+pnpm dice7 build --band inicio --max 1200      # mais orçamento por nível: as formas cheias caras precisam
+pnpm dice7 export                              # parte o pack por banda para game/public/levels
 ```

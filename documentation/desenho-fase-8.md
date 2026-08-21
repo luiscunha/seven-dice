@@ -5,7 +5,7 @@
 >
 > Escrito a 2026-08-20, depois do gate da Fase 6 e da Fase 7.
 >
-> Em caso de conflito, `spec-motor-septet.md` e `plano-modelo-jogo-septet.md` ganham,
+> Em caso de conflito, `spec-motor.md` e `plano-modelo-jogo.md` ganham,
 > **exceto** onde este documento diz explicitamente que os contraria — e nesses
 > casos diz porquê.
 
@@ -207,7 +207,8 @@ redundante — é o que faz isto funcionar em daltonismo.
 
 ### 4.2 A paleta, derivada do logótipo
 
-As cores de origem, tiradas da identidade **SEPTET**:
+As cores de origem, tiradas do logótipo original. O jogo chamava-se então
+**Septet**; a paleta sobreviveu ao nome, porque nada nela dependia dele.
 
 | | |
 |---|---|
@@ -561,10 +562,14 @@ Decidido por mim porque a direção já os determina. Se algum estiver errado,
   jogo. O lettering do logótipo pede uma sem-serifa geométrica de contornos
   suaves; a escolha exata fica por fazer, e importa mais do que parece, porque há
   um modo de dígitos nas peças.
-- **O nome do repositório.** O jogo passou a chamar-se **Septet** em todo o lado —
-  documentos, pacotes `@septet/*`, comando `pnpm septet`, chave de perfil. Duas
-  coisas ficaram por mudar porque mudá-las **partia** alguma coisa: o repositório
-  no GitHub continua `seven-dice`, e o URL de clone nos documentos aponta para lá.
-  Renomear o repositório é uma ação no GitHub, e o URL segue-a.
+- **O nome.** ~~Septet~~ → **DiceToSeven**, decidido a 2026-08-21 depois de
+  procurar o que já existia. `Sevenfall`, `7 Pips`, `Pipfall`, `Dicefall`,
+  `Sumfall`, `Alea`, `Cairn` e `Tessera` estavam todos ocupados — a categoria
+  esgotou os nomes que descrevem a mecânica. `DiceToSeven` está livre e diz o que
+  distingue este jogo dos que somam sete com dígitos: são **dados**.
+  - **O logótipo desenha o `T` como um `7`.** O nome escreve-se com T em todo o
+    lado — lojas, URL, código — porque ninguém escreve um `7` de ouvido. A graça
+    fica no desenho, onde não custa buscas.
+  - Fica por decidir a tipografia (§10 continua a valer) e o desenho em si.
 - **O conflito das nove colunas em telemóvel** (§2.3), que não é preciso resolver
   antes da Fase 9 mas não pode ser esquecido.

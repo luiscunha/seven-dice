@@ -30,7 +30,7 @@ export class HomeScreen {
 
     const marca = elemento("div", "home-marca");
     marca.append(
-      elemento("h1", "home-titulo", "Septet"),
+      elemento("h1", "home-titulo", "DiceToSeven"),
       elemento(
         "p",
         "home-lema",

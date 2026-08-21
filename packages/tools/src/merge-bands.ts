@@ -15,7 +15,7 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 
-import type { Level } from "@septet/engine";
+import type { Level } from "@dicetoseven/engine";
 
 import { BANDS } from "./bands";
 

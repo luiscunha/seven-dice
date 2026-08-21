@@ -1,4 +1,4 @@
-# CLAUDE.md — Septet (seven-dice)
+# CLAUDE.md — DiceToSeven (dice-to-seven)
 
 Puzzle de faces de dado: elimina grupos ortogonalmente conexos cuja soma seja
 exatamente **7**, até o tabuleiro ficar vazio.
@@ -9,8 +9,8 @@ Versionados neste repo, em `documentation/`:
 
 | Ficheiro | O que decide |
 |---|---|
-| `plano-modelo-jogo-septet.md` | Regras, modos, progressão, monetização |
-| `spec-motor-septet.md` | Arquitetura do motor. **A fonte de verdade para código** |
+| `plano-modelo-jogo.md` | Regras, modos, progressão, monetização |
+| `spec-motor.md` | Arquitetura do motor. **A fonte de verdade para código** |
 | `plano-implementacao.md` | Ordem de construção, fases, critérios de aceitação |
 
 Em caso de conflito com este ficheiro, a spec ganha. Este documento é um resumo
@@ -52,10 +52,10 @@ bundler:
 ```bash
 pnpm dev          # servidor de desenvolvimento do jogo
 pnpm build:game   # bundle de produção para packages/game/dist
-pnpm septet export  # parte o level pack por banda para game/public/levels
+pnpm dice7 export  # parte o level pack por banda para game/public/levels
 ```
 
-O Vite não tem alias para `@septet/engine`: resolve-o pelo workspace, como o
+O Vite não tem alias para `@dicetoseven/engine`: resolve-o pelo workspace, como o
 Vitest e o `tsc`. Um alias seria um segundo caminho de resolução, e dois caminhos
 são a porta para divergirem.
 

@@ -18,8 +18,8 @@
  * já percebeu sai daqui em quatro toques.
  */
 
-import type { Group, Packed } from "@septet/engine";
-import { JOKER, cellAt, hasAnyGroup, totalSum } from "@septet/engine";
+import type { Group, Packed } from "@dicetoseven/engine";
+import { JOKER, cellAt, hasAnyGroup, totalSum } from "@dicetoseven/engine";
 
 import type { GameState, JokerValue } from "../session/GameSession";
 import { isFinished, restart, startGame, tap } from "../session/GameSession";

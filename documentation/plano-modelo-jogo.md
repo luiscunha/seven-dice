@@ -1,4 +1,4 @@
-# Plano do Modelo de Jogo — "Septet" (nome provisório)
+# Plano do Modelo de Jogo — "DiceToSeven" (nome provisório)
 
 > Documento vivo. Modelo de jogo fechado — sem decisões pendentes.
 

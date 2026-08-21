@@ -32,7 +32,7 @@ function correrFatia(tarefa: TarefaWorker): Promise<Avaliacao[]> {
      * `--import tsx` no worker, e não só no processo principal.
      *
      * O worker é TypeScript e um `Worker` do Node arranca sem herdar o loader
-     * de quem o criou. Sob `pnpm septet` o tsx do processo principal chegaria por
+     * de quem o criou. Sob `pnpm dice7` o tsx do processo principal chegaria por
      * acaso; sob o Vitest não chega, porque aí quem transforma o TypeScript é o
      * Vite e o worker corre em Node puro. Pedir o loader explicitamente faz os
      * dois caminhos funcionarem — e é o que permite que este código seja

@@ -10,7 +10,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Level } from "@septet/engine";
+import type { Level } from "@dicetoseven/engine";
 
 import type { NivelDoCapitulo } from "../src/capitulos";
 import {

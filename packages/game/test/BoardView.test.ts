@@ -11,8 +11,8 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 
-import type { Board, Group, Packed } from "@septet/engine";
-import { applyMove, boardKey, packed } from "@septet/engine";
+import type { Board, Group, Packed } from "@dicetoseven/engine";
+import { applyMove, boardKey, packed } from "@dicetoseven/engine";
 
 import { BoardView } from "../src/ui/BoardView";
 

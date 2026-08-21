@@ -1,5 +1,5 @@
 {
-  "name": "@septet/game",
+  "name": "@dicetoseven/game",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,6 +13,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@septet/engine": "workspace:*"
+    "@dicetoseven/engine": "workspace:*"
   }
 }

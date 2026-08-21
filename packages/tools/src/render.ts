@@ -13,8 +13,8 @@
  *   topo (plano §3.2), e desenhar celas vazias por cima escondê-la-ia.
  */
 
-import type { Board, Group, Packed } from "@septet/engine";
-import { JOKER, cellAt, colOf, height, packed, rowOf, width } from "@septet/engine";
+import type { Board, Group, Packed } from "@dicetoseven/engine";
+import { JOKER, cellAt, colOf, height, packed, rowOf, width } from "@dicetoseven/engine";
 
 const LETRAS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 

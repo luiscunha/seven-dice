@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { applyMove, isGreedySafe, isValidGroup, pieceCount } from "@septet/engine";
+import { applyMove, isGreedySafe, isValidGroup, pieceCount } from "@dicetoseven/engine";
 
 import { BANDS, bandById } from "../src/bands";
 import { avaliar } from "../src/candidate";
