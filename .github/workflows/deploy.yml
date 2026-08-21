@@ -1,0 +1,79 @@
+# Publica o jogo no GitHub Pages.
+#
+# **Só corre quando alguém o mandar correr** — botão "Run workflow" no separador
+# Actions. A alternativa era publicar a cada push para a main; ficou de fora de
+# propósito, para que pôr uma versão à frente de quem testa seja sempre uma
+# decisão e nunca um efeito secundário de um commit.
+#
+# O `pnpm check` corre antes do build e não se salta. Um jogo publicado com a
+# suite vermelha é pior do que um jogo não publicado: quem testa reporta o
+# defeito que já sabíamos ter, e gasta-se a única coisa que o playtest tem de
+# escasso, que é a atenção da pessoa.
+#
+# Não é preciso configurar caminho base nem reescritas de rotas:
+#
+# - `vite.config.ts` usa `base: "./"`, portanto o bundle funciona servido de uma
+#   subpasta como `/seven-dice/`;
+# - as rotas vivem no fragmento (`#/puzzles/perito`), portanto o servidor só vê
+#   pedidos de `/` e nunca precisa de reescrever nada.
+
+name: Publicar
+
+on:
+  workflow_dispatch:
+
+# Um só deploy de cada vez, e sem cancelar o que já está a meio: cancelar a meio
+# de uma publicação deixaria o site num estado que ninguém pediu.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Verificar antes de publicar
+        run: pnpm check
+
+      # Reverifica o pack servido ao jogo, e não o de `tools/out`: é este que as
+      # pessoas vão jogar. Se um nível impossível chegasse aqui, é o último sítio
+      # onde ainda dá para o apanhar.
+      - name: Reverificar os níveis publicados
+        run: |
+          for banda in packages/game/public/levels/*.json; do
+            case "$banda" in */index.json) continue ;; esac
+            pnpm septet verify "$banda"
+          done
+
+      - name: Construir
+        run: pnpm build:game
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/game/dist
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

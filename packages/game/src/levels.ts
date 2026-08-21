@@ -16,11 +16,37 @@ export interface NivelNoIndice {
   readonly pieces: number;
   /** Decide o tutorial do joker e o andaime da soma, no arranque. */
   readonly joker?: boolean;
+  /** Colunas do tabuleiro. Decide se cabe num telemóvel — ver `cabeNoEcra`. */
+  readonly colunas?: number;
 }
+
+/**
+ * Colunas que um telemóvel comporta.
+ *
+ * **É largura, e largura não se recupera com enchimento.** Medido num ecrã de
+ * 360px, o mais estreito que vale a pena servir: sete colunas dão peças de 44px,
+ * que é o piso de toque; oito dão 38px e onze dão 26px — mais estreito do que
+ * uma tecla de teclado.
+ *
+ * Os níveis mais largos **continuam no pack** e continuam válidos; só não entram
+ * na campanha. São 20 em 240, nenhum no Tutorial nem no Iniciado.
+ */
+export const LARGURA_MAXIMA = 7;
+
+/**
+ * Um nível sem largura conhecida entra.
+ *
+ * O campo é opcional porque um índice gerado antes desta regra não o traz, e a
+ * escolha certa aí é deixar jogar em vez de esconder a campanha inteira.
+ */
+export const cabeNoEcra = (colunas: number | undefined): boolean =>
+  colunas === undefined || colunas <= LARGURA_MAXIMA;
 
 export interface BandaNoIndice {
   readonly id: string;
   readonly label: string;
+  /** `"tempo"` fica de fora da campanha — é o corpus do outro modo. */
+  readonly modo?: "tempo";
   readonly niveis: readonly NivelNoIndice[];
 }
 

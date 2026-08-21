@@ -69,6 +69,20 @@
 }
 
 /*
+ * Em telemóvel, cada pixel de cromado sai do tabuleiro.
+ *
+ * Medido num ecrã de 375: com a folga de 6px e o enchimento de secretária, um
+ * 7×7 dava peças de 41px — abaixo do piso de toque de 44. Apertar a folga e o
+ * enchimento leva-o a 46. É a diferença entre acertar na peça e acertar na do
+ * lado.
+ */
+@media (max-width: 480px) {
+  :root {
+    --gap-peca: 4px;
+  }
+}
+
+/*
  * Só o cromado muda de tema. **As faces não**: uma peça é a mesma peça nos dois
  * fundos, e trocá-las quebrava a identidade que o jogador aprendeu.
  */
@@ -126,6 +140,21 @@ body {
   /* O tabuleiro é uma superfície de toque, não de seleção de texto. */
   -webkit-user-select: none;
   user-select: none;
+
+  /*
+   * Duas coisas que só se notam com o dedo, e que estragam o jogo inteiro se
+   * faltarem.
+   *
+   * O realce de toque do iOS pinta um retângulo azul por cima da peça — por cima
+   * do anel de seleção que desenhámos justamente para não depender de cor.
+   *
+   * E "touch-action: manipulation" desliga o zoom por duplo toque. Sem ele o
+   * browser espera 300 ms a cada toque para ver se vem um segundo, e numa jogada
+   * de sete peças seguidas isso não se lê como zoom: lê-se como o jogo estar
+   * lento.
+   */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   /* Safe areas, para a fase 9 não ser uma surpresa. */
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
     env(safe-area-inset-bottom) env(safe-area-inset-left);

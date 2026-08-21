@@ -51,6 +51,16 @@ export interface BandSpec {
   readonly label: string;
 
   /**
+   * A que modo esta banda serve. Por omissão, campanha.
+   *
+   * O corpus do modo tempo é o **oposto** do da campanha (plano §6.1) — exige
+   * 100% de sobrevivência e prova de greedy-safe — e não tem nada que fazer na
+   * lista de bandas. Sem isto, o jogo teria de adivinhar pelo id ou pelos
+   * critérios de aceitação, que é adivinhar.
+   */
+  readonly modo?: "tempo";
+
+  /**
    * Formas cheias desta banda. **Metade dos níveis publicados sai daqui**, com
    * uma quota por forma — ver `comandoBuild`.
    *
@@ -185,7 +195,7 @@ export const BANDS: readonly BandSpec[] = [
   },
   {
     id: "meio-joker",
-    label: "Meio — o nível de estrangulamento, construído à volta do joker",
+    label: "Meio com joker — o nível de estrangulamento",
     params: {
       compositionWeights: ateNPecas(4),
       newColumnProbability: 0.35,
@@ -267,6 +277,7 @@ export const BANDS: readonly BandSpec[] = [
   {
     id: "tempo",
     label: "Modo tempo — greedy-safe, sem joker",
+    modo: "tempo",
     params: { compositionWeights: ateNPecas(3), newColumnProbability: 0.45 },
     pieces: [10, 18],
     accept: { survival: [1, 1], requireGreedySafe: true, fairnessDepth: 0 },

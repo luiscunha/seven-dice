@@ -49,7 +49,7 @@ contrariados por medições. Ver "Onde a realidade contrariou os documentos".
 | 5 | Métricas e pipeline | ✅ |
 | 6 | Renderer de consola | ✅ **gate fechado a Verde** |
 | 7 | Camada de sessão | ✅ |
-| 8 | UI web | 🔨 **em curso** — tabuleiro e tutorial do joker feitos; falta lista de níveis, modo tempo e meta-jogo |
+| 8 | UI web | 🔨 **em curso** — jogável ponta a ponta nos dois modos; falta o deploy para o playtest externo |
 | 9 | Empacotamento | por começar |
 
 O motor está completo e é puro: `packages/engine/src/` não importa nada de Node,
@@ -133,15 +133,20 @@ remede-se antes de a tratar como facto.
 
 ## O que se segue
 
-A **Fase 8**, a meio. O tabuleiro joga-se ponta a ponta — seleção, animação em
-três tempos, undo, reinício, dicas, joker e fim de nível com selo — e o tutorial
-do joker está feito. Falta a lista de níveis, o modo tempo e o meta-jogo.
+A **Fase 8**, quase fechada. O jogo tem Home, **Puzzles** (campanha em cinco
+capítulos, com grelha e selos), **Contra-Relógio** e definições. **Falta o
+deploy** — e com ele o playtest externo, que é o critério de aceitação da fase.
 
 ```bash
 pnpm dev     # localhost:5173
 ```
 
-Enquanto não há lista, escolhe-se por query: `?banda=denso&nivel=20`.
+As rotas vivem no fragmento — `#/puzzles/perito`, `#/jogo/perito/27`,
+`#/contrarrelogio`.
+É o que faz o jogo publicado correr em alojamento estático sem uma linha de
+reescritas, e o que dá endereço a cada ecrã: no playtest, um link leva a pessoa
+exatamente ao nível de que se está a falar. A forma antiga, `?banda=…&nivel=…`,
+continua a funcionar.
 
 O critério de aceitação da fase é *campanha inicial jogável ponta a ponta, com os
 dois modos, num link partilhável*. Contra ele falta, por ordem:
@@ -149,9 +154,10 @@ dois modos, num link partilhável*. Contra ele falta, por ordem:
 | | | |
 |---|---|---|
 | 1 | Tutorial do joker | ✅ |
-| 2 | Lista de níveis por banda, com os selos | por fazer |
-| 3 | Modo tempo — `TimeAttackSession` existe desde a Fase 7 e **nenhuma linha de UI o usa** | por fazer |
-| 4 | Link partilhável, para o playtest externo | por fazer |
+| 2 | Forma dos tabuleiros — metade cheios | ✅ |
+| 3 | Home, campanha em capítulos, definições | ✅ |
+| 4 | Contra-Relógio | ✅ |
+| 5 | Link partilhável, para o playtest externo | por fazer |
 
 O mapa de progressão, o perfil, as definições e o puzzle diário ficam **depois**
 da marca do playtest (desenho §8) e não bloqueiam a Fase 9.
@@ -282,6 +288,90 @@ cheio, não ~150. A razão está nos seus próprios números: os tabuleiros chei
 desta banda têm mediana de sobrevivência **0,42**, e a banda exige **0,55 para
 cima**. Foi preciso dar-lhe seis vezes mais orçamento, e daí vem o `--max` do
 `septet build`.
+
+---
+
+## Bandas e capítulos são coisas diferentes
+
+Estavam a ser a mesma, e isso pôs sete entradas na lista de níveis — duas delas,
+`meio-joker` e `denso`, bandas **inteiras** de joker. O plano §7 diz o
+contrário: o joker "aparece esporadicamente — não em todos os tabuleiros".
+
+A campanha passa a mostrar **cinco capítulos**, com o joker intercalado um em
+cada três níveis:
+
+| Capítulo | Base | Joker intercalado | Níveis |
+|---|---|---|---|
+| Tutorial | `tutorial` | — | 30 |
+| Iniciado | `inicio` | — | 30 |
+| Médio | `meio` | `meio-joker` | 45 |
+| Avançado | `avancado` | `denso` | 45 |
+| Perito | `perito` | — | 30 |
+
+Os dois modos chamam-se **Puzzles** e **Contra-Relógio**. O segundo arranca com
+60 segundos por omissão, e o valor está nas definições — 30, 60 ou 90. O plano
+§6.3 pede um arranque generoso mas não diz quanto, e isso é número de playtest.
+
+**As bandas não se fundem, e não é preguiça.** A `meio` aceita sobrevivência de
+30–55% e a `meio-joker` de 2–15%; nenhum tabuleiro cumpre as duas, porque um
+joker sozinho leva a sobrevivência de 0,83 para 0,20. A separação é uma restrição
+de *geração*. A apresentação não a tem — daí viver em `capitulos.ts` e as bandas
+continuarem oito no pipeline.
+
+A rota do jogo continua a ser `#/jogo/<banda>/<índice>`, e não a posição no
+capítulo: é o par que identifica o nível no pack, portanto um link sobrevive a
+mudar a cadência de intercalação — e os links antigos continuam a funcionar sem
+tradução nenhuma.
+
+**Sobram 15 níveis de cada banda com joker**, 30 ao todo, gerados e por jogar. É
+assumido, e há um teste que o vigia: são o corpo natural do puzzle diário
+(desenho §8, passo 10).
+
+---
+
+## Telemóvel deixou de ser da Fase 9
+
+O desenho da Fase 8 assumiu "desktop primeiro" e adiou o telemóvel. Deixou de
+servir: **mais de 80% de quem vai testar usa telemóvel**.
+
+Medido, não presumido. Nada rebentava — sem rolagem lateral, rodapé sempre
+visível, tabuleiro sempre dentro da bandeja. O que falhava era o **alvo de
+toque**, e falhava de duas maneiras diferentes.
+
+**A que se resolve com CSS.** Num ecrã de 375, um 7×7 dava peças de 41px, abaixo
+do piso de 44. Apertando a folga das peças de 6 para 4 e o enchimento dos ecrãs
+em larguras até 480px, passa a 46px — e a 44px num ecrã de 360, o pior caso que
+vale a pena servir.
+
+Mais duas ausências que só doem com o dedo:
+
+| | |
+|---|---|
+| `-webkit-tap-highlight-color: transparent` | o iOS pintava um retângulo azul por cima do anel de seleção |
+| `touch-action: manipulation` | sem ele, 300ms de espera por toque à procura de um duplo toque — numa jogada de sete peças lê-se como o jogo estar lento |
+
+**A que não se resolve com CSS: a largura.** Até 7 colunas as peças ficam no piso
+de toque; 8 colunas dão 38px e o único nível de 11 dá 26px, mais estreito do que
+uma tecla de teclado. Não há enchimento que recupere largura.
+
+A campanha passa a **saltar os níveis com 8 ou mais colunas**. Continuam no pack,
+continuam válidos, e continuam acessíveis por link direto — só não entram nos
+capítulos:
+
+| Capítulo | Antes | Agora |
+|---|---|---|
+| Tutorial | 30 | 30 |
+| Iniciado | 30 | 30 |
+| Médio | 45 | 40 |
+| Avançado | 45 | 33 |
+| Perito | 30 | 23 |
+
+O índice ganhou `colunas` para isto ser decidido no arranque, sem carregar as
+bandas todas. **O índice na banda continua a ser calculado antes de filtrar** —
+é ele que vai na rota, e renumerar fazia um link antigo abrir outro nível.
+
+É a correção barata e reversível; a correção de raiz seria um teto de largura no
+pipeline, e essa fica para quando houver razão para regerar.
 
 ---
 
@@ -467,7 +557,7 @@ Duas ressalvas honestas:
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 288 testes
+pnpm check                                    # lint + typecheck + 323 testes
 pnpm septet bands                               # as bandas e os seus critérios
 pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm septet verify                              # revalida o pack todo

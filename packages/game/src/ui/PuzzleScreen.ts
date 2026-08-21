@@ -56,6 +56,14 @@ export interface OpcoesPuzzleScreen {
   readonly aoPedirAjuda?: () => void;
 
   /**
+   * Sobe para a grelha da banda. Sem isto a seta não aparece.
+   *
+   * Sobe **na hierarquia**, não no histórico: quem chega a um nível por link
+   * direto não tem para onde recuar, mas tem sempre a lista acima de si.
+   */
+  readonly aoVoltar?: () => void;
+
+  /**
    * O andaime dos três primeiros níveis com joker (`session/tutorial.ts`): a
    * soma das faces no cabeçalho, enquanto o joker ainda estiver no tabuleiro.
    */
@@ -100,6 +108,15 @@ export class PuzzleScreen {
 
     const espaco = document.createElement("div");
     espaco.className = "espaco";
+
+    if (opcoes.aoVoltar !== undefined) {
+      const voltar = botao("‹", "redondo");
+      voltar.setAttribute("aria-label", "voltar à lista");
+      voltar.addEventListener("click", () => {
+        opcoes.aoVoltar?.();
+      });
+      topo.appendChild(voltar);
+    }
 
     topo.append(this.elTitulo, espaco, this.elMeta);
 

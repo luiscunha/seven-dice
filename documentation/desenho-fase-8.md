@@ -531,10 +531,10 @@ deita fora.
 | 3 | Tabuleiro, faces, seleção, soma corrente | ✅ |
 | 4 | A animação em três fases | ✅ |
 | 5 | Pendência do joker e o seu tutorial | ✅ |
-| 6 | Lista de níveis, resultado com selo, persistência | |
-| 7 | Modo tempo | |
+| 6 | Lista de níveis, resultado com selo, persistência | ✅ |
+| 7 | Modo tempo | ✅ |
 | 8 | ← **aqui há link partilhável e o playtest externo pode começar** | |
-| 9 | Mapa de progressão, perfil, definições | |
+| 9 | Mapa de progressão, perfil, definições | parcial — definições feitas |
 | 10 | Puzzle diário | |
 
 ---
