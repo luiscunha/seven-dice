@@ -133,15 +133,16 @@ remede-se antes de a tratar como facto.
 
 ## O que se segue
 
-A **Fase 8**, quase fechada. O jogo tem Home, campanha por bandas, grelha de
-níveis com selos, definições e modo tempo. **Falta o deploy** — e com ele o
-playtest externo, que é o critério de aceitação da fase.
+A **Fase 8**, quase fechada. O jogo tem Home, **Puzzles** (campanha em cinco
+capítulos, com grelha e selos), **Contra-Relógio** e definições. **Falta o
+deploy** — e com ele o playtest externo, que é o critério de aceitação da fase.
 
 ```bash
 pnpm dev     # localhost:5173
 ```
 
-As rotas vivem no fragmento — `#/niveis/perito`, `#/jogo/perito/27`, `#/tempo`.
+As rotas vivem no fragmento — `#/puzzles/perito`, `#/jogo/perito/27`,
+`#/contrarrelogio`.
 É o que faz o jogo publicado correr em alojamento estático sem uma linha de
 reescritas, e o que dá endereço a cada ecrã: no playtest, um link leva a pessoa
 exatamente ao nível de que se está a falar. A forma antiga, `?banda=…&nivel=…`,
@@ -155,7 +156,7 @@ dois modos, num link partilhável*. Contra ele falta, por ordem:
 | 1 | Tutorial do joker | ✅ |
 | 2 | Forma dos tabuleiros — metade cheios | ✅ |
 | 3 | Home, campanha em capítulos, definições | ✅ |
-| 4 | Modo tempo | ✅ |
+| 4 | Contra-Relógio | ✅ |
 | 5 | Link partilhável, para o playtest externo | por fazer |
 
 O mapa de progressão, o perfil, as definições e o puzzle diário ficam **depois**
@@ -306,6 +307,10 @@ cada três níveis:
 | Médio | `meio` | `meio-joker` | 45 |
 | Avançado | `avancado` | `denso` | 45 |
 | Perito | `perito` | — | 30 |
+
+Os dois modos chamam-se **Puzzles** e **Contra-Relógio**. O segundo arranca com
+60 segundos por omissão, e o valor está nas definições — 30, 60 ou 90. O plano
+§6.3 pede um arranque generoso mas não diz quanto, e isso é número de playtest.
 
 **As bandas não se fundem, e não é preguiça.** A `meio` aceita sobrevivência de
 30–55% e a `meio-joker` de 2–15%; nenhum tabuleiro cumpre as duas, porque um
@@ -506,7 +511,7 @@ Duas ressalvas honestas:
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 316 testes
+pnpm check                                    # lint + typecheck + 318 testes
 pnpm septet bands                               # as bandas e os seus critérios
 pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm septet verify                              # revalida o pack todo

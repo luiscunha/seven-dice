@@ -35,7 +35,7 @@ export class CapitulosScreen {
   constructor(host: HTMLElement, opcoes: OpcoesCapitulos) {
     this.raiz = elemento("div", "ecra");
 
-    const { el: topo } = cabecalho("Níveis", opcoes.aoVoltar);
+    const { el: topo } = cabecalho("Puzzles", opcoes.aoVoltar);
 
     const lista = elemento("div", "bandas");
     for (const entrada of opcoes.capitulos) {

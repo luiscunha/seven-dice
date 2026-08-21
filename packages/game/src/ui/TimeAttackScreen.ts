@@ -20,8 +20,12 @@ import type { Group, Level, Packed } from "@septet/engine";
 import { colOf, mulberry32, rowOf, shuffled } from "@septet/engine";
 
 import { selectionTotal } from "../session/GameSession";
-import type { TimeAttackState } from "../session/TimeAttackSession";
+import type {
+  TimeAttackConfig,
+  TimeAttackState,
+} from "../session/TimeAttackSession";
 import {
+  DEFAULT_TIME_ATTACK,
   isOver,
   nextBoard,
   remainingMs,
@@ -42,6 +46,11 @@ export interface OpcoesTimeAttack {
   }) => void;
   readonly aoSair: () => void;
   readonly melhorPontuacao: number;
+  /**
+   * Segundos de arranque. O plano §6.3 pede um começo generoso, mas quanto é
+   * generoso é número de playtest — daí ser uma definição e não uma constante.
+   */
+  readonly tempoInicial: number;
 }
 
 export class TimeAttackScreen {
@@ -56,6 +65,7 @@ export class TimeAttackScreen {
   private readonly elFim: HTMLElement;
 
   private estado: TimeAttackState;
+  private readonly config: TimeAttackConfig;
   private ordem: readonly Level[];
   private indice = 0;
   private cronometro: ReturnType<typeof setInterval> | undefined;
@@ -75,7 +85,12 @@ export class TimeAttackScreen {
     const primeiro = this.ordem[0];
     if (primeiro === undefined) throw new Error("não há níveis para o modo tempo");
 
-    this.estado = startTimeAttack(primeiro, Date.now());
+    this.config = {
+      ...DEFAULT_TIME_ATTACK,
+      initialMs: opcoes.tempoInicial * 1000,
+    };
+
+    this.estado = startTimeAttack(primeiro, Date.now(), this.config);
 
     this.raiz = elemento("div", "ecra tempo");
 
@@ -150,7 +165,7 @@ export class TimeAttackScreen {
     const antes = this.estado;
     const selecao = [...antes.game.selection, p];
 
-    const r = tapTimeAttack(antes, p, Date.now());
+    const r = tapTimeAttack(antes, p, Date.now(), { time: this.config });
     this.estado = r.state;
 
     if (r.moved) {

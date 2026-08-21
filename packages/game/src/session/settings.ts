@@ -27,14 +27,27 @@ export type Tema = "sistema" | "claro" | "escuro";
 
 const TEMAS: readonly Tema[] = ["sistema", "claro", "escuro"];
 
+/**
+ * Segundos com que o contra-relógio arranca.
+ *
+ * O plano §6.3 pede um arranque generoso, para o jogador entrar em ritmo antes
+ * da pressão — mas quanto é generoso é número de playtest, não de escrivaninha.
+ * Fica à escolha em vez de fixo, e o valor por omissão é 60.
+ */
+export type TempoInicial = 30 | 60 | 90;
+
+const TEMPOS: readonly TempoInicial[] = [30, 60, 90];
+
 export interface Settings {
   readonly version: number;
   readonly tema: Tema;
+  readonly tempoInicial: TempoInicial;
 }
 
 export const defaultSettings = (): Settings => ({
   version: SETTINGS_VERSION,
   tema: "sistema",
+  tempoInicial: 60,
 });
 
 export const saveSettings = (
@@ -60,9 +73,18 @@ export function loadSettings(storage: ProfileStorage): Settings {
   const s = parsed as Partial<Settings>;
   if (s.version !== SETTINGS_VERSION) return defaultSettings();
 
+  /*
+   * Cada campo valida-se sozinho e cai no seu valor por omissão. É o que permite
+   * acrescentar preferências **sem subir a versão** — um ficheiro gravado antes
+   * de o contra-relógio ser configurável lê-se na mesma, e ninguém perde o tema
+   * por causa de um campo novo.
+   */
   return {
     version: SETTINGS_VERSION,
     tema: TEMAS.includes(s.tema as Tema) ? (s.tema as Tema) : "sistema",
+    tempoInicial: TEMPOS.includes(s.tempoInicial as TempoInicial)
+      ? (s.tempoInicial as TempoInicial)
+      : 60,
   };
 }
 

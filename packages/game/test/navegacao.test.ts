@@ -77,8 +77,15 @@ describe("rotas", () => {
 
   it("nomes com hífen sobrevivem à codificação", () => {
     const r: Rota = { ecra: "niveis", capitulo: "avancado" };
-    expect(paraHash(r)).toBe("#/niveis/avancado");
+    expect(paraHash(r)).toBe("#/puzzles/avancado");
     expect(deHash(paraHash(r))).toEqual(r);
+  });
+
+  /* O nome antigo da rota continua a ser aceite à entrada, e sai já com o novo. */
+  it("«niveis» ainda entra, e «tempo» também", () => {
+    expect(deHash("#/niveis/perito")).toEqual({ ecra: "niveis", capitulo: "perito" });
+    expect(deHash("#/tempo")).toEqual({ ecra: "tempo" });
+    expect(paraHash({ ecra: "tempo" })).toBe("#/contrarrelogio");
   });
 
   /* Há links `?banda=…` espalhados por notas e conversas; traduzi-los é uma linha. */
@@ -176,10 +183,11 @@ describe("modo tempo", () => {
   let terminou: { pontos: number; tabuleiros: number } | undefined;
   let saiu = 0;
 
-  const abrir = (): TimeAttackScreen =>
+  const abrir = (segundos: 30 | 60 | 90 = 60): TimeAttackScreen =>
     new TimeAttackScreen(host, {
       niveis: [nivel("tempo-1"), nivel("tempo-2")],
       melhorPontuacao: 0,
+      tempoInicial: segundos,
       aoTerminar: (info) => {
         terminou = { ...info };
       },
@@ -214,14 +222,22 @@ describe("modo tempo", () => {
     expect(host.textContent).not.toContain("Desfazer");
   });
 
-  it("o relógio mostra décimos no último minuto de tensão", () => {
+  it("o tempo de arranque vem das definições", () => {
+    for (const segundos of [30, 60, 90] as const) {
+      ecra?.destruir();
+      ecra = abrir(segundos);
+      expect(host.querySelector(".relogio")?.textContent).toBe(String(segundos));
+    }
+  });
+
+  it("o relógio mostra décimos nos últimos dez segundos", () => {
     ecra = abrir();
 
     const relogio = host.querySelector(".relogio");
-    expect(relogio?.textContent).toBe("90");
+    expect(relogio?.textContent).toBe("60");
     expect(relogio?.classList.contains("a-acabar")).toBe(false);
 
-    vi.advanceTimersByTime(85_000);
+    vi.advanceTimersByTime(55_000);
 
     expect(relogio?.textContent).toBe("5.0");
     expect(relogio?.classList.contains("a-acabar")).toBe(true);
@@ -230,7 +246,7 @@ describe("modo tempo", () => {
   it("a corrida acaba quando o tempo passa, e o resultado é registado", () => {
     ecra = abrir();
 
-    vi.advanceTimersByTime(91_000);
+    vi.advanceTimersByTime(61_000);
 
     expect(terminou).toBeDefined();
     expect(terminou?.tabuleiros).toBe(0);
@@ -243,7 +259,7 @@ describe("modo tempo", () => {
   it("acaba uma vez só, por muito que o relógio continue", () => {
     ecra = abrir();
 
-    vi.advanceTimersByTime(91_000);
+    vi.advanceTimersByTime(61_000);
     const primeiro = terminou;
     terminou = undefined;
 

@@ -41,13 +41,13 @@ export class HomeScreen {
     const modos = elemento("div", "home-modos");
     modos.append(
       this.cartao(
-        "Níveis",
-        "A campanha, banda a banda",
+        "Puzzles",
+        "A campanha, capítulo a capítulo",
         opcoes.aoEscolherNiveis,
         "primario",
       ),
       this.cartao(
-        "Tempo",
+        "Contra-Relógio",
         "Um relógio só, que nunca pára",
         opcoes.aoEscolherTempo,
       ),
@@ -97,7 +97,7 @@ export class HomeScreen {
         elemento(
           "p",
           undefined,
-          `${String(feitos)} de ${String(opcoes.totalNiveis)} níveis · ` +
+          `${String(feitos)} de ${String(opcoes.totalNiveis)} puzzles · ` +
             plural(perfeitos, "perfeito", "perfeitos"),
         ),
       );
@@ -108,7 +108,7 @@ export class HomeScreen {
         elemento(
           "p",
           undefined,
-          `Modo tempo: ${String(opcoes.perfil.bestTimeAttackScore)} pontos · ` +
+          `Contra-Relógio: ${String(opcoes.perfil.bestTimeAttackScore)} pontos · ` +
             plural(opcoes.perfil.bestBoardsCleared, "tabuleiro", "tabuleiros"),
         ),
       );

@@ -27,13 +27,13 @@ export function paraHash(r: Rota): string {
     case "home":
       return "#/";
     case "bandas":
-      return "#/niveis";
+      return "#/puzzles";
     case "niveis":
-      return `#/niveis/${encodeURIComponent(r.capitulo)}`;
+      return `#/puzzles/${encodeURIComponent(r.capitulo)}`;
     case "jogo":
       return `#/jogo/${encodeURIComponent(r.banda)}/${String(r.nivel)}`;
     case "tempo":
-      return "#/tempo";
+      return "#/contrarrelogio";
     case "definicoes":
       return "#/definicoes";
   }
@@ -51,10 +51,13 @@ export function deHash(hash: string): Rota {
 
   if (primeira === undefined) return ROTA_INICIAL;
 
-  if (primeira === "tempo") return { ecra: "tempo" };
+  if (primeira === "contrarrelogio" || primeira === "tempo") {
+    return { ecra: "tempo" };
+  }
   if (primeira === "definicoes") return { ecra: "definicoes" };
 
-  if (primeira === "niveis") {
+  // `niveis` é o nome antigo de `puzzles`, e continua a ser aceite à entrada.
+  if (primeira === "puzzles" || primeira === "niveis") {
     return segunda === undefined
       ? { ecra: "bandas" }
       : { ecra: "niveis", capitulo: segunda };

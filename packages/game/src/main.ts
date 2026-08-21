@@ -27,7 +27,7 @@ import {
 } from "./session/progress";
 import type { Profile } from "./session/progress";
 import type { Seal } from "./session/PuzzleSession";
-import type { Settings, Tema } from "./session/settings";
+import type { Settings, Tema, TempoInicial } from "./session/settings";
 import {
   aplicarTema,
   defaultSettings,
@@ -147,6 +147,11 @@ async function mostrar(rota: Rota): Promise<void> {
           aplicarTema(document.documentElement, tema);
           guardarPreferencias();
         },
+        tempoInicial: preferencias.tempoInicial,
+        aoMudarTempoInicial: (segundos: TempoInicial) => {
+          preferencias = { ...preferencias, tempoInicial: segundos };
+          guardarPreferencias();
+        },
         aoApagarProgresso: () => {
           perfil = emptyProfile();
           guardarPerfil();
@@ -263,6 +268,7 @@ async function mostrarTempo(): Promise<void> {
   atual = new TimeAttackScreen(app as HTMLElement, {
     niveis,
     melhorPontuacao: perfil.bestTimeAttackScore,
+    tempoInicial: preferencias.tempoInicial,
     aoTerminar: ({ pontos, tabuleiros }) => {
       perfil = recordTimeAttack(perfil, pontos, tabuleiros);
       guardarPerfil();
