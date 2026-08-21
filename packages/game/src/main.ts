@@ -15,7 +15,7 @@ import type { Level } from "@septet/engine";
 import type { Capitulo, NivelDoCapitulo } from "./capitulos";
 import { CAPITULOS, capituloDaBanda, capituloPorId, montarCapitulo } from "./capitulos";
 import type { BandaNoIndice } from "./levels";
-import { carregarBanda, carregarIndice } from "./levels";
+import { cabeNoEcra, carregarBanda, carregarIndice } from "./levels";
 import {
   countCompleted,
   emptyProfile,
@@ -263,7 +263,14 @@ async function mostrarTempo(): Promise<void> {
     return;
   }
 
-  const niveis: readonly Level[] = await carregarBanda("tempo");
+  /*
+   * A mesma regra de largura da campanha. Hoje a banda do Contra-Relógio não tem
+   * um único tabuleiro largo, mas confiar nisso era confiar numa coincidência do
+   * pack atual.
+   */
+  const niveis: readonly Level[] = (await carregarBanda("tempo")).filter((n) =>
+    cabeNoEcra(n.board.length),
+  );
 
   atual = new TimeAttackScreen(app as HTMLElement, {
     niveis,

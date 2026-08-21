@@ -179,6 +179,9 @@ async function comandoExport(args: string[]): Promise<number> {
       niveis: niveis.map((n) => ({
         id: n.id,
         pieces: n.metrics?.pieces ?? 0,
+        // A largura decide se o nível cabe num telemóvel. Sem isto no índice, a
+        // campanha teria de carregar as bandas todas no arranque para o saber.
+        colunas: n.board.length,
         // O jogo precisa disto no arranque, para saber quando abrir o tutorial
         // do joker e durante quantos níveis manter o andaime da soma. Sem estar
         // no índice, obrigava a carregar as bandas todas para o descobrir.

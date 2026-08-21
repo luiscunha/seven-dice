@@ -6,151 +6,181 @@
    {
     "id": "tutorial-000003",
     "pieces": 14,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000008",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000009",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000012",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tutorial-000022",
     "pieces": 12,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tutorial-000052",
     "pieces": 10,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000066",
     "pieces": 10,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tutorial-000076",
     "pieces": 12,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tutorial-000107",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000116",
     "pieces": 12,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "tutorial-000144",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tutorial-000145",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tutorial-000150",
     "pieces": 14,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tutorial-000183",
     "pieces": 10,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000191",
     "pieces": 14,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tutorial-000196",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tutorial-000225",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000235",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tutorial-000238",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000261",
     "pieces": 10,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tutorial-000264",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000266",
     "pieces": 12,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tutorial-000267",
     "pieces": 12,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tutorial-000301",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tutorial-000316",
     "pieces": 12,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "tutorial-000320",
     "pieces": 14,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tutorial-000329",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000338",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tutorial-000340",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tutorial-000341",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    }
   ]
@@ -162,151 +192,181 @@
    {
     "id": "inicio-000034",
     "pieces": 24,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "inicio-000134",
     "pieces": 20,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "inicio-000150",
     "pieces": 24,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "inicio-000204",
     "pieces": 24,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "inicio-000241",
     "pieces": 19,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "inicio-000256",
     "pieces": 24,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "inicio-000260",
     "pieces": 22,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-000296",
     "pieces": 18,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "inicio-000358",
     "pieces": 18,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "inicio-000371",
     "pieces": 23,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "inicio-000392",
     "pieces": 16,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-000432",
     "pieces": 16,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-000491",
     "pieces": 19,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "inicio-000516",
     "pieces": 24,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "inicio-000529",
     "pieces": 19,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "inicio-1000232",
     "pieces": 16,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-1000354",
     "pieces": 16,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-1000877",
     "pieces": 16,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-1001248",
     "pieces": 16,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-1001717",
     "pieces": 16,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-1002190",
     "pieces": 16,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-1002311",
     "pieces": 16,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-2000105",
     "pieces": 20,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-2000560",
     "pieces": 20,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-2000820",
     "pieces": 20,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-2001819",
     "pieces": 20,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-2001995",
     "pieces": 20,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-2002167",
     "pieces": 20,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-2002504",
     "pieces": 20,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "inicio-2002550",
     "pieces": 20,
+    "colunas": 4,
     "joker": false
    }
   ]
@@ -318,151 +378,181 @@
    {
     "id": "meio-000006",
     "pieces": 35,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "meio-000015",
     "pieces": 28,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "meio-000022",
     "pieces": 35,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "meio-000028",
     "pieces": 33,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "meio-000050",
     "pieces": 27,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "meio-000059",
     "pieces": 36,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "meio-000071",
     "pieces": 34,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "meio-000082",
     "pieces": 27,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-000091",
     "pieces": 36,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "meio-000100",
     "pieces": 29,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "meio-000103",
     "pieces": 34,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "meio-000111",
     "pieces": 34,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "meio-000113",
     "pieces": 36,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "meio-000119",
     "pieces": 34,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "meio-000125",
     "pieces": 34,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "meio-1000262",
     "pieces": 25,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-1000599",
     "pieces": 25,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-1000670",
     "pieces": 25,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-1001041",
     "pieces": 25,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-1001663",
     "pieces": 25,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-1001671",
     "pieces": 25,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-1001679",
     "pieces": 25,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-2000063",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-2000102",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-2000172",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-2000180",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-2000185",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-2000200",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-2000217",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "meio-2000226",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    }
   ]
@@ -474,151 +564,181 @@
    {
     "id": "meio-joker-000003",
     "pieces": 27,
+    "colunas": 6,
     "joker": true
    },
    {
     "id": "meio-joker-000010",
     "pieces": 23,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-000013",
     "pieces": 27,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-000021",
     "pieces": 26,
+    "colunas": 6,
     "joker": true
    },
    {
     "id": "meio-joker-000034",
     "pieces": 23,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-000041",
     "pieces": 29,
+    "colunas": 6,
     "joker": true
    },
    {
     "id": "meio-joker-000047",
     "pieces": 28,
+    "colunas": 7,
     "joker": true
    },
    {
     "id": "meio-joker-000058",
     "pieces": 30,
+    "colunas": 6,
     "joker": true
    },
    {
     "id": "meio-joker-000067",
     "pieces": 30,
+    "colunas": 6,
     "joker": true
    },
    {
     "id": "meio-joker-000072",
     "pieces": 26,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-000073",
     "pieces": 29,
+    "colunas": 8,
     "joker": true
    },
    {
     "id": "meio-joker-000074",
     "pieces": 30,
+    "colunas": 7,
     "joker": true
    },
    {
     "id": "meio-joker-000078",
     "pieces": 25,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-000083",
     "pieces": 30,
+    "colunas": 9,
     "joker": true
    },
    {
     "id": "meio-joker-000088",
     "pieces": 26,
+    "colunas": 6,
     "joker": true
    },
    {
     "id": "meio-joker-1000045",
     "pieces": 24,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "meio-joker-1000088",
     "pieces": 24,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "meio-joker-1000121",
     "pieces": 24,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "meio-joker-1000253",
     "pieces": 24,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "meio-joker-1000456",
     "pieces": 24,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "meio-joker-1000504",
     "pieces": 24,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "meio-joker-1000680",
     "pieces": 24,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "meio-joker-2000055",
     "pieces": 25,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-2000095",
     "pieces": 25,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-2000128",
     "pieces": 25,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-2000257",
     "pieces": 25,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-2000407",
     "pieces": 25,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-2000454",
     "pieces": 25,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-2001039",
     "pieces": 25,
+    "colunas": 5,
     "joker": true
    },
    {
     "id": "meio-joker-2001086",
     "pieces": 25,
+    "colunas": 5,
     "joker": true
    }
   ]
@@ -630,151 +750,181 @@
    {
     "id": "avancado-000002",
     "pieces": 40,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "avancado-000006",
     "pieces": 35,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-000013",
     "pieces": 36,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "avancado-000019",
     "pieces": 42,
+    "colunas": 9,
     "joker": false
    },
    {
     "id": "avancado-000020",
     "pieces": 34,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "avancado-000021",
     "pieces": 32,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-000022",
     "pieces": 38,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "avancado-000024",
     "pieces": 41,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "avancado-000030",
     "pieces": 33,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-000049",
     "pieces": 37,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "avancado-000053",
     "pieces": 38,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "avancado-000054",
     "pieces": 38,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-000055",
     "pieces": 41,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "avancado-000073",
     "pieces": 39,
+    "colunas": 11,
     "joker": false
    },
    {
     "id": "avancado-000074",
     "pieces": 40,
+    "colunas": 9,
     "joker": false
    },
    {
     "id": "avancado-1000108",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "avancado-1000175",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "avancado-1000182",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "avancado-1000192",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "avancado-1000285",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "avancado-1000370",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "avancado-1000519",
     "pieces": 30,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "avancado-2000099",
     "pieces": 36,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-2000207",
     "pieces": 36,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-2000264",
     "pieces": 36,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-2000354",
     "pieces": 36,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-2000529",
     "pieces": 36,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-2000781",
     "pieces": 36,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-2001061",
     "pieces": 36,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "avancado-2001251",
     "pieces": 36,
+    "colunas": 6,
     "joker": false
    }
   ]
@@ -786,151 +936,181 @@
    {
     "id": "perito-000003",
     "pieces": 48,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "perito-000017",
     "pieces": 50,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "perito-000018",
     "pieces": 37,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "perito-000021",
     "pieces": 46,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "perito-000022",
     "pieces": 45,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "perito-000025",
     "pieces": 44,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "perito-000028",
     "pieces": 47,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "perito-000034",
     "pieces": 37,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "perito-000045",
     "pieces": 38,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "perito-000054",
     "pieces": 41,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "perito-000055",
     "pieces": 44,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "perito-000056",
     "pieces": 43,
+    "colunas": 9,
     "joker": false
    },
    {
     "id": "perito-000068",
     "pieces": 39,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "perito-000069",
     "pieces": 46,
+    "colunas": 8,
     "joker": false
    },
    {
     "id": "perito-000073",
     "pieces": 44,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "perito-1000010",
     "pieces": 35,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "perito-1000036",
     "pieces": 35,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "perito-1000053",
     "pieces": 35,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "perito-1000068",
     "pieces": 35,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "perito-1000227",
     "pieces": 35,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "perito-2000010",
     "pieces": 42,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "perito-2000059",
     "pieces": 42,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "perito-2000088",
     "pieces": 42,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "perito-2000134",
     "pieces": 42,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "perito-2000140",
     "pieces": 42,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "perito-3000051",
     "pieces": 49,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "perito-3000204",
     "pieces": 49,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "perito-3000300",
     "pieces": 49,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "perito-3000578",
     "pieces": 49,
+    "colunas": 7,
     "joker": false
    },
    {
     "id": "perito-3000611",
     "pieces": 49,
+    "colunas": 7,
     "joker": false
    }
   ]
@@ -942,151 +1122,181 @@
    {
     "id": "denso-000006",
     "pieces": 14,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000011",
     "pieces": 15,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000012",
     "pieces": 12,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000020",
     "pieces": 12,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000023",
     "pieces": 13,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000028",
     "pieces": 12,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000034",
     "pieces": 14,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000036",
     "pieces": 12,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000044",
     "pieces": 12,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000046",
     "pieces": 10,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-000047",
     "pieces": 13,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-000048",
     "pieces": 10,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-000049",
     "pieces": 11,
+    "colunas": 4,
     "joker": true
    },
    {
     "id": "denso-000054",
     "pieces": 10,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-000056",
     "pieces": 10,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-1000003",
     "pieces": 12,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-1000004",
     "pieces": 12,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-1000008",
     "pieces": 12,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-1000010",
     "pieces": 12,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-1000011",
     "pieces": 12,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-1000023",
     "pieces": 12,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-1000045",
     "pieces": 12,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-2000034",
     "pieces": 15,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-2000079",
     "pieces": 15,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-2000201",
     "pieces": 15,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-2000210",
     "pieces": 15,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-2000261",
     "pieces": 15,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-2000281",
     "pieces": 15,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-2000313",
     "pieces": 15,
+    "colunas": 3,
     "joker": true
    },
    {
     "id": "denso-2000367",
     "pieces": 15,
+    "colunas": 3,
     "joker": true
    }
   ]
@@ -1099,151 +1309,181 @@
    {
     "id": "tempo-000002",
     "pieces": 11,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000004",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000008",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000040",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000048",
     "pieces": 10,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000071",
     "pieces": 13,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tempo-000093",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000133",
     "pieces": 10,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tempo-000135",
     "pieces": 11,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tempo-000145",
     "pieces": 12,
+    "colunas": 5,
     "joker": false
    },
    {
     "id": "tempo-000147",
     "pieces": 11,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "tempo-000149",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000189",
     "pieces": 10,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000270",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000282",
     "pieces": 10,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000288",
     "pieces": 11,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000306",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000309",
     "pieces": 15,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000322",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000346",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000351",
     "pieces": 14,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "tempo-000362",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000377",
     "pieces": 13,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000382",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000385",
     "pieces": 13,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000386",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    },
    {
     "id": "tempo-000390",
     "pieces": 12,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000391",
     "pieces": 14,
+    "colunas": 4,
     "joker": false
    },
    {
     "id": "tempo-000417",
     "pieces": 13,
+    "colunas": 6,
     "joker": false
    },
    {
     "id": "tempo-000431",
     "pieces": 10,
+    "colunas": 3,
     "joker": false
    }
   ]

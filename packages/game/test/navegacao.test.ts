@@ -21,6 +21,7 @@ import {
   montarCapitulo,
 } from "../src/capitulos";
 import type { BandaNoIndice } from "../src/levels";
+import { LARGURA_MAXIMA, cabeNoEcra } from "../src/levels";
 
 import {
   SETTINGS_KEY,
@@ -426,5 +427,90 @@ describe("capítulos", () => {
     const soBase = montarCapitulo(capitulo, [banda("meio", 30)]);
     expect(soBase).toHaveLength(30);
     expect(soBase.every((n) => n.banda === "meio")).toBe(true);
+  });
+});
+
+/* ─── Largura e telemóvel ───────────────────────────────────────────────────
+ *
+ * Mais de 80% de quem vai testar usa telemóvel. Até sete colunas as peças ficam
+ * nos 44px de piso de toque num ecrã de 360; oito dão 38 e onze dão 26. É
+ * largura, e largura não se recupera com enchimento — a única saída é os
+ * tabuleiros largos não entrarem na campanha.
+ *
+ * Continuam no pack e continuam válidos. O que se protege aqui é que ficam de
+ * fora, e que **o índice na banda não é renumerado** por causa disso: é ele que
+ * vai na rota.
+ */
+
+describe("largura e telemóvel", () => {
+  const comLargura = (
+    id: string,
+    larguras: readonly number[],
+  ): BandaNoIndice => ({
+    id,
+    label: id,
+    niveis: larguras.map((colunas, i) => ({
+      id: `${id}-${String(i)}`,
+      pieces: 20,
+      colunas,
+    })),
+  });
+
+  it("o teto são sete colunas", () => {
+    expect(LARGURA_MAXIMA).toBe(7);
+    expect(cabeNoEcra(7)).toBe(true);
+    expect(cabeNoEcra(8)).toBe(false);
+    expect(cabeNoEcra(11)).toBe(false);
+  });
+
+  /* Um índice gerado antes desta regra não traz a largura: deixa-se jogar. */
+  it("sem largura conhecida, o nível entra", () => {
+    expect(cabeNoEcra(undefined)).toBe(true);
+  });
+
+  it("os tabuleiros largos não entram no capítulo", () => {
+    const capitulo = capituloPorId("perito");
+    if (capitulo === undefined) throw new Error("sem capítulo");
+
+    const niveis = montarCapitulo(capitulo, [
+      comLargura("perito", [5, 9, 6, 11, 7, 8]),
+    ]);
+
+    expect(niveis.map((n) => n.id)).toEqual([
+      "perito-0",
+      "perito-2",
+      "perito-4",
+    ]);
+  });
+
+  /**
+   * O ponto mais fácil de partir num refactor: se o índice fosse recalculado
+   * depois de filtrar, `#/jogo/perito/2` passava a abrir outro nível.
+   */
+  it("o índice na banda não é renumerado pela filtragem", () => {
+    const capitulo = capituloPorId("perito");
+    if (capitulo === undefined) throw new Error("sem capítulo");
+
+    const niveis = montarCapitulo(capitulo, [
+      comLargura("perito", [9, 5, 6]),
+    ]);
+
+    // O primeiro nível jogável é o segundo do ficheiro, e tem de o dizer.
+    expect(niveis[0]).toEqual({ id: "perito-1", banda: "perito", indice: 1 });
+    expect(niveis[1]).toEqual({ id: "perito-2", banda: "perito", indice: 2 });
+  });
+
+  it("a filtragem também vale para a banda intercalada", () => {
+    const capitulo = capituloPorId("medio");
+    if (capitulo === undefined) throw new Error("sem capítulo");
+
+    const niveis = montarCapitulo(capitulo, [
+      comLargura("meio", [5, 5, 5, 5]),
+      comLargura("meio-joker", [9, 9, 6]),
+    ]);
+
+    const jokers = niveis.filter((n) => n.banda === "meio-joker");
+    expect(jokers).toHaveLength(1);
+    expect(jokers[0]?.indice).toBe(2);
   });
 });

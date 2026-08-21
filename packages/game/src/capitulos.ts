@@ -23,6 +23,7 @@
  */
 
 import type { BandaNoIndice } from "./levels";
+import { cabeNoEcra } from "./levels";
 
 /** Um em cada três níveis do capítulo vem da banda com joker. */
 export const CADENCIA_JOKER = 3;
@@ -107,14 +108,19 @@ export function montarCapitulo(
   capitulo: Capitulo,
   bandas: readonly BandaNoIndice[],
 ): readonly NivelDoCapitulo[] {
+  /*
+   * O índice na banda calcula-se **antes** de filtrar, e não depois: é ele que
+   * vai na rota, e tem de continuar a apontar para o nível certo dentro do
+   * ficheiro da banda. Filtrar primeiro renumerava tudo e um link antigo passava
+   * a abrir outro nível.
+   */
   const niveisDe = (id: string | undefined): readonly NivelDoCapitulo[] =>
     id === undefined
       ? []
-      : (bandas.find((b) => b.id === id)?.niveis ?? []).map((n, i) => ({
-          id: n.id,
-          banda: id,
-          indice: i,
-        }));
+      : (bandas.find((b) => b.id === id)?.niveis ?? [])
+          .map((n, i) => ({ id: n.id, banda: id, indice: i, colunas: n.colunas }))
+          .filter((n) => cabeNoEcra(n.colunas))
+          .map(({ id: nivelId, banda, indice }) => ({ id: nivelId, banda, indice }));
 
   const base = niveisDe(capitulo.base);
   const joker = niveisDe(capitulo.joker);

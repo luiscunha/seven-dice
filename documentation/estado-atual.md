@@ -329,6 +329,52 @@ assumido, e há um teste que o vigia: são o corpo natural do puzzle diário
 
 ---
 
+## Telemóvel deixou de ser da Fase 9
+
+O desenho da Fase 8 assumiu "desktop primeiro" e adiou o telemóvel. Deixou de
+servir: **mais de 80% de quem vai testar usa telemóvel**.
+
+Medido, não presumido. Nada rebentava — sem rolagem lateral, rodapé sempre
+visível, tabuleiro sempre dentro da bandeja. O que falhava era o **alvo de
+toque**, e falhava de duas maneiras diferentes.
+
+**A que se resolve com CSS.** Num ecrã de 375, um 7×7 dava peças de 41px, abaixo
+do piso de 44. Apertando a folga das peças de 6 para 4 e o enchimento dos ecrãs
+em larguras até 480px, passa a 46px — e a 44px num ecrã de 360, o pior caso que
+vale a pena servir.
+
+Mais duas ausências que só doem com o dedo:
+
+| | |
+|---|---|
+| `-webkit-tap-highlight-color: transparent` | o iOS pintava um retângulo azul por cima do anel de seleção |
+| `touch-action: manipulation` | sem ele, 300ms de espera por toque à procura de um duplo toque — numa jogada de sete peças lê-se como o jogo estar lento |
+
+**A que não se resolve com CSS: a largura.** Até 7 colunas as peças ficam no piso
+de toque; 8 colunas dão 38px e o único nível de 11 dá 26px, mais estreito do que
+uma tecla de teclado. Não há enchimento que recupere largura.
+
+A campanha passa a **saltar os níveis com 8 ou mais colunas**. Continuam no pack,
+continuam válidos, e continuam acessíveis por link direto — só não entram nos
+capítulos:
+
+| Capítulo | Antes | Agora |
+|---|---|---|
+| Tutorial | 30 | 30 |
+| Iniciado | 30 | 30 |
+| Médio | 45 | 40 |
+| Avançado | 45 | 33 |
+| Perito | 30 | 23 |
+
+O índice ganhou `colunas` para isto ser decidido no arranque, sem carregar as
+bandas todas. **O índice na banda continua a ser calculado antes de filtrar** —
+é ele que vai na rota, e renumerar fazia um link antigo abrir outro nível.
+
+É a correção barata e reversível; a correção de raiz seria um teto de largura no
+pipeline, e essa fica para quando houver razão para regerar.
+
+---
+
 ## Onde a realidade contrariou os documentos
 
 Quatro conclusões medidas que contrariam a spec ou o plano. Estão em comentários
@@ -511,7 +557,7 @@ Duas ressalvas honestas:
 ## Comandos
 
 ```bash
-pnpm check                                    # lint + typecheck + 318 testes
+pnpm check                                    # lint + typecheck + 323 testes
 pnpm septet bands                               # as bandas e os seus critérios
 pnpm septet play --id inicio-000296 --log p.jsonl # jogar um nível na consola
 pnpm septet verify                              # revalida o pack todo
