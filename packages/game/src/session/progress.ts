@@ -37,6 +37,11 @@ export interface Profile {
   /** Melhor número de tabuleiros limpos numa corrida. */
   readonly bestBoardsCleared: number;
 
+  /** Melhor pontuação do Survival. */
+  readonly bestSurvivalScore: number;
+  /** Mais linhas aguentadas numa corrida de Survival. */
+  readonly bestSurvivalRows: number;
+
   /**
    * O tutorial do joker já correu uma vez.
    *
@@ -53,6 +58,8 @@ export const emptyProfile = (): Profile => ({
   levels: {},
   bestTimeAttackScore: 0,
   bestBoardsCleared: 0,
+  bestSurvivalScore: 0,
+  bestSurvivalRows: 0,
   sawJokerTutorial: false,
 });
 
@@ -122,6 +129,23 @@ export const recordTimeAttack = (
   bestBoardsCleared: Math.max(profile.bestBoardsCleared, boardsCleared),
 });
 
+/**
+ * Guarda o melhor do Survival.
+ *
+ * Os dois campos são independentes de propósito: a pontuação premeia jogar bem,
+ * as linhas premeiam aguentar. Não sobem sempre juntos — quem puxa linhas para
+ * apanhar o multiplicador faz pontos a gastar espaço, e morre mais cedo.
+ */
+export const recordSurvival = (
+  profile: Profile,
+  score: number,
+  rows: number,
+): Profile => ({
+  ...profile,
+  bestSurvivalScore: Math.max(profile.bestSurvivalScore, score),
+  bestSurvivalRows: Math.max(profile.bestSurvivalRows, rows),
+});
+
 export const save = (storage: ProfileStorage, profile: Profile): void => {
   storage.setItem(PROFILE_KEY, JSON.stringify(profile));
 };
@@ -154,6 +178,8 @@ export function load(storage: ProfileStorage): Profile {
     levels: sanitizeLevels(p.levels),
     bestTimeAttackScore: finiteOrZero(p.bestTimeAttackScore),
     bestBoardsCleared: finiteOrZero(p.bestBoardsCleared),
+    bestSurvivalScore: finiteOrZero(p.bestSurvivalScore),
+    bestSurvivalRows: finiteOrZero(p.bestSurvivalRows),
     sawJokerTutorial: p.sawJokerTutorial === true,
   };
 }

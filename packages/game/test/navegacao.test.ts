@@ -48,6 +48,7 @@ describe("rotas", () => {
     { ecra: "niveis", capitulo: "perito" },
     { ecra: "jogo", banda: "meio-joker", nivel: 12 },
     { ecra: "tempo" },
+    { ecra: "survival", seed: 20260822 },
     { ecra: "definicoes" },
   ];
 
@@ -90,6 +91,17 @@ describe("rotas", () => {
   });
 
   /* Há links `?banda=…` espalhados por notas e conversas; traduzi-los é uma linha. */
+  it("a seed do Survival sobrevive ao endereço — é o que torna a corrida partilhável", () => {
+    expect(deHash("#/survival/20260822")).toEqual({ ecra: "survival", seed: 20260822 });
+
+    // Sem seed, o modo sorteia uma: a rota não a inventa aqui.
+    expect(deHash("#/survival")).toEqual({ ecra: "survival" });
+
+    // Uma seed absurda não trava nada — sorteia-se outra.
+    expect(deHash("#/survival/abc")).toEqual({ ecra: "survival" });
+    expect(deHash("#/survival/-3")).toEqual({ ecra: "survival" });
+  });
+
   it("a forma antiga continua a levar ao sítio certo", () => {
     expect(rotaLegada("?banda=perito&nivel=27")).toEqual({
       ecra: "jogo",

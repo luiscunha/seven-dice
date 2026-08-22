@@ -22,6 +22,7 @@ import {
   load,
   markJokerTutorialSeen,
   recordLevel,
+  recordSurvival,
   recordTimeAttack,
   save,
 } from "./session/progress";
@@ -45,6 +46,7 @@ import { NiveisScreen } from "./ui/NiveisScreen";
 import { PuzzleScreen } from "./ui/PuzzleScreen";
 import type { Rota } from "./ui/rotas";
 import { deHash, paraHash, rotaLegada } from "./ui/rotas";
+import { SurvivalScreen, novaSeed } from "./ui/SurvivalScreen";
 import { TimeAttackScreen } from "./ui/TimeAttackScreen";
 
 const app = document.querySelector<HTMLElement>("#app");
@@ -124,6 +126,7 @@ async function mostrar(rota: Rota): Promise<void> {
         totalNiveis: campanha.reduce((n, c) => n + c.niveis.length, 0),
         aoEscolherNiveis: voltarA({ ecra: "bandas" }),
         aoEscolherTempo: voltarA({ ecra: "tempo" }),
+        aoEscolherSurvival: voltarA({ ecra: "survival" }),
         aoEscolherDefinicoes: voltarA({ ecra: "definicoes" }),
       });
       return;
@@ -168,6 +171,9 @@ async function mostrar(rota: Rota): Promise<void> {
 
     case "tempo":
       return mostrarTempo();
+
+    case "survival":
+      return mostrarSurvival(rota.seed);
   }
 }
 
@@ -279,6 +285,37 @@ async function mostrarTempo(): Promise<void> {
     aoTerminar: ({ pontos, tabuleiros }) => {
       perfil = recordTimeAttack(perfil, pontos, tabuleiros);
       guardarPerfil();
+    },
+    aoSair: voltarA({ ecra: "home" }),
+  });
+}
+
+/**
+ * O Survival.
+ *
+ * Não carrega pack nenhum — o tabuleiro nasce da seed. É o único modo assim, e
+ * é o que o torna partilhável: a seed vai no endereço, portanto passar o link é
+ * passar a corrida exata.
+ *
+ * Sem seed no URL sorteia-se uma e **reescreve-se o endereço**, para que a
+ * corrida que está a acontecer tenha sempre nome. Sem isso, acabar uma corrida
+ * boa e não a poder mostrar a ninguém era o desperdício óbvio.
+ */
+function mostrarSurvival(seed: number | undefined): void {
+  if (seed === undefined) {
+    ir({ ecra: "survival", seed: novaSeed() });
+    return;
+  }
+
+  atual = new SurvivalScreen(app as HTMLElement, {
+    seed,
+    melhorPontuacao: perfil.bestSurvivalScore,
+    aoTerminar: ({ pontos, linhas }) => {
+      perfil = recordSurvival(perfil, pontos, linhas);
+      guardarPerfil();
+    },
+    aoRecomecar: (nova) => {
+      ir({ ecra: "survival", seed: nova });
     },
     aoSair: voltarA({ ecra: "home" }),
   });

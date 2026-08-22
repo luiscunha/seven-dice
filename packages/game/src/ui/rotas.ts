@@ -18,6 +18,15 @@ export type Rota =
   | { readonly ecra: "niveis"; readonly capitulo: string }
   | { readonly ecra: "jogo"; readonly banda: string; readonly nivel: number }
   | { readonly ecra: "tempo" }
+  /**
+   * A seed vai no endereço, e é o que faz a corrida ser partilhável.
+   *
+   * O Survival é determinístico na seed: a mesma seed dá o mesmo tabuleiro e a
+   * mesma fila, do princípio ao fim. Portanto `#/survival/20260822` é literalmente
+   * «joga a minha corrida» — e sai de graça da regra que proíbe `Math.random()`
+   * na engine. Sem seed no endereço, o modo sorteia uma.
+   */
+  | { readonly ecra: "survival"; readonly seed?: number }
   | { readonly ecra: "definicoes" };
 
 export const ROTA_INICIAL: Rota = { ecra: "home" };
@@ -34,6 +43,10 @@ export function paraHash(r: Rota): string {
       return `#/jogo/${encodeURIComponent(r.banda)}/${String(r.nivel)}`;
     case "tempo":
       return "#/contrarrelogio";
+    case "survival":
+      return r.seed === undefined
+        ? "#/survival"
+        : `#/survival/${String(r.seed)}`;
     case "definicoes":
       return "#/definicoes";
   }
@@ -55,6 +68,14 @@ export function deHash(hash: string): Rota {
     return { ecra: "tempo" };
   }
   if (primeira === "definicoes") return { ecra: "definicoes" };
+
+  if (primeira === "survival") {
+    // Uma seed que não seja um inteiro não trava nada: sorteia-se outra.
+    const n = Number.parseInt(segunda ?? "", 10);
+    return Number.isFinite(n) && n >= 0
+      ? { ecra: "survival", seed: n }
+      : { ecra: "survival" };
+  }
 
   // `niveis` é o nome antigo de `puzzles`, e continua a ser aceite à entrada.
   if (primeira === "puzzles" || primeira === "niveis") {

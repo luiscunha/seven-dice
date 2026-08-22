@@ -65,7 +65,17 @@ export interface SurvivalConfig {
   readonly largura: number;
   /** Linhas no arranque. Poucas: o jogador tem de ver o tabuleiro a encher. */
   readonly alturaInicial: number;
-  /** Passar daqui é perder. */
+  /**
+   * Passar daqui é perder.
+   *
+   * **Sete, e quem manda é o piso de toque.** A 320px de largura, o palco que
+   * sobra depois da fila e do rodapé dá 348px de altura: com nove linhas a peça
+   * ficava a 39px, abaixo dos 44 que o projeto fixou. Com sete dá 46px.
+   *
+   * O custo mediu-se: 78 jogadas por corrida em vez de 92, com ramificação 9.2.
+   * Quinze por cento mais curta, e jogável com o dedo — que não é uma troca
+   * difícil quando 80% de quem vai jogar está no telemóvel.
+   */
   readonly alturaMaxima: number;
 
   /** Jogadas entre injeções automáticas, no início. */
@@ -127,13 +137,13 @@ export interface SurvivalConfig {
 
 export const DEFAULT_SURVIVAL: SurvivalConfig = {
   largura: 6,
-  alturaInicial: 3,
-  alturaMaxima: 9,
+  alturaInicial: 2,
+  alturaMaxima: 7,
   jogadasPorLinha: 5,
   minJogadasPorLinha: 2,
   linhasPorDegrau: 6,
   previsao: 3,
-  bonusPorFolga: 0.15,
+  bonusPorFolga: 0.25,
   bonusMaximo: 2.5,
   jogadasComBonus: 8,
   bonusTabuleiroLimpo: 500,
