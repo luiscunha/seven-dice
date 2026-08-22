@@ -301,14 +301,46 @@ describe("modo tempo", () => {
     expect(host.querySelector<HTMLElement>(".fim")?.hidden).toBe(false);
   });
 
-  it("sair a meio termina a corrida e regista o que se fez", () => {
+  it("sair a meio pergunta antes, e só depois termina a corrida", () => {
     ecra = abrir();
 
     const sair = host.querySelector<HTMLElement>(".topo .btn.redondo");
     sair?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
+    /*
+     * O primeiro toque **não** sai. Num telemóvel a seta fica onde o polegar já
+     * está, e um toque por engano custava a corrida inteira.
+     */
+    expect(terminou).toBeUndefined();
+    expect(saiu).toBe(0);
+
+    const caixa = host.querySelector("dialog.confirmacao");
+    expect(caixa).not.toBeNull();
+
+    const confirmar = [...(caixa?.querySelectorAll("button") ?? [])].find(
+      (b) => b.textContent === "Sair",
+    );
+    confirmar?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
     expect(terminou).toBeDefined();
     expect(saiu).toBe(1);
+  });
+
+  it("cancelar a saída deixa a corrida onde estava", () => {
+    ecra = abrir();
+
+    host
+      .querySelector<HTMLElement>(".topo .btn.redondo")
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    const caixa = host.querySelector("dialog.confirmacao");
+    [...(caixa?.querySelectorAll("button") ?? [])]
+      .find((b) => b.textContent === "Cancelar")
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    expect(terminou).toBeUndefined();
+    expect(saiu).toBe(0);
+    expect(host.querySelector("dialog.confirmacao")).toBeNull();
   });
 
   it("largar o ecrã não deixa o relógio a correr", () => {

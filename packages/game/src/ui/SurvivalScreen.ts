@@ -28,8 +28,9 @@
  */
 
 import type { Cell, Group, Packed } from "@dicetoseven/engine";
-import { hasAnyGroup, isEmpty } from "@dicetoseven/engine";
+import { JOKER, cellAt, hasAnyGroup, isEmpty } from "@dicetoseven/engine";
 
+import type { JokerValue } from "../session/GameSession";
 import { selectionTotal } from "../session/GameSession";
 import type {
   SurvivalConfig,
@@ -46,13 +47,30 @@ import {
 } from "../session/SurvivalSession";
 import { BoardView } from "./BoardView";
 import { criarPeca } from "./dice";
-import { botao, elemento, texto } from "./dom";
+import { botao, confirmar, elemento, texto } from "./dom";
+import { JokerPicker } from "./JokerPicker";
 
 /** De quanto em quanto o cronómetro se repinta. Décimos chegam. */
 const PASSO_RELOGIO = 100;
 
+/** Uma corrida a meio, para o ecrã a retomar onde ficou. */
+export interface CorridaGuardada {
+  readonly estado: SurvivalState;
+  readonly decorridoMs: number;
+}
+
 export interface OpcoesSurvival {
   readonly seed: number;
+  /**
+   * A corrida que ficou a meio, se houver.
+   *
+   * Sair do modo não é desistir dele. O tabuleiro, o cronómetro e a linha que
+   * vinha a seguir ficam onde estavam até alguém carregar em recomeçar — e esse
+   * botão pergunta antes.
+   */
+  readonly retomar?: CorridaGuardada;
+  /** Chamado ao sair, para que a corrida sobreviva à navegação. */
+  readonly aoGuardar: (corrida: CorridaGuardada) => void;
   /** Melhor tempo em milissegundos, ou 0 se ainda não há. */
   readonly melhorTempo: number;
   readonly aoTerminar: (info: {
@@ -77,7 +95,12 @@ export class SurvivalScreen {
   private readonly elSoma: HTMLElement;
   private readonly elResto: HTMLElement;
   private readonly btPuxar: HTMLButtonElement;
+  private readonly btRecomecar: HTMLButtonElement;
   private readonly elFim: HTMLDialogElement;
+  private readonly picker: JokerPicker;
+
+  /** A peça de joker tocada, à espera de valor. */
+  private jokerPendente: Packed | undefined;
 
   private estado: SurvivalState;
   private terminado = false;
@@ -95,15 +118,33 @@ export class SurvivalScreen {
 
   constructor(host: HTMLElement, opcoes: OpcoesSurvival) {
     this.opcoes = opcoes;
-    this.estado = startSurvival(opcoes.seed, this.config);
+    this.estado = opcoes.retomar?.estado ?? startSurvival(opcoes.seed, this.config);
+
+    /*
+     * Retomar repõe o cronómetro a andar de onde ficou: o início desloca-se
+     * para trás pelo tempo já gasto. Guardar o instante de início em vez do
+     * decorrido faria a corrida contar o tempo em que o jogador esteve noutro
+     * ecrã.
+     */
+    if (opcoes.retomar !== undefined && opcoes.retomar.decorridoMs > 0) {
+      this.inicioMs = Date.now() - opcoes.retomar.decorridoMs;
+      this.cronometro = setInterval(() => {
+        this.pintarRelogio();
+      }, PASSO_RELOGIO);
+    }
 
     this.raiz = elemento("div", "ecra survival");
 
     /* ── topo: o cronómetro manda ── */
     const topo = elemento("header", "topo survival-topo");
 
+    /*
+     * Sair **não** pede confirmação, porque não perde nada: a corrida fica
+     * guardada e retoma-se onde ficou. Confirmar aqui era pedir uma decisão
+     * sobre uma consequência que não existe.
+     */
     const sair = botao("‹", "redondo", () => {
-      this.parar();
+      this.guardar();
       opcoes.aoSair();
     });
     sair.setAttribute("aria-label", "sair da corrida");
@@ -132,7 +173,11 @@ export class SurvivalScreen {
     this.btPuxar = botao("Puxar linha", "primario", () => {
       void this.puxar();
     });
-    acoes.appendChild(this.btPuxar);
+    this.btRecomecar = botao("Recomeçar", undefined, () => {
+      this.pedirParaRecomecar();
+    });
+
+    acoes.append(this.btPuxar, this.btRecomecar);
 
     rodape.append(linha, acoes);
 
@@ -143,6 +188,9 @@ export class SurvivalScreen {
     host.replaceChildren(this.raiz);
 
     this.view = new BoardView(palco, { aoTocar: (p) => void this.tocar(p) });
+    this.picker = new JokerPicker(palco, {
+      aoEscolher: (valor) => void this.escolherJoker(valor),
+    });
 
     /*
      * **Pintar antes de dimensionar.** A fila só ganha altura quando tem
@@ -165,7 +213,9 @@ export class SurvivalScreen {
   }
 
   destruir(): void {
+    this.guardar();
     this.parar();
+    this.picker.destruir();
     if (this.elFim.open && typeof this.elFim.close === "function") {
       this.elFim.close();
     }
@@ -196,15 +246,33 @@ export class SurvivalScreen {
 
   /* ─── jogar ─────────────────────────────────────────────────────────────── */
 
-  private async tocar(p: Packed): Promise<void> {
+  private async tocar(p: Packed, jokerAs?: JokerValue): Promise<void> {
     if (this.terminado || this.ocupado) return;
 
     this.arrancar();
 
     const antes = this.estado;
-    const selecao = [...antes.game.selection, p];
 
-    const r = survivalTap(antes, p, this.config);
+    /*
+     * **O joker não entra na seleção sem valor.** O toque abre a escolha, e é a
+     * escolha que faz a jogada — o mesmo desenho da campanha. Sem isto, tocar no
+     * joker não fazia rigorosamente nada: a sessão rejeitava o toque com
+     * `joker-needs-value` e o ecrã não tinha como perguntar.
+     */
+    if (cellAt(antes.game.board, p) === JOKER && jokerAs === undefined) {
+      const caixa = this.view.caixaDe(p);
+      if (caixa !== undefined) {
+        this.jokerPendente = p;
+        this.picker.abrir(caixa, antes.game.jokerAs);
+      }
+      return;
+    }
+
+    const selecao = antes.game.selection.includes(p)
+      ? [...antes.game.selection]
+      : [...antes.game.selection, p];
+
+    const r = survivalTap(antes, p, this.config, undefined, jokerAs);
     this.estado = r.state;
 
     if (r.moved) {
@@ -230,6 +298,47 @@ export class SurvivalScreen {
 
     this.pintar();
     this.verificarFim();
+  }
+
+  private async escolherJoker(valor: JokerValue): Promise<void> {
+    const p = this.jokerPendente;
+    this.jokerPendente = undefined;
+    if (p === undefined) return;
+
+    await this.tocar(p, valor);
+  }
+
+  /** Guarda a corrida para quem sair poder voltar ao mesmo sítio. */
+  private guardar(): void {
+    if (this.terminado) return;
+    this.opcoes.aoGuardar({
+      estado: this.estado,
+      decorridoMs: this.decorridoMs(),
+    });
+  }
+
+  /**
+   * Recomeçar pergunta, e o pedido é o único sítio onde perguntar.
+   *
+   * Num telemóvel um dedo acerta ao lado com facilidade, e este botão deita
+   * fora a corrida inteira. Sair não pergunta porque sair não perde nada.
+   */
+  private pedirParaRecomecar(): void {
+    if (this.terminado) {
+      this.opcoes.aoRecomecar(novaSeed());
+      return;
+    }
+
+    confirmar(this.raiz, {
+      titulo: "Recomeçar?",
+      texto: "Esta corrida e o tempo perdem-se. O tabuleiro volta ao início.",
+      confirmar: "Recomeçar",
+      aoConfirmar: () => {
+        this.terminado = true;
+        this.parar();
+        this.opcoes.aoRecomecar(novaSeed());
+      },
+    });
   }
 
   private async puxar(): Promise<void> {
@@ -323,7 +432,12 @@ export class SurvivalScreen {
     this.pintarRelogio();
     this.pintarFila();
     this.pintarRodape();
-    this.view.marcarSelecao(new Set(this.estado.game.selection));
+    const jogo = this.estado.game;
+    this.view.marcarSelecao(new Set(jogo.selection));
+
+    // Mostra na peça o valor que o jogador deu ao joker nesta seleção.
+    const joker = jogo.selection.find((p) => cellAt(jogo.board, p) === JOKER);
+    this.view.marcarJoker(joker, jogo.jokerAs);
   }
 
   private pintarRelogio(): void {

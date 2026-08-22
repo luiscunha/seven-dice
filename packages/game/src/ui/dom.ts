@@ -54,3 +54,71 @@ export function cabecalho(
   el.append(voltar, elTitulo);
   return { el, elTitulo };
 }
+
+/**
+ * Uma confirmação, em pop-up ao meio do ecrã.
+ *
+ * Existe por causa do telemóvel. Um dedo acerta ao lado do que queria com muito
+ * mais frequência do que um rato, e as ações que aqui pede confirmação — sair,
+ * reiniciar, recomeçar — deitam fora uma partida inteira. Perguntar custa um
+ * toque; não perguntar custa o jogo todo.
+ *
+ * **Só se pergunta quando há o que perder.** Uma confirmação sobre uma corrida
+ * já terminada não protege nada e é ruído — e uma caixa que aparece sempre é
+ * uma caixa que se aprende a despachar sem ler, o que a torna pior do que não
+ * existir.
+ *
+ * O botão que confirma **não** é o primário: o realce fica em cancelar, porque
+ * quem chegou aqui por engano é quem precisa da saída fácil.
+ */
+export interface OpcoesConfirmar {
+  readonly titulo: string;
+  readonly texto?: string;
+  /** O rótulo da ação a sério. «Sim» não diz o que vai acontecer. */
+  readonly confirmar: string;
+  readonly aoConfirmar: () => void;
+}
+
+export function confirmar(
+  host: HTMLElement,
+  opcoes: OpcoesConfirmar,
+): HTMLDialogElement {
+  const d = document.createElement("dialog");
+  // Classe própria: os ecrãs já têm um `.popup` seu, e os dois não se confundem.
+  d.className = "popup confirmacao";
+
+  const corpo = elemento("div", "popup-corpo");
+  corpo.appendChild(elemento("h2", "popup-titulo", opcoes.titulo));
+  if (opcoes.texto !== undefined) {
+    corpo.appendChild(elemento("p", "popup-texto", opcoes.texto));
+  }
+
+  const fechar = (): void => {
+    if (typeof d.close === "function") d.close();
+    else d.open = false;
+    d.remove();
+  };
+
+  const acoes = elemento("div", "acoes");
+  acoes.append(
+    botao("Cancelar", "primario", fechar),
+    botao(opcoes.confirmar, undefined, () => {
+      fechar();
+      opcoes.aoConfirmar();
+    }),
+  );
+  corpo.appendChild(acoes);
+
+  // Tocar fora cancela: é o gesto de quem percebeu que se enganou.
+  d.addEventListener("click", (e) => {
+    if (e.target === d) fechar();
+  });
+
+  d.appendChild(corpo);
+  host.appendChild(d);
+
+  if (typeof d.showModal === "function") d.showModal();
+  else d.open = true;
+
+  return d;
+}

@@ -46,6 +46,7 @@ import { NiveisScreen } from "./ui/NiveisScreen";
 import { PuzzleScreen } from "./ui/PuzzleScreen";
 import type { Rota } from "./ui/rotas";
 import { deHash, paraHash, rotaLegada } from "./ui/rotas";
+import type { CorridaGuardada } from "./ui/SurvivalScreen";
 import { SurvivalScreen, novaSeed, relogio } from "./ui/SurvivalScreen";
 import { TimeAttackScreen } from "./ui/TimeAttackScreen";
 
@@ -84,6 +85,15 @@ const niveisDoCapitulo = (id: string): readonly NivelDoCapitulo[] =>
 /** O ecrã montado. Só um de cada vez, e é sempre este que se destrói. */
 let atual: { destruir: () => void } | undefined;
 let tutorial: JokerTutorial | undefined;
+
+/**
+ * A corrida de Survival a meio.
+ *
+ * Vive aqui e não no ecrã porque o ecrã é destruído a cada navegação. Sair do
+ * modo passa a ser uma pausa: o tabuleiro, o cronómetro e a linha que vinha a
+ * seguir esperam por quem volta.
+ */
+let corridaSurvival: CorridaGuardada | undefined;
 
 const guardarPerfil = (): void => {
   if (armazenamento !== undefined) save(armazenamento, perfil);
@@ -310,12 +320,20 @@ function mostrarSurvival(seed: number | undefined): void {
 
   atual = new SurvivalScreen(app as HTMLElement, {
     seed,
+    // `exactOptionalPropertyTypes`: a chave omite-se, não se põe a `undefined`.
+    ...(corridaSurvival?.estado.seed === seed ? { retomar: corridaSurvival } : {}),
+    aoGuardar: (corrida) => {
+      corridaSurvival = corrida;
+    },
     melhorTempo: perfil.bestSurvivalMs,
     aoTerminar: ({ limpou, tempoMs, linhas }) => {
+      // A corrida acabou: não há nada para retomar.
+      corridaSurvival = undefined;
       perfil = recordSurvival(perfil, limpou, tempoMs, linhas);
       guardarPerfil();
     },
     aoRecomecar: (nova) => {
+      corridaSurvival = undefined;
       ir({ ecra: "survival", seed: nova });
     },
     aoSair: voltarA({ ecra: "home" }),

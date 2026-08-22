@@ -55,7 +55,7 @@ import {
   weightedIndex,
 } from "@dicetoseven/engine";
 
-import type { GameState } from "./GameSession";
+import type { GameState, JokerValue } from "./GameSession";
 import { startGame, tap } from "./GameSession";
 import type { ScoringConfig } from "./scoring";
 import { DEFAULT_SCORING, moveScore } from "./scoring";
@@ -385,6 +385,8 @@ export function survivalTap(
   p: Packed,
   config: SurvivalConfig = DEFAULT_SURVIVAL,
   scoring: ScoringConfig = DEFAULT_SCORING,
+  /** O valor que o jogador deu ao joker. Obrigatório ao tocar-lhe. */
+  jokerAs?: JokerValue,
 ): SurvivalTap {
   if (s.morto || s.limpo) return parado(s);
 
@@ -393,7 +395,7 @@ export function survivalTap(
     ? [...antes.selection]
     : [...antes.selection, p];
 
-  const game = tap(antes, p);
+  const game = tap(antes, p, jokerAs);
   const jogou = game.history.length > antes.history.length;
 
   if (!jogou) return { ...parado(s), state: { ...s, game } };
