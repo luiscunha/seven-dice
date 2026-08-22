@@ -86,6 +86,10 @@ export class PuzzleScreen {
   private readonly elSoma: HTMLElement;
   private readonly elAviso: HTMLElement;
   private readonly elFim: HTMLElement;
+  private readonly elBeco: HTMLDialogElement;
+
+  /** Já foi mostrado para *este* beco. Dispensá-lo não o traz de volta. */
+  private becoMostrado = false;
 
   private readonly btDesfazer: HTMLButtonElement;
   private readonly btReiniciar: HTMLButtonElement;
@@ -166,7 +170,13 @@ export class PuzzleScreen {
     this.elFim.hidden = true;
 
     rodape.append(linha, acoes, this.elFim);
-    this.raiz.append(topo, palco, rodape);
+    this.elBeco = document.createElement("dialog");
+    this.elBeco.className = "popup";
+    this.elBeco.addEventListener("click", (e) => {
+      if (e.target === this.elBeco) this.esconderBeco();
+    });
+
+    this.raiz.append(topo, palco, rodape, this.elBeco);
 
     this.view = new BoardView(palco, { aoTocar: (p) => void this.tocar(p) });
     this.picker = new JokerPicker(palco, {
@@ -189,6 +199,13 @@ export class PuzzleScreen {
   }
 
   destruir(): void {
+    /*
+     * Fechar antes de remover. Um `<dialog>` modal vive na camada de topo do
+     * documento, não no seu lugar na árvore, e sair do nível com ele aberto
+     * deixava o escurecimento e o `inert` a cobrir o ecrã seguinte — o jogo
+     * parecia ter congelado.
+     */
+    this.esconderBeco();
     this.picker.destruir();
     this.view.destruir();
     this.raiz.remove();
@@ -398,8 +415,11 @@ export class PuzzleScreen {
 
     if (isBlocked(jogo)) {
       this.pintarPreso();
+      this.elFim.hidden = true;
       return;
     }
+
+    this.fecharBeco();
 
     if (!isFinished(jogo)) {
       this.elFim.hidden = true;
@@ -452,36 +472,59 @@ export class PuzzleScreen {
    * porque a jogada fatal está quase sempre umas quantas atrás e foi invisível
    * quando aconteceu.
    *
-   * Não é um modal por cima do tabuleiro. O tabuleiro encravado **é** a lição,
-   * e tapá-lo para dizer que se encravou seria esconder a única coisa que há
-   * para ver. O painel é o mesmo do fim de nível, no mesmo sítio.
+   * É um `<dialog>` a meio do ecrã, com escurecimento por trás.
+   *
+   * **Dispensável.** O tabuleiro encravado é a lição, e um modal que não se
+   * pode fechar esconde a única coisa que há para ver. O `✕`, o `Esc` e o clique
+   * no escurecimento fecham-no; os botões do rodapé continuam lá, portanto
+   * fechar não deixa ninguém sem saída — e `becoMostrado` impede que ele volte
+   * a saltar sozinho no mesmo beco.
+   *
+   * `showModal` dá foco preso e `Esc` de graça, mas não existe em jsdom. O
+   * `open = true` é a rede: mostra o mesmo diálogo, só sem o comportamento
+   * modal.
    */
   private pintarPreso(): void {
+    if (this.becoMostrado) return;
+    this.becoMostrado = true;
+
     const jogo = this.estado.game;
     const restantes = jogo.board.reduce((n, col) => n + col.length, 0);
 
-    this.elFim.dataset["tipo"] = "preso";
-    this.elFim.hidden = false;
+    const fechar = botao("✕", "redondo");
+    fechar.setAttribute("aria-label", "ver o tabuleiro");
+    fechar.addEventListener("click", () => {
+      this.esconderBeco();
+    });
 
-    const titulo = document.createElement("div");
-    titulo.className = "selo";
-    titulo.textContent = "Beco sem saída";
+    const titulo = document.createElement("h2");
+    titulo.className = "popup-titulo";
+    titulo.textContent = "Ups! Beco sem saída!";
 
-    const detalhe = document.createElement("div");
-    detalhe.className = "detalhe";
+    const detalhe = document.createElement("p");
+    detalhe.className = "popup-texto";
     detalhe.textContent =
       restantes === 1
         ? "Sobrou 1 peça, e já não há nenhum grupo que some 7."
         : `Sobraram ${String(restantes)} peças, e já não há nenhum grupo que some 7.`;
 
-    this.elFim.replaceChildren(titulo, detalhe);
+    /*
+     * O conteúdo vive num invólucro para que o clique no escurecimento seja
+     * distinguível: num `<dialog>`, o clique no fundo chega com `target` no
+     * próprio diálogo — mas o mesmo aconteceria a um clique no seu enchimento.
+     * Com o enchimento no invólucro, `target === elBeco` só sobra para o fundo.
+     */
+    const corpo = document.createElement("div");
+    corpo.className = "popup-corpo";
+    corpo.append(fechar, titulo, detalhe);
+    this.elBeco.replaceChildren(corpo);
 
     // Só nos níveis com joker, porque só aí o erro é invisível quando se comete.
     if (jogo.level.joker !== undefined) {
-      const nota = document.createElement("div");
-      nota.className = "detalhe";
+      const nota = document.createElement("p");
+      nota.className = "popup-texto";
       nota.textContent = "Com o joker, a jogada fatal costuma estar umas atrás.";
-      this.elFim.appendChild(nota);
+      corpo.appendChild(nota);
     }
 
     const acoes = document.createElement("div");
@@ -492,6 +535,7 @@ export class PuzzleScreen {
     if (jogo.history.length > 0) {
       const desfazer = botao("Desfazer", "primario");
       desfazer.addEventListener("click", () => {
+        this.esconderBeco();
         this.desfazer();
       });
       acoes.appendChild(desfazer);
@@ -502,11 +546,32 @@ export class PuzzleScreen {
       jogo.history.length > 0 ? undefined : "primario",
     );
     reiniciar.addEventListener("click", () => {
+      this.esconderBeco();
       this.reiniciar();
     });
     acoes.appendChild(reiniciar);
 
-    this.elFim.appendChild(acoes);
+    corpo.appendChild(acoes);
+
+    if (typeof this.elBeco.showModal === "function") this.elBeco.showModal();
+    else this.elBeco.open = true;
+  }
+
+  /**
+   * Fecha a caixa e mais nada. **Não mexe em `becoMostrado`** — dispensar o
+   * aviso não é sair do beco, e quem o dispensou não quer vê-lo outra vez ao
+   * primeiro repintar.
+   */
+  private esconderBeco(): void {
+    if (!this.elBeco.open) return;
+    if (typeof this.elBeco.close === "function") this.elBeco.close();
+    else this.elBeco.open = false;
+  }
+
+  /** Sair do beco fecha a caixa e rearma-a para a próxima vez que aconteça. */
+  private fecharBeco(): void {
+    this.becoMostrado = false;
+    this.esconderBeco();
   }
 }
 

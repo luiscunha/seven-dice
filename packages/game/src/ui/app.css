@@ -288,35 +288,102 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ─── Beco sem saída ──────────────────────────────────────────────────────── */
+
 /*
- * Beco sem saída.
+ * O pop-up a meio do ecrã.
  *
- * A entrada anima-se porque **explica uma mudança de estado** — é o critério
- * do §2.1, e é o mesmo que autoriza as três fases da jogada. Um painel que
- * aparece do nada, num ecrã onde o jogador acabou de tocar numa peça e nada
- * aconteceu, deixa a dúvida de se já lá estava.
+ * A entrada anima-se porque **explica uma mudança de estado** — é o critério do
+ * §2.1, o mesmo que autoriza as três fases da jogada. Um painel que aparece do
+ * nada, num ecrã onde o jogador acabou de tocar numa peça e nada aconteceu,
+ * deixa a dúvida de se já lá estava.
  *
- * Aparece e assenta: 6px e 180ms, sem ressalto e sem escala. Celebrar uma
- * derrota seria mau gosto, e celebrar seja o que for está fora desta direção.
+ * Aparece e assenta: 8px e 200ms, sem ressalto e sem escala exagerada. Celebrar
+ * uma derrota seria mau gosto, e celebrar seja o que for está fora desta direção.
+ *
+ * O enchimento vive no `.popup-corpo` e não aqui: é o que faz o clique no
+ * escurecimento ser distinguível de um clique na margem do diálogo.
  */
-.fim[data-tipo="preso"] {
-  border-color: var(--face-joker);
-  animation: entrar-painel 180ms var(--suavizacao) both;
-}
-
-.fim[data-tipo="preso"] .selo {
+.popup {
+  border: 1px solid var(--line);
+  border-radius: var(--raio);
+  background: var(--surface);
   color: var(--ink);
+  padding: 0;
+  max-width: min(360px, calc(100vw - 32px));
+  box-shadow: var(--sombra);
 }
 
-@keyframes entrar-painel {
+/*
+ * A animação vive no `[open]`, não na regra de base.
+ *
+ * Um `<dialog>` fechado é `display: none`, e uma animação declarada nesse estado
+ * é criada sem tempo de início: fica eternamente «a correr» no primeiro
+ * fotograma. O diálogo abria 8px abaixo do centro e ficava lá. Declarada no
+ * `[open]`, nasce no instante em que o elemento passa a ter caixa.
+ */
+.popup[open] {
+  animation: entrar-popup 200ms var(--suavizacao) backwards;
+}
+
+.popup::backdrop {
+  background: rgb(18 63 58 / 0.45);
+}
+
+.popup[open]::backdrop {
+  animation: entrar-escurecimento 200ms var(--suavizacao) backwards;
+}
+
+.popup-corpo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+
+.popup-titulo {
+  margin: 0;
+  padding-right: 32px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.popup-texto {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+/* O `✕` não é decoração: é ele que impede o modal de tapar a lição para sempre. */
+.popup-corpo > .btn.redondo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.popup .acoes {
+  margin-top: 4px;
+}
+
+@keyframes entrar-popup {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
+  }
+}
+
+@keyframes entrar-escurecimento {
+  from {
+    opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fim[data-tipo="preso"] {
+  .popup[open],
+  .popup[open]::backdrop {
     animation: none;
   }
 }
