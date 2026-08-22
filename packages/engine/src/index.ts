@@ -43,6 +43,8 @@ export {
 
 export { InvalidMoveError, applyMove } from "./moves";
 
+export { InvalidInjectionError, pushRow, tallestColumn } from "./inject";
+
 export type { Limits, Verdict } from "./solver";
 export {
   DEFAULT_LIMITS,

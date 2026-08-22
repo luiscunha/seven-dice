@@ -1,5 +1,5 @@
 /**
- * A Home: os dois modos e as definições.
+ * A Home: os três modos e as definições.
  *
  * É o único ecrã sem seta de voltar, e o único que mostra o nome do jogo. Tudo o
  * resto é uma escolha entre três coisas — e três coisas não precisam de mapa,
@@ -16,10 +16,13 @@ import { botao, elemento } from "./dom";
 export interface OpcoesHome {
   readonly aoEscolherNiveis: () => void;
   readonly aoEscolherTempo: () => void;
+  readonly aoEscolherSurvival: () => void;
   readonly aoEscolherDefinicoes: () => void;
   readonly perfil: Profile;
   /** Total de níveis do pack, para o «x de y». */
   readonly totalNiveis: number;
+  /** Já formatado: a Home não sabe converter milissegundos em tempo. */
+  readonly melhorTempoSurvival: string;
 }
 
 export class HomeScreen {
@@ -51,6 +54,11 @@ export class HomeScreen {
         "Contra-Relógio",
         "Um relógio só, que nunca pára",
         opcoes.aoEscolherTempo,
+      ),
+      this.cartao(
+        "Survival",
+        "Vês o que aí vem. Limpa o tabuleiro o mais depressa que consigas",
+        opcoes.aoEscolherSurvival,
       ),
     );
 
@@ -131,6 +139,17 @@ export class HomeScreen {
           undefined,
           `Contra-Relógio: ${String(opcoes.perfil.bestTimeAttackScore)} pontos · ` +
             plural(opcoes.perfil.bestBoardsCleared, "tabuleiro", "tabuleiros"),
+        ),
+      );
+    }
+
+    if (opcoes.perfil.bestSurvivalMs > 0) {
+      el.appendChild(
+        elemento(
+          "p",
+          undefined,
+          `Survival: ${opcoes.melhorTempoSurvival} · ` +
+            plural(opcoes.perfil.bestSurvivalRows, "linha", "linhas"),
         ),
       );
     }

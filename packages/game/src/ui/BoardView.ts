@@ -34,6 +34,9 @@ const LADO_MAX = 72;
 /** Piso de toque da acessibilidade. Abaixo disto marca-se, não se impede. */
 export const LADO_MIN_TOQUE = 44;
 
+/** Linhas acima do tabuleiro de onde a linha injetada parte. */
+const ALTURA_DA_QUEDA = 3;
+
 export interface OpcoesBoardView {
   readonly aoTocar: (p: Packed) => void;
   readonly modoFace?: ModoFace;
@@ -197,6 +200,62 @@ export class BoardView {
     if (!(await this.espera("--t-colapso", minha))) return;
 
     this.fecharAnimacao = undefined;
+  }
+
+  /**
+   * Faz cair uma linha nova por cima do que já lá está.
+   *
+   * As peças nascem **acima do tabuleiro** e só depois recebem a posição final.
+   * São duas escritas do mesmo `transform` com um reflow pelo meio: a primeira
+   * não anima, porque o elemento acabou de entrar e não tem valor anterior; a
+   * segunda anima, pela transição que a `.peca` já traz. Sem o reflow o browser
+   * junta as duas e a peça aparece no sítio, sem queda nenhuma.
+   *
+   * `depois` é o tabuleiro já com a linha — a vista não calcula nada, só mostra
+   * o que a sessão decidiu.
+   */
+  async injetarLinha(depois: Board): Promise<void> {
+    this.fecharAnimacao?.();
+    const minha = ++this.geracao;
+
+    const antes = this.board;
+    this.board = depois;
+    this.colunas = Math.max(this.colunas, width(depois));
+    this.linhas = Math.max(
+      this.linhas,
+      depois.reduce((m, col) => Math.max(m, col.length), 0),
+    );
+
+    const novas: { readonly el: HTMLElement; readonly p: Packed }[] = [];
+
+    for (let c = 0; c < depois.length; c++) {
+      const col = depois[c];
+      if (col === undefined) continue;
+
+      for (let r = antes[c]?.length ?? 0; r < col.length; r++) {
+        const valor = col[r];
+        if (valor === undefined) continue;
+
+        const p = packed(c, r);
+        const el = criarPeca(valor, this.modo);
+        el.dataset["pos"] = String(p);
+        this.posicionar(el, packed(c, r + ALTURA_DA_QUEDA));
+
+        this.pecas.set(p, el);
+        this.grelha.appendChild(el);
+        novas.push({ el, p });
+      }
+    }
+
+    if (novas.length === 0) return;
+
+    this.redimensionar();
+
+    // Força o layout, para que a posição de partida conte como valor anterior.
+    void this.grelha.offsetHeight;
+
+    for (const { el, p } of novas) this.posicionar(el, p);
+    await this.espera("--t-gravidade", minha);
   }
 
   /** Retângulo de uma peça no ecrã — o seletor do joker ancora-se nele. */

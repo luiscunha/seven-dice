@@ -37,6 +37,11 @@ export interface Profile {
   /** Melhor número de tabuleiros limpos numa corrida. */
   readonly bestBoardsCleared: number;
 
+  /** Melhor tempo a limpar o tabuleiro no Survival, em ms. `0` = ainda nenhum. */
+  readonly bestSurvivalMs: number;
+  /** Linhas aguentadas nessa corrida. */
+  readonly bestSurvivalRows: number;
+
   /**
    * O tutorial do joker já correu uma vez.
    *
@@ -53,6 +58,8 @@ export const emptyProfile = (): Profile => ({
   levels: {},
   bestTimeAttackScore: 0,
   bestBoardsCleared: 0,
+  bestSurvivalMs: 0,
+  bestSurvivalRows: 0,
   sawJokerTutorial: false,
 });
 
@@ -122,6 +129,28 @@ export const recordTimeAttack = (
   bestBoardsCleared: Math.max(profile.bestBoardsCleared, boardsCleared),
 });
 
+/**
+ * Guarda o melhor do Survival.
+ *
+ * **Só conta a corrida que limpou o tabuleiro.** Transbordar não é uma marca, é
+ * uma tentativa — e um recorde de «quanto tempo aguentei antes de perder» premeia
+ * jogar devagar, que é o contrário do que o modo pede.
+ *
+ * Menor é melhor, portanto o zero significa «ainda nenhum» e não «instantâneo».
+ */
+export const recordSurvival = (
+  profile: Profile,
+  limpou: boolean,
+  tempoMs: number,
+  rows: number,
+): Profile => {
+  if (!limpou) return profile;
+  if (profile.bestSurvivalMs !== 0 && tempoMs >= profile.bestSurvivalMs) {
+    return profile;
+  }
+  return { ...profile, bestSurvivalMs: tempoMs, bestSurvivalRows: rows };
+};
+
 export const save = (storage: ProfileStorage, profile: Profile): void => {
   storage.setItem(PROFILE_KEY, JSON.stringify(profile));
 };
@@ -154,6 +183,8 @@ export function load(storage: ProfileStorage): Profile {
     levels: sanitizeLevels(p.levels),
     bestTimeAttackScore: finiteOrZero(p.bestTimeAttackScore),
     bestBoardsCleared: finiteOrZero(p.bestBoardsCleared),
+    bestSurvivalMs: finiteOrZero(p.bestSurvivalMs),
+    bestSurvivalRows: finiteOrZero(p.bestSurvivalRows),
     sawJokerTutorial: p.sawJokerTutorial === true,
   };
 }

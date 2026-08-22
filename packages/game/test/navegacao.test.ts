@@ -48,6 +48,7 @@ describe("rotas", () => {
     { ecra: "niveis", capitulo: "perito" },
     { ecra: "jogo", banda: "meio-joker", nivel: 12 },
     { ecra: "tempo" },
+    { ecra: "survival", seed: 20260822 },
     { ecra: "definicoes" },
   ];
 
@@ -90,6 +91,17 @@ describe("rotas", () => {
   });
 
   /* Há links `?banda=…` espalhados por notas e conversas; traduzi-los é uma linha. */
+  it("a seed do Survival sobrevive ao endereço — é o que torna a corrida partilhável", () => {
+    expect(deHash("#/survival/20260822")).toEqual({ ecra: "survival", seed: 20260822 });
+
+    // Sem seed, o modo sorteia uma: a rota não a inventa aqui.
+    expect(deHash("#/survival")).toEqual({ ecra: "survival" });
+
+    // Uma seed absurda não trava nada — sorteia-se outra.
+    expect(deHash("#/survival/abc")).toEqual({ ecra: "survival" });
+    expect(deHash("#/survival/-3")).toEqual({ ecra: "survival" });
+  });
+
   it("a forma antiga continua a levar ao sítio certo", () => {
     expect(rotaLegada("?banda=perito&nivel=27")).toEqual({
       ecra: "jogo",
@@ -289,14 +301,46 @@ describe("modo tempo", () => {
     expect(host.querySelector<HTMLElement>(".fim")?.hidden).toBe(false);
   });
 
-  it("sair a meio termina a corrida e regista o que se fez", () => {
+  it("sair a meio pergunta antes, e só depois termina a corrida", () => {
     ecra = abrir();
 
     const sair = host.querySelector<HTMLElement>(".topo .btn.redondo");
     sair?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
+    /*
+     * O primeiro toque **não** sai. Num telemóvel a seta fica onde o polegar já
+     * está, e um toque por engano custava a corrida inteira.
+     */
+    expect(terminou).toBeUndefined();
+    expect(saiu).toBe(0);
+
+    const caixa = host.querySelector("dialog.confirmacao");
+    expect(caixa).not.toBeNull();
+
+    const confirmar = [...(caixa?.querySelectorAll("button") ?? [])].find(
+      (b) => b.textContent === "Sair",
+    );
+    confirmar?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
     expect(terminou).toBeDefined();
     expect(saiu).toBe(1);
+  });
+
+  it("cancelar a saída deixa a corrida onde estava", () => {
+    ecra = abrir();
+
+    host
+      .querySelector<HTMLElement>(".topo .btn.redondo")
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    const caixa = host.querySelector("dialog.confirmacao");
+    [...(caixa?.querySelectorAll("button") ?? [])]
+      .find((b) => b.textContent === "Cancelar")
+      ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    expect(terminou).toBeUndefined();
+    expect(saiu).toBe(0);
+    expect(host.querySelector("dialog.confirmacao")).toBeNull();
   });
 
   it("largar o ecrã não deixa o relógio a correr", () => {

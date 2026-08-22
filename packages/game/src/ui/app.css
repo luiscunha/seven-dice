@@ -1025,3 +1025,98 @@
     font-size: 26px;
   }
 }
+
+/* ─── Survival ────────────────────────────────────────────────────────────── */
+
+/*
+ * A folga é o relógio deste modo. O que aqui se gasta é **espaço**, e por isso
+ * ocupa no topo o lugar que o relógio ocupa no Contra-Relógio: grande, sempre
+ * à vista, e a mudar de cor quando aperta.
+ */
+/* O cronómetro corre para cima: a marca é o tempo até limpar o tabuleiro. */
+.survival-topo .relogio {
+  margin-inline: auto;
+  font-size: clamp(28px, 8vw, 40px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.survival-topo .meta[data-aperto="aviso"] { color: var(--face-5); }
+.survival-topo .meta[data-aperto="critico"] {
+  color: var(--face-joker);
+  font-weight: 600;
+}
+
+.survival .multiplicador {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+/*
+ * A fila fica **entre o topo e o tabuleiro**, que é de onde as peças vêm. Pô-la
+ * ao lado ou no rodapé obrigava a ligar mentalmente duas zonas do ecrã que não
+ * têm relação espacial nenhuma com a injeção.
+ */
+/*
+ * A fila fica **entre o topo e o tabuleiro**, que é de onde as peças caem.
+ *
+ * As peças são as mesmas do tabuleiro — mesma fábrica, mesmas pintas, mesmas
+ * cores — só que mais pequenas e sem toque. Uma fila com números obrigava a
+ * traduzir entre dois alfabetos a cada linha.
+ */
+.fila {
+  display: flex;
+  gap: var(--gap-peca);
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  border-radius: var(--raio);
+  background: var(--tray);
+}
+
+.fila .peca.na-fila {
+  --lado-real: 26px;
+  position: static;
+  transform: none;
+  cursor: default;
+  flex: none;
+}
+
+/*
+ * O resto para limpar. Cada jogada tira exatamente 7, portanto o tabuleiro só
+ * pode esvaziar se a soma for múltipla de 7 — e `0` é a única leitura sobre a
+ * qual há alguma coisa a fazer. É a única que ganha cor.
+ */
+.resto {
+  font-size: 13px;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.resto[data-pronto="sim"] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Sem jogadas, puxar deixa de ser opção e passa a ser a única saída. */
+.survival .btn[data-urgente="sim"] {
+  background: var(--face-joker);
+  border-color: var(--face-joker);
+  color: var(--on-accent);
+}
+
+@media (max-width: 480px) {
+  .fila { padding: 4px; }
+  .fila .peca.na-fila { --lado-real: 22px; }
+}
+
+/* Quatro faixas em vez de três: a fila entra entre o topo e o tabuleiro. */
+.ecra.survival {
+  grid-template-rows: auto auto 1fr auto;
+}

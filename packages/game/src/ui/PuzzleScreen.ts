@@ -36,6 +36,7 @@ import {
   tap,
 } from "../session/GameSession";
 import { moveScore } from "../session/scoring";
+import { confirmar } from "./dom";
 import { BoardView } from "./BoardView";
 import { JokerPicker } from "./JokerPicker";
 
@@ -189,7 +190,24 @@ export class PuzzleScreen {
       this.desfazer();
     });
     this.btReiniciar.addEventListener("click", () => {
-      this.reiniciar();
+      /*
+       * Pergunta só quando há o que perder. Num tabuleiro por tocar, reiniciar
+       * não faz nada — e uma caixa que aparece sempre aprende-se a despachar
+       * sem ler, o que a torna pior do que não existir.
+       */
+      if (this.estado.game.moves === 0 && this.estado.game.selection.length === 0) {
+        this.reiniciar();
+        return;
+      }
+
+      confirmar(this.raiz, {
+        titulo: "Reiniciar o nível?",
+        texto: "As jogadas feitas até aqui perdem-se.",
+        confirmar: "Reiniciar",
+        aoConfirmar: () => {
+          this.reiniciar();
+        },
+      });
     });
     this.btDica.addEventListener("click", () => {
       this.pedirDica();

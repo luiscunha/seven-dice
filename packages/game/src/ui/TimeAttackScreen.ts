@@ -33,7 +33,7 @@ import {
   tapTimeAttack,
 } from "../session/TimeAttackSession";
 import { BoardView } from "./BoardView";
-import { botao, elemento, texto } from "./dom";
+import { botao, confirmar, elemento, texto } from "./dom";
 
 /** De quanto em quanto o relógio se repinta. Décimos chegam, e custam pouco. */
 const PASSO_RELOGIO = 100;
@@ -97,9 +97,26 @@ export class TimeAttackScreen {
     /* ── topo: o relógio manda ── */
     const topo = elemento("header", "topo tempo-topo");
 
+    /*
+     * Sair acaba a corrida — não há como a retomar, porque o relógio andou.
+     * Num telemóvel a seta fica onde o polegar já está, e um toque por engano
+     * custava a corrida inteira.
+     */
     const sair = botao("‹", "redondo", () => {
-      this.terminar();
-      opcoes.aoSair();
+      if (this.terminado) {
+        opcoes.aoSair();
+        return;
+      }
+
+      confirmar(this.raiz, {
+        titulo: "Sair da corrida?",
+        texto: "O relógio não pára: a corrida acaba aqui.",
+        confirmar: "Sair",
+        aoConfirmar: () => {
+          this.terminar();
+          opcoes.aoSair();
+        },
+      });
     });
     sair.setAttribute("aria-label", "sair da corrida");
 

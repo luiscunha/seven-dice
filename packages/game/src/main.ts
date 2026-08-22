@@ -22,6 +22,7 @@ import {
   load,
   markJokerTutorialSeen,
   recordLevel,
+  recordSurvival,
   recordTimeAttack,
   save,
 } from "./session/progress";
@@ -34,6 +35,12 @@ import {
   loadSettings,
   saveSettings,
 } from "./session/settings";
+import type { CorridaGuardada } from "./session/corridaSurvival";
+import {
+  guardarCorrida,
+  lerCorrida,
+  limparCorrida,
+} from "./session/corridaSurvival";
 import { mostraSomaDasFaces } from "./session/tutorial";
 import type { CapituloNaLista } from "./ui/CapitulosScreen";
 import { CapitulosScreen } from "./ui/CapitulosScreen";
@@ -45,6 +52,7 @@ import { NiveisScreen } from "./ui/NiveisScreen";
 import { PuzzleScreen } from "./ui/PuzzleScreen";
 import type { Rota } from "./ui/rotas";
 import { deHash, paraHash, rotaLegada } from "./ui/rotas";
+import { SurvivalScreen, novaSeed, relogio } from "./ui/SurvivalScreen";
 import { TimeAttackScreen } from "./ui/TimeAttackScreen";
 
 const app = document.querySelector<HTMLElement>("#app");
@@ -82,6 +90,24 @@ const niveisDoCapitulo = (id: string): readonly NivelDoCapitulo[] =>
 /** O ecrã montado. Só um de cada vez, e é sempre este que se destrói. */
 let atual: { destruir: () => void } | undefined;
 let tutorial: JokerTutorial | undefined;
+
+/**
+ * A corrida de Survival a meio.
+ *
+ * Vive aqui e não no ecrã porque o ecrã é destruído a cada navegação, e vai a
+ * disco porque a página também é: num telemóvel, trocar de aplicação e voltar
+ * basta para o browser a montar de novo.
+ */
+let corridaSurvival: CorridaGuardada | undefined =
+  armazenamento === undefined ? undefined : lerCorrida(armazenamento);
+
+const guardarSurvival = (corrida: CorridaGuardada | undefined): void => {
+  corridaSurvival = corrida;
+  if (armazenamento === undefined) return;
+
+  if (corrida === undefined) limparCorrida(armazenamento);
+  else guardarCorrida(armazenamento, corrida);
+};
 
 const guardarPerfil = (): void => {
   if (armazenamento !== undefined) save(armazenamento, perfil);
@@ -122,8 +148,10 @@ async function mostrar(rota: Rota): Promise<void> {
       atual = new HomeScreen(app as HTMLElement, {
         perfil,
         totalNiveis: campanha.reduce((n, c) => n + c.niveis.length, 0),
+        melhorTempoSurvival: relogio(perfil.bestSurvivalMs),
         aoEscolherNiveis: voltarA({ ecra: "bandas" }),
         aoEscolherTempo: voltarA({ ecra: "tempo" }),
+        aoEscolherSurvival: voltarA({ ecra: "survival" }),
         aoEscolherDefinicoes: voltarA({ ecra: "definicoes" }),
       });
       return;
@@ -168,6 +196,9 @@ async function mostrar(rota: Rota): Promise<void> {
 
     case "tempo":
       return mostrarTempo();
+
+    case "survival":
+      return mostrarSurvival(rota.seed);
   }
 }
 
@@ -279,6 +310,51 @@ async function mostrarTempo(): Promise<void> {
     aoTerminar: ({ pontos, tabuleiros }) => {
       perfil = recordTimeAttack(perfil, pontos, tabuleiros);
       guardarPerfil();
+    },
+    aoSair: voltarA({ ecra: "home" }),
+  });
+}
+
+/**
+ * O Survival.
+ *
+ * Não carrega pack nenhum — o tabuleiro nasce da seed. É o único modo assim, e
+ * é o que o torna partilhável: a seed vai no endereço, portanto passar o link é
+ * passar a corrida exata.
+ *
+ * Sem seed no URL sorteia-se uma e **reescreve-se o endereço**, para que a
+ * corrida que está a acontecer tenha sempre nome. Sem isso, acabar uma corrida
+ * boa e não a poder mostrar a ninguém era o desperdício óbvio.
+ */
+function mostrarSurvival(seed: number | undefined): void {
+  /*
+   * **Entrar sem seed retoma a corrida a meio**, se houver.
+   *
+   * Era aqui que o estado se perdia: o cartão da Home aponta para `#/survival`
+   * sem seed, e sortear sempre uma nova fazia com que a corrida guardada — que
+   * tem a seed antiga — nunca casasse com a do endereço. O jogador saía a meio
+   * e voltava a um tabuleiro novo em folha.
+   */
+  if (seed === undefined) {
+    ir({ ecra: "survival", seed: corridaSurvival?.estado.seed ?? novaSeed() });
+    return;
+  }
+
+  atual = new SurvivalScreen(app as HTMLElement, {
+    seed,
+    // `exactOptionalPropertyTypes`: a chave omite-se, não se põe a `undefined`.
+    ...(corridaSurvival?.estado.seed === seed ? { retomar: corridaSurvival } : {}),
+    aoGuardar: guardarSurvival,
+    melhorTempo: perfil.bestSurvivalMs,
+    aoTerminar: ({ limpou, tempoMs, linhas }) => {
+      // A corrida acabou: não há nada para retomar.
+      guardarSurvival(undefined);
+      perfil = recordSurvival(perfil, limpou, tempoMs, linhas);
+      guardarPerfil();
+    },
+    aoRecomecar: (nova) => {
+      guardarSurvival(undefined);
+      ir({ ecra: "survival", seed: nova });
     },
     aoSair: voltarA({ ecra: "home" }),
   });
