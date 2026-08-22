@@ -1,30 +1,34 @@
 /**
  * O modo Survival.
  *
- * Três coisas dominam o ecrã, e todas as três são informação que muda a jogada
- * seguinte:
+ * **O objetivo é limpar o tabuleiro, e o cronómetro é a marca.** Corre para
+ * cima desde o primeiro toque e pára quando a última peça sai — ou quando o
+ * tabuleiro transborda, que é a outra maneira de a corrida acabar.
  *
- * **A fila.** As próximas linhas, na ordem e na coluna em que vão entrar. É a
- * razão de ser do modo — sem ela isto era sorte cega, e com ela é planeamento.
- * Mostra-se com as peças a sério, não com números: a peça na fila tem de ser
- * reconhecível como a mesma coisa que vai aterrar no tabuleiro.
+ * Três coisas no ecrã, e as três mudam a jogada seguinte:
  *
- * **A folga.** Quantas linhas ainda cabem antes do teto. É o relógio deste modo
- * — o que aqui se gasta é espaço, não tempo.
+ * **O cronómetro**, em grande no topo, onde o Contra-Relógio tem o relógio dele.
+ *
+ * **A próxima linha**, entre o topo e o tabuleiro — é de lá que as peças vêm, e
+ * cai de lá quando entra. Uma linha só, com as peças a sério: as mesmas pintas,
+ * as mesmas cores, o mesmo tamanho da peça no tabuleiro. Uma peça na fila tem de
+ * ser reconhecível como a peça que vai aterrar, e um número não é.
  *
  * **O resto para limpar.** Cada jogada tira exatamente 7, portanto o tabuleiro
- * só pode esvaziar se a soma for múltipla de 7. As linhas fazem a soma derivar,
- * portanto isto anda: `0` quer dizer «dá para limpar agora», e qualquer outro
- * valor quer dizer «hoje não, de certeza». É condição necessária e não
- * suficiente, e o texto diz isso sem mentir.
+ * só pode esvaziar se a soma for múltipla de 7. As linhas fazem a soma derivar:
+ * `0` quer dizer «dá para limpar agora», qualquer outro valor quer dizer «hoje
+ * não, de certeza». É condição necessária e não suficiente, e o texto não mente
+ * sobre isso.
  *
  * Sem undo e sem dicas, como no Contra-Relógio. Mas ao contrário dele, **ficar
- * sem jogadas não é morrer**: é o momento de puxar uma linha. A mesma deteção
- * do beco sem saída da campanha, com o sentido ao contrário.
+ * sem jogadas não é morrer**: é o momento de puxar uma linha. A mesma deteção do
+ * beco sem saída da campanha, com o sentido ao contrário.
+ *
+ * O relógio do sistema entra aqui e só aqui. A `SurvivalSession` não o conhece.
  */
 
 import type { Cell, Group, Packed } from "@dicetoseven/engine";
-import { findAllGroups, hasAnyGroup, isEmpty } from "@dicetoseven/engine";
+import { hasAnyGroup, isEmpty } from "@dicetoseven/engine";
 
 import { selectionTotal } from "../session/GameSession";
 import type {
@@ -33,27 +37,31 @@ import type {
 } from "../session/SurvivalSession";
 import {
   DEFAULT_SURVIVAL,
-  cadencia,
-  filaVisivel,
   folga,
-  multiplicadorAoPuxar,
+  proximaLinha,
   puxarLinha,
   restoParaLimpar,
   startSurvival,
   survivalTap,
 } from "../session/SurvivalSession";
 import { BoardView } from "./BoardView";
+import { criarPeca } from "./dice";
 import { botao, elemento, texto } from "./dom";
+
+/** De quanto em quanto o cronómetro se repinta. Décimos chegam. */
+const PASSO_RELOGIO = 100;
 
 export interface OpcoesSurvival {
   readonly seed: number;
-  readonly melhorPontuacao: number;
+  /** Melhor tempo em milissegundos, ou 0 se ainda não há. */
+  readonly melhorTempo: number;
   readonly aoTerminar: (info: {
-    readonly pontos: number;
+    readonly limpou: boolean;
+    readonly tempoMs: number;
     readonly linhas: number;
   }) => void;
   readonly aoSair: () => void;
-  /** Recomeçar com outra seed. Sem isto, morrer é um beco. */
+  /** Recomeçar com outra seed. Sem isto, acabar é um beco. */
   readonly aoRecomecar: (seed: number) => void;
 }
 
@@ -63,7 +71,7 @@ export class SurvivalScreen {
   private readonly opcoes: OpcoesSurvival;
   private readonly config: SurvivalConfig = DEFAULT_SURVIVAL;
 
-  private readonly elFolga: HTMLElement;
+  private readonly elRelogio: HTMLElement;
   private readonly elMeta: HTMLElement;
   private readonly elFila: HTMLElement;
   private readonly elSoma: HTMLElement;
@@ -75,32 +83,41 @@ export class SurvivalScreen {
   private terminado = false;
   private ocupado = false;
 
+  /**
+   * O cronómetro arranca no **primeiro toque**, não ao abrir o ecrã.
+   *
+   * Quem chega ao modo tem primeiro de olhar para o tabuleiro, e cronometrar
+   * esse olhar seria cronometrar a coisa errada.
+   */
+  private inicioMs: number | undefined;
+  private fimMs: number | undefined;
+  private cronometro: ReturnType<typeof setInterval> | undefined;
+
   constructor(host: HTMLElement, opcoes: OpcoesSurvival) {
     this.opcoes = opcoes;
     this.estado = startSurvival(opcoes.seed, this.config);
 
     this.raiz = elemento("div", "ecra survival");
 
-    /* ── topo: a folga manda, como o relógio manda no Contra-Relógio ── */
+    /* ── topo: o cronómetro manda ── */
     const topo = elemento("header", "topo survival-topo");
 
     const sair = botao("‹", "redondo", () => {
-      this.terminar();
+      this.parar();
       opcoes.aoSair();
     });
     sair.setAttribute("aria-label", "sair da corrida");
 
-    this.elFolga = elemento("div", "folga");
-    this.elFolga.setAttribute("role", "status");
+    this.elRelogio = elemento("div", "relogio");
+    this.elRelogio.setAttribute("role", "timer");
     this.elMeta = elemento("div", "meta");
 
-    topo.append(sair, this.elFolga, this.elMeta);
+    topo.append(sair, this.elRelogio, this.elMeta);
 
-    /* ── a fila, entre o topo e o tabuleiro: é de lá que as peças vêm ── */
+    /* ── a próxima linha, entre o topo e o tabuleiro: é de lá que ela cai ── */
     this.elFila = elemento("div", "fila");
-    this.elFila.setAttribute("aria-label", "próximas linhas");
+    this.elFila.setAttribute("aria-label", "próxima linha");
 
-    /* ── palco ── */
     const palco = elemento("div", "palco");
 
     /* ── rodapé ── */
@@ -113,7 +130,7 @@ export class SurvivalScreen {
 
     const acoes = elemento("div", "acoes");
     this.btPuxar = botao("Puxar linha", "primario", () => {
-      this.puxar();
+      void this.puxar();
     });
     acoes.appendChild(this.btPuxar);
 
@@ -130,8 +147,7 @@ export class SurvivalScreen {
     /*
      * **Pintar antes de dimensionar.** A fila só ganha altura quando tem
      * conteúdo, e o palco é o que sobra depois dela. Dimensionar primeiro media
-     * um palco 62px mais alto do que o real, e o tabuleiro acabava por cima do
-     * rodapé — medido a 320px, transbordava 41px.
+     * um palco mais alto do que o real, e o tabuleiro acabava por cima do rodapé.
      */
     this.pintar();
 
@@ -149,6 +165,7 @@ export class SurvivalScreen {
   }
 
   destruir(): void {
+    this.parar();
     if (this.elFim.open && typeof this.elFim.close === "function") {
       this.elFim.close();
     }
@@ -156,10 +173,33 @@ export class SurvivalScreen {
     this.raiz.remove();
   }
 
+  /* ─── cronómetro ────────────────────────────────────────────────────────── */
+
+  private arrancar(): void {
+    if (this.inicioMs !== undefined) return;
+
+    this.inicioMs = Date.now();
+    this.cronometro = setInterval(() => {
+      this.pintarRelogio();
+    }, PASSO_RELOGIO);
+  }
+
+  private parar(): void {
+    if (this.cronometro !== undefined) clearInterval(this.cronometro);
+    this.cronometro = undefined;
+  }
+
+  private decorridoMs(): number {
+    if (this.inicioMs === undefined) return 0;
+    return (this.fimMs ?? Date.now()) - this.inicioMs;
+  }
+
   /* ─── jogar ─────────────────────────────────────────────────────────────── */
 
   private async tocar(p: Packed): Promise<void> {
     if (this.terminado || this.ocupado) return;
+
+    this.arrancar();
 
     const antes = this.estado;
     const selecao = [...antes.game.selection, p];
@@ -171,73 +211,88 @@ export class SurvivalScreen {
       this.ocupado = true;
 
       /*
-       * `finally`, e não uma atribuição no fim.
-       *
-       * O `ocupado` trava o ecrã inteiro enquanto a jogada anima, e se alguma
-       * coisa correr mal aqui dentro o jogo fica **permanentemente** morto: nem
-       * toques, nem botão de puxar, sem nada no ecrã a dizer porquê. Um travão
-       * que só se solta pelo caminho feliz não é um travão, é uma armadilha.
+       * `finally`, e não uma atribuição no fim. O `ocupado` trava o ecrã
+       * inteiro, e um travão que só se solta pelo caminho feliz deixa o jogo
+       * morto sem nada a dizer porquê.
        */
       try {
         const grupo = [...selecao].sort((a, b) => a - b) as Group;
-        /*
-         * A animação corre sobre o tabuleiro **anterior** à injeção. A linha
-         * nova monta-se depois, e não se anima junto — peças a sair e peças a
-         * entrar ao mesmo tempo não se distinguiam umas das outras.
-         */
         await this.view.aplicarJogada(grupo);
+
+        // A linha automática cai **depois** da jogada, e cai a sério: peças a
+        // sair e peças a entrar ao mesmo tempo não se distinguiam.
+        if (r.injected) await this.view.injetarLinha(this.estado.game.board);
       } finally {
-        // Resincroniza sempre. A sessão é a fonte de verdade, e a vista pode ter
-        // ficado a meio de uma animação interrompida.
         this.view.montar(this.estado.game.board);
         this.ocupado = false;
       }
     }
 
     this.pintar();
-    if (this.estado.morto) this.terminar();
+    this.verificarFim();
   }
 
-  private puxar(): void {
+  private async puxar(): Promise<void> {
     if (this.terminado || this.ocupado) return;
 
-    this.estado = puxarLinha(this.estado, this.config);
-    this.view.montar(this.estado.game.board);
-    this.pintar();
+    this.arrancar();
+    this.ocupado = true;
 
-    if (this.estado.morto) this.terminar();
+    try {
+      this.estado = puxarLinha(this.estado, this.config);
+      await this.view.injetarLinha(this.estado.game.board);
+    } finally {
+      this.view.montar(this.estado.game.board);
+      this.ocupado = false;
+    }
+
+    this.pintar();
+    this.verificarFim();
   }
 
   /* ─── fim ───────────────────────────────────────────────────────────────── */
 
-  private terminar(): void {
+  private verificarFim(): void {
     if (this.terminado) return;
+    if (!this.estado.limpo && !this.estado.morto) return;
+
     this.terminado = true;
+    this.fimMs = Date.now();
+    this.parar();
+    this.pintarRelogio();
 
     this.opcoes.aoTerminar({
-      pontos: this.estado.score,
+      limpou: this.estado.limpo,
+      tempoMs: this.decorridoMs(),
       linhas: this.estado.linhasInjetadas,
     });
 
-    if (!this.estado.morto) return;
     this.pintarFim();
   }
 
   private pintarFim(): void {
+    const limpou = this.estado.limpo;
+    const tempo = this.decorridoMs();
+    const recorde =
+      limpou && (this.opcoes.melhorTempo === 0 || tempo < this.opcoes.melhorTempo);
+
     const corpo = elemento("div", "popup-corpo");
-
-    const recorde = this.estado.score > this.opcoes.melhorPontuacao;
-
     corpo.append(
       elemento(
         "h2",
         "popup-titulo",
-        recorde ? "Recorde! O tabuleiro transbordou." : "O tabuleiro transbordou",
+        limpou
+          ? recorde
+            ? "Recorde! Tabuleiro limpo."
+            : "Tabuleiro limpo!"
+          : "O tabuleiro transbordou",
       ),
       elemento(
         "p",
         "popup-texto",
-        `${String(this.estado.score)} pontos · ${String(this.estado.linhasInjetadas)} linhas aguentadas`,
+        limpou
+          ? `${relogio(tempo)} · ${String(this.estado.linhasInjetadas)} linhas aguentadas`
+          : `${relogio(tempo)} até transbordar`,
       ),
       // A seed é a corrida. Quem a passa a alguém passa exatamente esta partida.
       elemento("p", "popup-texto", `Seed ${String(this.estado.seed)}`),
@@ -265,99 +320,77 @@ export class SurvivalScreen {
   /* ─── desenho ───────────────────────────────────────────────────────────── */
 
   private pintar(): void {
-    const s = this.estado;
-    const jogo = s.game;
-    const espaco = folga(s, this.config);
-
-    this.elFolga.replaceChildren(
-      elemento("span", "folga-numero", String(espaco)),
-      elemento("span", "folga-etiqueta", espaco === 1 ? "linha" : "linhas"),
-    );
-    this.elFolga.dataset["aperto"] =
-      espaco <= 1 ? "critico" : espaco <= 3 ? "aviso" : "folgado";
-
-    const jogadasAte = Math.max(0, cadencia(s, this.config) - s.jogadasDesdeLinha);
-
-    this.elMeta.replaceChildren(
-      texto(`${String(s.score)} pontos`),
-      texto(`linha em ${String(jogadasAte)}`),
-    );
-    if (s.jogadasComBonus > 0) {
-      this.elMeta.appendChild(
-        elemento(
-          "span",
-          "multiplicador",
-          `×${s.multiplicador.toFixed(2).replace(/0+$/, "").replace(/\.$/, "")} · ${String(s.jogadasComBonus)}`,
-        ),
-      );
-    }
-
+    this.pintarRelogio();
     this.pintarFila();
     this.pintarRodape();
-
-    this.view.marcarSelecao(new Set(jogo.selection));
+    this.view.marcarSelecao(new Set(this.estado.game.selection));
   }
 
-  /** As próximas linhas, na coluna em que vão entrar. */
+  private pintarRelogio(): void {
+    this.elRelogio.textContent = relogio(this.decorridoMs());
+
+    const espaco = folga(this.estado, this.config);
+    this.elMeta.replaceChildren(
+      texto(espaco === 1 ? "1 linha de folga" : `${String(espaco)} linhas de folga`),
+    );
+    this.elMeta.dataset["aperto"] =
+      espaco <= 1 ? "critico" : espaco <= 2 ? "aviso" : "folgado";
+  }
+
+  /**
+   * A próxima linha, com as peças a sério.
+   *
+   * `criarPeca` é a mesma fábrica do tabuleiro, portanto as pintas, as cores e o
+   * joker são exatamente os mesmos. Uma peça na fila que se parecesse com outra
+   * coisa obrigava a traduzir mentalmente entre dois alfabetos.
+   */
   private pintarFila(): void {
-    const linhas = filaVisivel(this.estado, this.config);
+    const linha = proximaLinha(this.estado, this.config);
 
     this.elFila.replaceChildren(
-      ...linhas.map((linha, i) => {
-        const el = elemento("div", "fila-linha");
-        // A primeira é a que vem já, e é a única que se lê com atenção.
-        el.dataset["ordem"] = i === 0 ? "proxima" : "depois";
-        el.append(
-          ...linha.map((v) => {
-            const peca = elemento("span", "fila-peca", String(v));
-            peca.dataset["face"] = String(v);
-            return peca;
-          }),
-        );
+      ...linha.map((v) => {
+        const el = criarPeca(v, "pintas");
+        el.classList.add("na-fila");
+        el.removeAttribute("role");
         return el;
       }),
     );
   }
 
   private pintarRodape(): void {
-    const s = this.estado;
-    const jogo = s.game;
+    const jogo = this.estado.game;
 
-    const total = selectionTotal(jogo);
     this.elSoma.textContent =
       jogo.selection.length === 0
         ? "Toca nas peças para somar 7"
-        : `${String(total)} / 7`;
+        : `${String(selectionTotal(jogo))} / 7`;
 
     /*
-     * O resto. `0` é a única leitura acionável, e por isso é a única que ganha
-     * cor — o resto do tempo é um número discreto que se aprende a espreitar.
+     * O resto. `0` é a única leitura acionável, e por isso é a única com cor —
+     * o resto do tempo é um número discreto que se aprende a espreitar.
      */
-    const resto = restoParaLimpar(s);
+    const resto = restoParaLimpar(this.estado);
     this.elResto.textContent =
       resto === 0 ? "dá para limpar" : `limpar: faltam ${String(7 - resto)}`;
     this.elResto.dataset["pronto"] = resto === 0 ? "sim" : "nao";
 
     const preso = !isEmpty(jogo.board) && !hasAnyGroup(jogo.board);
-    const mult = multiplicadorAoPuxar(s, this.config);
-
-    /*
-     * Sem jogadas, puxar deixa de ser opção e passa a ser a única saída. O
-     * botão diz isso — e continua a pagar o multiplicador, porque a alternativa
-     * era castigar o jogador por um tabuleiro que ele não escolheu.
-     */
-    this.btPuxar.replaceChildren(
-      texto(preso ? "Sem jogadas — puxa uma linha" : "Puxar linha"),
-      elemento("span", "contador", `×${mult.toFixed(2).replace(/0+$/, "").replace(/\.$/, "")}`),
-    );
+    this.btPuxar.textContent = preso
+      ? "Sem jogadas — puxa uma linha"
+      : "Puxar linha";
     this.btPuxar.dataset["urgente"] = preso ? "sim" : "nao";
     this.btPuxar.disabled = this.terminado;
   }
 }
 
+/** `m:ss.d`. Décimos porque a marca é um tempo, e um tempo compara-se ao décimo. */
+export function relogio(ms: number): string {
+  const total = Math.max(0, ms);
+  const minutos = Math.floor(total / 60_000);
+  const segundos = Math.floor((total % 60_000) / 1000);
+  const decimos = Math.floor((total % 1000) / 100);
+  return `${String(minutos)}:${String(segundos).padStart(2, "0")}.${String(decimos)}`;
+}
+
 /** Uma seed nova. Aqui não há nada a reproduzir — a partilha é do que já correu. */
 export const novaSeed = (): number => Date.now() >>> 0;
-
-/** Quantos grupos existem agora. Só para a barra de estado; não é dica. */
-export const gruposDisponiveis = (s: SurvivalState): number =>
-  [...findAllGroups(s.game.board)].length;

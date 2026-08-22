@@ -43,10 +43,13 @@
 
 import type { Board, Cell, Level, Packed } from "@dicetoseven/engine";
 import {
+  JOKER,
   deriveSeed,
   isEmpty,
+  jokerAt,
   mulberry32,
   pushRow,
+  randInt,
   tallestColumn,
   totalSum,
   weightedIndex,
@@ -133,21 +136,34 @@ export interface SurvivalConfig {
    * razão para existir, sem o tornar a mecânica principal.
    */
   readonly pesos: readonly number[];
+
+  /** O joker entra nas linhas novas. É uma opção do jogador. */
+  readonly comJoker: boolean;
+  /**
+   * Peças entre jokers.
+   *
+   * Conta-se em peças e não em linhas para o encontro não ficar preso à largura
+   * do tabuleiro. Só entra um se o tabuleiro não tiver já um — a invariante 3
+   * não admite dois, e `pushRow` recusa-o.
+   */
+  readonly pecasPorJoker: number;
 }
 
 export const DEFAULT_SURVIVAL: SurvivalConfig = {
-  largura: 6,
-  alturaInicial: 2,
+  largura: 7,
+  alturaInicial: 5,
   alturaMaxima: 7,
   jogadasPorLinha: 5,
   minJogadasPorLinha: 2,
   linhasPorDegrau: 6,
-  previsao: 3,
+  previsao: 1,
   bonusPorFolga: 0.25,
   bonusMaximo: 2.5,
   jogadasComBonus: 8,
   bonusTabuleiroLimpo: 500,
   pesos: [4, 3, 2, 1, 1, 1],
+  comJoker: true,
+  pecasPorJoker: 25,
 };
 
 export interface SurvivalState {
@@ -158,8 +174,12 @@ export interface SurvivalState {
   readonly linhasInjetadas: number;
   /** Jogadas desde a última linha. Chega ao limite, cai outra. */
   readonly jogadasDesdeLinha: number;
-  /** Tabuleiros esvaziados por completo. Raro, e é para ser. */
+  /** Tabuleiros esvaziados por completo. É o objetivo do modo. */
   readonly limpezas: number;
+  /** Peças entradas desde o último joker. Decide quando aparece o próximo. */
+  readonly pecasDesdeJoker: number;
+  /** O tabuleiro ficou vazio. A corrida acabou, e acabou bem. */
+  readonly limpo: boolean;
 
   /** Multiplicador em vigor, de puxar uma linha. `1` quando não há. */
   readonly multiplicador: number;
@@ -183,23 +203,41 @@ export function linhaDe(
   seed: number,
   i: number,
   config: SurvivalConfig = DEFAULT_SURVIVAL,
+  comJoker = false,
 ): readonly Cell[] {
   const rng = mulberry32(deriveSeed(seed, i));
   const linha: Cell[] = [];
   for (let c = 0; c < config.largura; c++) {
     linha.push((weightedIndex(rng, config.pesos) + 1) as Cell);
   }
+
+  // O joker toma o lugar de uma face, em coluna sorteada pela mesma seed.
+  if (comJoker) linha[randInt(rng, config.largura)] = JOKER;
+
   return linha;
 }
 
-/** As próximas linhas, a começar na que ainda não entrou. */
-export const filaVisivel = (
+/**
+ * O joker entra nesta linha?
+ *
+ * Contado em peças, e só se o tabuleiro não tiver já um — a invariante 3 não
+ * admite dois. É a mesma função que a fila usa e que a injeção usa, portanto o
+ * joker que se vê na previsão é o joker que cai.
+ */
+export const trazJoker = (
   s: SurvivalState,
   config: SurvivalConfig = DEFAULT_SURVIVAL,
-): readonly (readonly Cell[])[] =>
-  Array.from({ length: config.previsao }, (_, k) =>
-    linhaDe(s.seed, s.linhasInjetadas + k, config),
-  );
+): boolean =>
+  config.comJoker &&
+  s.pecasDesdeJoker >= config.pecasPorJoker &&
+  jokerAt(s.game.board) === undefined;
+
+/** A linha que entra a seguir. É a única que se mostra. */
+export const proximaLinha = (
+  s: SurvivalState,
+  config: SurvivalConfig = DEFAULT_SURVIVAL,
+): readonly Cell[] =>
+  linhaDe(s.seed, s.linhasInjetadas, config, trazJoker(s, config));
 
 /* ─── Leituras ────────────────────────────────────────────────────────────── */
 
@@ -258,6 +296,8 @@ export function startSurvival(
     linhasInjetadas: config.alturaInicial,
     jogadasDesdeLinha: 0,
     limpezas: 0,
+    pecasDesdeJoker: 0,
+    limpo: false,
     multiplicador: 1,
     jogadasComBonus: 0,
     morto: false,
@@ -291,19 +331,22 @@ export function injectRow(
   voluntaria: boolean,
   config: SurvivalConfig = DEFAULT_SURVIVAL,
 ): SurvivalState {
-  if (s.morto) return s;
+  if (s.morto || s.limpo) return s;
 
   const bonus = voluntaria
     ? { multiplicador: multiplicadorAoPuxar(s, config), jogadasComBonus: config.jogadasComBonus }
     : { multiplicador: s.multiplicador, jogadasComBonus: s.jogadasComBonus };
 
-  const board = pushRow(s.game.board, linhaDe(s.seed, s.linhasInjetadas, config));
+  const comJoker = trazJoker(s, config);
+  const board = pushRow(s.game.board, proximaLinha(s, config));
 
   return {
     ...comTabuleiro(s, board),
     ...bonus,
     linhasInjetadas: s.linhasInjetadas + 1,
     jogadasDesdeLinha: 0,
+    // O contador reinicia quando o joker cai, e acumula quando não cai.
+    pecasDesdeJoker: comJoker ? 0 : s.pecasDesdeJoker + config.largura,
     morto: tallestColumn(board) > config.alturaMaxima,
   };
 }
@@ -343,7 +386,7 @@ export function survivalTap(
   config: SurvivalConfig = DEFAULT_SURVIVAL,
   scoring: ScoringConfig = DEFAULT_SCORING,
 ): SurvivalTap {
-  if (s.morto) return parado(s);
+  if (s.morto || s.limpo) return parado(s);
 
   const antes = s.game;
   const candidato = antes.selection.includes(p)
@@ -379,12 +422,17 @@ export function survivalTap(
     score: s.score + ganho,
     jogadasDesdeLinha: jogadas,
     limpezas: limpou ? s.limpezas + 1 : s.limpezas,
+    limpo: limpou,
     jogadasComBonus: restantes,
     multiplicador: restantes > 0 ? s.multiplicador : 1,
   };
 
-  // Um tabuleiro vazio tem de receber linha já, senão não há o que jogar.
-  const injeta = limpou || jogadas >= cadencia(seguinte, config);
+  /*
+   * **Limpar o tabuleiro acaba a corrida**, e acaba-a bem. É o objetivo do modo:
+   * o relógio corre até lá, e o tempo é a marca. Não se injeta mais nada por
+   * cima de uma vitória.
+   */
+  const injeta = !limpou && jogadas >= cadencia(seguinte, config);
   if (injeta) seguinte = injectRow(seguinte, false, config);
 
   return {

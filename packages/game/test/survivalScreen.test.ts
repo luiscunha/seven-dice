@@ -22,14 +22,17 @@ describe("SurvivalScreen", () => {
   let host: HTMLElement;
   let ecra: SurvivalScreen;
 
-  const pecas = (): number => host.querySelectorAll(".peca").length;
+  /** Só as do tabuleiro: a fila também tem `.peca`, e não conta. */
+  const pecas = (): number =>
+    host.querySelectorAll(".tabuleiro .peca").length;
   const botaoPuxar = (): HTMLButtonElement | null =>
     host.querySelector(".rodape .acoes .btn");
-  const folga = (): string =>
-    host.querySelector(".folga-numero")?.textContent ?? "";
+  const relogio = (): string =>
+    host.querySelector(".relogio")?.textContent ?? "";
+  /** As faces da próxima linha, lidas das peças a sério. */
   const fila = (): string[] =>
-    [...host.querySelectorAll(".fila-linha")].map((l) =>
-      [...l.querySelectorAll(".fila-peca")].map((p) => p.textContent).join(""),
+    [...host.querySelectorAll(".fila .peca")].map(
+      (p) => (p as HTMLElement).dataset["valor"] ?? "",
     );
 
   const clicar = (p: number): void => {
@@ -51,7 +54,7 @@ describe("SurvivalScreen", () => {
     document.body.appendChild(host);
     ecra = new SurvivalScreen(host, {
       seed: SEED,
-      melhorPontuacao: 0,
+      melhorTempo: 0,
       aoTerminar: () => undefined,
       aoSair: () => undefined,
       aoRecomecar: () => undefined,
@@ -62,24 +65,23 @@ describe("SurvivalScreen", () => {
     expect(pecas()).toBe(
       DEFAULT_SURVIVAL.largura * DEFAULT_SURVIVAL.alturaInicial,
     );
-    expect(fila()).toHaveLength(DEFAULT_SURVIVAL.previsao);
-    expect(folga()).toBe(
-      String(DEFAULT_SURVIVAL.alturaMaxima - DEFAULT_SURVIVAL.alturaInicial),
-    );
+    expect(fila()).toHaveLength(DEFAULT_SURVIVAL.largura);
+    // O cronómetro só arranca ao primeiro toque.
+    expect(relogio()).toBe("0:00.0");
     ecra.destruir();
   });
 
-  it("puxar uma linha faz o tabuleiro crescer e a fila andar", () => {
+  it("puxar uma linha faz o tabuleiro crescer e a fila andar", async () => {
     const antes = fila();
     const contagem = pecas();
 
     botaoPuxar()?.click();
+    // A queda é animada, portanto a fila só anda quando ela assenta.
+    await assentar();
 
     expect(pecas()).toBe(contagem + DEFAULT_SURVIVAL.largura);
-    expect(fila()[0]).toBe(antes[1]);
-    expect(folga()).toBe(
-      String(DEFAULT_SURVIVAL.alturaMaxima - DEFAULT_SURVIVAL.alturaInicial - 1),
-    );
+    // A linha que estava à frente entrou, e a fila mostra outra.
+    expect(fila()).not.toEqual(antes);
     ecra.destruir();
   });
 

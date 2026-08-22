@@ -21,6 +21,8 @@ export interface OpcoesHome {
   readonly perfil: Profile;
   /** Total de níveis do pack, para o «x de y». */
   readonly totalNiveis: number;
+  /** Já formatado: a Home não sabe converter milissegundos em tempo. */
+  readonly melhorTempoSurvival: string;
 }
 
 export class HomeScreen {
@@ -55,7 +57,7 @@ export class HomeScreen {
       ),
       this.cartao(
         "Survival",
-        "Vês o que aí vem. Aguenta o máximo que puderes",
+        "Vês o que aí vem. Limpa o tabuleiro o mais depressa que consigas",
         opcoes.aoEscolherSurvival,
       ),
     );
@@ -141,12 +143,12 @@ export class HomeScreen {
       );
     }
 
-    if (opcoes.perfil.bestSurvivalScore > 0) {
+    if (opcoes.perfil.bestSurvivalMs > 0) {
       el.appendChild(
         elemento(
           "p",
           undefined,
-          `Survival: ${String(opcoes.perfil.bestSurvivalScore)} pontos · ` +
+          `Survival: ${opcoes.melhorTempoSurvival} · ` +
             plural(opcoes.perfil.bestSurvivalRows, "linha", "linhas"),
         ),
       );

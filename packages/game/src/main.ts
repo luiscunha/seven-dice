@@ -46,7 +46,7 @@ import { NiveisScreen } from "./ui/NiveisScreen";
 import { PuzzleScreen } from "./ui/PuzzleScreen";
 import type { Rota } from "./ui/rotas";
 import { deHash, paraHash, rotaLegada } from "./ui/rotas";
-import { SurvivalScreen, novaSeed } from "./ui/SurvivalScreen";
+import { SurvivalScreen, novaSeed, relogio } from "./ui/SurvivalScreen";
 import { TimeAttackScreen } from "./ui/TimeAttackScreen";
 
 const app = document.querySelector<HTMLElement>("#app");
@@ -124,6 +124,7 @@ async function mostrar(rota: Rota): Promise<void> {
       atual = new HomeScreen(app as HTMLElement, {
         perfil,
         totalNiveis: campanha.reduce((n, c) => n + c.niveis.length, 0),
+        melhorTempoSurvival: relogio(perfil.bestSurvivalMs),
         aoEscolherNiveis: voltarA({ ecra: "bandas" }),
         aoEscolherTempo: voltarA({ ecra: "tempo" }),
         aoEscolherSurvival: voltarA({ ecra: "survival" }),
@@ -309,9 +310,9 @@ function mostrarSurvival(seed: number | undefined): void {
 
   atual = new SurvivalScreen(app as HTMLElement, {
     seed,
-    melhorPontuacao: perfil.bestSurvivalScore,
-    aoTerminar: ({ pontos, linhas }) => {
-      perfil = recordSurvival(perfil, pontos, linhas);
+    melhorTempo: perfil.bestSurvivalMs,
+    aoTerminar: ({ limpou, tempoMs, linhas }) => {
+      perfil = recordSurvival(perfil, limpou, tempoMs, linhas);
       guardarPerfil();
     },
     aoRecomecar: (nova) => {

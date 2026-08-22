@@ -37,9 +37,9 @@ export interface Profile {
   /** Melhor número de tabuleiros limpos numa corrida. */
   readonly bestBoardsCleared: number;
 
-  /** Melhor pontuação do Survival. */
-  readonly bestSurvivalScore: number;
-  /** Mais linhas aguentadas numa corrida de Survival. */
+  /** Melhor tempo a limpar o tabuleiro no Survival, em ms. `0` = ainda nenhum. */
+  readonly bestSurvivalMs: number;
+  /** Linhas aguentadas nessa corrida. */
   readonly bestSurvivalRows: number;
 
   /**
@@ -58,7 +58,7 @@ export const emptyProfile = (): Profile => ({
   levels: {},
   bestTimeAttackScore: 0,
   bestBoardsCleared: 0,
-  bestSurvivalScore: 0,
+  bestSurvivalMs: 0,
   bestSurvivalRows: 0,
   sawJokerTutorial: false,
 });
@@ -132,19 +132,24 @@ export const recordTimeAttack = (
 /**
  * Guarda o melhor do Survival.
  *
- * Os dois campos são independentes de propósito: a pontuação premeia jogar bem,
- * as linhas premeiam aguentar. Não sobem sempre juntos — quem puxa linhas para
- * apanhar o multiplicador faz pontos a gastar espaço, e morre mais cedo.
+ * **Só conta a corrida que limpou o tabuleiro.** Transbordar não é uma marca, é
+ * uma tentativa — e um recorde de «quanto tempo aguentei antes de perder» premeia
+ * jogar devagar, que é o contrário do que o modo pede.
+ *
+ * Menor é melhor, portanto o zero significa «ainda nenhum» e não «instantâneo».
  */
 export const recordSurvival = (
   profile: Profile,
-  score: number,
+  limpou: boolean,
+  tempoMs: number,
   rows: number,
-): Profile => ({
-  ...profile,
-  bestSurvivalScore: Math.max(profile.bestSurvivalScore, score),
-  bestSurvivalRows: Math.max(profile.bestSurvivalRows, rows),
-});
+): Profile => {
+  if (!limpou) return profile;
+  if (profile.bestSurvivalMs !== 0 && tempoMs >= profile.bestSurvivalMs) {
+    return profile;
+  }
+  return { ...profile, bestSurvivalMs: tempoMs, bestSurvivalRows: rows };
+};
 
 export const save = (storage: ProfileStorage, profile: Profile): void => {
   storage.setItem(PROFILE_KEY, JSON.stringify(profile));
@@ -178,7 +183,7 @@ export function load(storage: ProfileStorage): Profile {
     levels: sanitizeLevels(p.levels),
     bestTimeAttackScore: finiteOrZero(p.bestTimeAttackScore),
     bestBoardsCleared: finiteOrZero(p.bestBoardsCleared),
-    bestSurvivalScore: finiteOrZero(p.bestSurvivalScore),
+    bestSurvivalMs: finiteOrZero(p.bestSurvivalMs),
     bestSurvivalRows: finiteOrZero(p.bestSurvivalRows),
     sawJokerTutorial: p.sawJokerTutorial === true,
   };

@@ -24,14 +24,15 @@ import {
 import {
   DEFAULT_SURVIVAL,
   cadencia,
-  filaVisivel,
   injectRow,
   linhaDe,
   multiplicadorAoPuxar,
+  proximaLinha,
   puxarLinha,
   restoParaLimpar,
   startSurvival,
   survivalTap,
+  trazJoker,
 } from "../src/session/SurvivalSession";
 import type { SurvivalState } from "../src/session/SurvivalSession";
 
@@ -53,26 +54,26 @@ describe("a fila", () => {
 
   it("**a linha que se vê é a que entra** — a promessa do modo", () => {
     const s = startSurvival(SEED);
-    const [primeira, segunda] = filaVisivel(s);
+    const primeira = proximaLinha(s);
 
     const depois = injectRow(s, false);
     // O topo de cada coluna passou a ser exatamente a linha que estava à frente.
     const topos = depois.game.board.map((col) => col[col.length - 1]);
-    expect(topos).toEqual([...(primeira ?? [])]);
+    expect(topos).toEqual([...primeira]);
 
-    // E a que era a segunda passou a ser a primeira.
-    expect(filaVisivel(depois)[0]).toEqual(segunda);
+    // E a linha seguinte já é outra.
+    expect(proximaLinha(depois)).not.toEqual(primeira);
   });
 
   it("o tabuleiro não muda o que está na fila", () => {
     const s = startSurvival(SEED);
-    const antes = filaVisivel(s);
+    const antes = proximaLinha(s);
 
     // Jogar não pode reescrever o futuro que já foi mostrado.
     let depois: SurvivalState = s;
     for (const p of [0, 64, 128]) depois = survivalTap(depois, p).state;
 
-    expect(filaVisivel(depois)).toEqual(antes);
+    expect(proximaLinha(depois)).toEqual(antes);
   });
 });
 
@@ -225,5 +226,70 @@ describe("o resto para limpar", () => {
     const board = [[1, 2], [4]] as const;
     const fixo: SurvivalState = { ...s, game: { ...s.game, board } };
     expect(restoParaLimpar(fixo)).toBe(0);
+  });
+});
+
+describe("o joker", () => {
+  it("entra ao fim das peças configuradas, e a fila mostra-o antes de cair", () => {
+    const base = startSurvival(SEED);
+    const quase: SurvivalState = {
+      ...base,
+      pecasDesdeJoker: DEFAULT_SURVIVAL.pecasPorJoker,
+    };
+
+    expect(trazJoker(quase)).toBe(true);
+    // A promessa: o que se vê é o que entra.
+    expect(proximaLinha(quase)).toContain(0);
+
+    const depois = injectRow(quase, false);
+    expect(depois.game.board.flat()).toContain(0);
+    expect(depois.pecasDesdeJoker).toBe(0);
+  });
+
+  it("nunca entra um segundo — a invariante 3 não admite dois", () => {
+    const base = startSurvival(SEED);
+    const comJokerNoTabuleiro: SurvivalState = {
+      ...base,
+      pecasDesdeJoker: DEFAULT_SURVIVAL.pecasPorJoker * 3,
+      game: { ...base.game, board: [[0], [3], [4]] },
+    };
+
+    expect(trazJoker(comJokerNoTabuleiro)).toBe(false);
+    expect(proximaLinha(comJokerNoTabuleiro)).not.toContain(0);
+    // E `pushRow` também recusaria, portanto isto não rebenta.
+    expect(injectRow(comJokerNoTabuleiro, false).game.board.flat().filter((v) => v === 0)).toHaveLength(1);
+  });
+
+  it("desligado na configuração, não aparece nunca", () => {
+    const config = { ...DEFAULT_SURVIVAL, comJoker: false };
+    const s: SurvivalState = {
+      ...startSurvival(SEED, config),
+      pecasDesdeJoker: 999,
+    };
+
+    expect(trazJoker(s, config)).toBe(false);
+    expect(proximaLinha(s, config)).not.toContain(0);
+  });
+});
+
+describe("limpar o tabuleiro acaba a corrida", () => {
+  it("e não deixa cair mais nenhuma linha por cima", () => {
+    // `[[3],[4]]` some 7: uma jogada limpa tudo.
+    const base = startSurvival(SEED);
+    const quase: SurvivalState = {
+      ...base,
+      game: { ...base.game, board: [[3], [4]] },
+      jogadasDesdeLinha: DEFAULT_SURVIVAL.jogadasPorLinha - 1,
+    };
+
+    let s = quase;
+    for (const p of [0, 64]) s = survivalTap(s, p).state;
+
+    expect(s.limpo).toBe(true);
+    expect(s.game.board).toEqual([]);
+    // Sem isto, a vitória era imediatamente soterrada pela linha automática.
+    expect(s.linhasInjetadas).toBe(quase.linhasInjetadas);
+    // E depois de limpo nada mais conta.
+    expect(injectRow(s, true)).toBe(s);
   });
 });
