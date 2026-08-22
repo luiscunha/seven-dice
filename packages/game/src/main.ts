@@ -35,6 +35,12 @@ import {
   loadSettings,
   saveSettings,
 } from "./session/settings";
+import type { CorridaGuardada } from "./session/corridaSurvival";
+import {
+  guardarCorrida,
+  lerCorrida,
+  limparCorrida,
+} from "./session/corridaSurvival";
 import { mostraSomaDasFaces } from "./session/tutorial";
 import type { CapituloNaLista } from "./ui/CapitulosScreen";
 import { CapitulosScreen } from "./ui/CapitulosScreen";
@@ -46,7 +52,6 @@ import { NiveisScreen } from "./ui/NiveisScreen";
 import { PuzzleScreen } from "./ui/PuzzleScreen";
 import type { Rota } from "./ui/rotas";
 import { deHash, paraHash, rotaLegada } from "./ui/rotas";
-import type { CorridaGuardada } from "./ui/SurvivalScreen";
 import { SurvivalScreen, novaSeed, relogio } from "./ui/SurvivalScreen";
 import { TimeAttackScreen } from "./ui/TimeAttackScreen";
 
@@ -89,11 +94,20 @@ let tutorial: JokerTutorial | undefined;
 /**
  * A corrida de Survival a meio.
  *
- * Vive aqui e não no ecrã porque o ecrã é destruído a cada navegação. Sair do
- * modo passa a ser uma pausa: o tabuleiro, o cronómetro e a linha que vinha a
- * seguir esperam por quem volta.
+ * Vive aqui e não no ecrã porque o ecrã é destruído a cada navegação, e vai a
+ * disco porque a página também é: num telemóvel, trocar de aplicação e voltar
+ * basta para o browser a montar de novo.
  */
-let corridaSurvival: CorridaGuardada | undefined;
+let corridaSurvival: CorridaGuardada | undefined =
+  armazenamento === undefined ? undefined : lerCorrida(armazenamento);
+
+const guardarSurvival = (corrida: CorridaGuardada | undefined): void => {
+  corridaSurvival = corrida;
+  if (armazenamento === undefined) return;
+
+  if (corrida === undefined) limparCorrida(armazenamento);
+  else guardarCorrida(armazenamento, corrida);
+};
 
 const guardarPerfil = (): void => {
   if (armazenamento !== undefined) save(armazenamento, perfil);
@@ -313,8 +327,16 @@ async function mostrarTempo(): Promise<void> {
  * boa e não a poder mostrar a ninguém era o desperdício óbvio.
  */
 function mostrarSurvival(seed: number | undefined): void {
+  /*
+   * **Entrar sem seed retoma a corrida a meio**, se houver.
+   *
+   * Era aqui que o estado se perdia: o cartão da Home aponta para `#/survival`
+   * sem seed, e sortear sempre uma nova fazia com que a corrida guardada — que
+   * tem a seed antiga — nunca casasse com a do endereço. O jogador saía a meio
+   * e voltava a um tabuleiro novo em folha.
+   */
   if (seed === undefined) {
-    ir({ ecra: "survival", seed: novaSeed() });
+    ir({ ecra: "survival", seed: corridaSurvival?.estado.seed ?? novaSeed() });
     return;
   }
 
@@ -322,18 +344,16 @@ function mostrarSurvival(seed: number | undefined): void {
     seed,
     // `exactOptionalPropertyTypes`: a chave omite-se, não se põe a `undefined`.
     ...(corridaSurvival?.estado.seed === seed ? { retomar: corridaSurvival } : {}),
-    aoGuardar: (corrida) => {
-      corridaSurvival = corrida;
-    },
+    aoGuardar: guardarSurvival,
     melhorTempo: perfil.bestSurvivalMs,
     aoTerminar: ({ limpou, tempoMs, linhas }) => {
       // A corrida acabou: não há nada para retomar.
-      corridaSurvival = undefined;
+      guardarSurvival(undefined);
       perfil = recordSurvival(perfil, limpou, tempoMs, linhas);
       guardarPerfil();
     },
     aoRecomecar: (nova) => {
-      corridaSurvival = undefined;
+      guardarSurvival(undefined);
       ir({ ecra: "survival", seed: nova });
     },
     aoSair: voltarA({ ecra: "home" }),

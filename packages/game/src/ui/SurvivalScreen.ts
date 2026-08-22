@@ -45,6 +45,7 @@ import {
   startSurvival,
   survivalTap,
 } from "../session/SurvivalSession";
+import type { CorridaGuardada } from "../session/corridaSurvival";
 import { BoardView } from "./BoardView";
 import { criarPeca } from "./dice";
 import { botao, confirmar, elemento, texto } from "./dom";
@@ -52,12 +53,6 @@ import { JokerPicker } from "./JokerPicker";
 
 /** De quanto em quanto o cronómetro se repinta. Décimos chegam. */
 const PASSO_RELOGIO = 100;
-
-/** Uma corrida a meio, para o ecrã a retomar onde ficou. */
-export interface CorridaGuardada {
-  readonly estado: SurvivalState;
-  readonly decorridoMs: number;
-}
 
 export interface OpcoesSurvival {
   readonly seed: number;
@@ -82,6 +77,8 @@ export interface OpcoesSurvival {
   /** Recomeçar com outra seed. Sem isto, acabar é um beco. */
   readonly aoRecomecar: (seed: number) => void;
 }
+
+export type { CorridaGuardada };
 
 export class SurvivalScreen {
   private readonly raiz: HTMLElement;
@@ -115,6 +112,7 @@ export class SurvivalScreen {
   private inicioMs: number | undefined;
   private fimMs: number | undefined;
   private cronometro: ReturnType<typeof setInterval> | undefined;
+  private readonly aoEsconder: () => void;
 
   constructor(host: HTMLElement, opcoes: OpcoesSurvival) {
     this.opcoes = opcoes;
@@ -210,9 +208,24 @@ export class SurvivalScreen {
       ),
     );
     this.view.montar(this.estado.game.board);
+
+    /*
+     * Gravar também quando o ecrã se esconde.
+     *
+     * `destruir` cobre a navegação dentro do jogo, mas num telemóvel a página
+     * é muitas vezes deitada fora **sem** aviso: trocar de aplicação, o sistema
+     * a libertar memória, o separador a dormir. Nenhum desses casos passa por
+     * `destruir`, e sem isto perdia-se tudo o que se jogou desde a última
+     * navegação — que é precisamente o caso mais comum a jogar com o telemóvel.
+     */
+    this.aoEsconder = () => {
+      if (document.visibilityState === "hidden") this.guardar();
+    };
+    document.addEventListener("visibilitychange", this.aoEsconder);
   }
 
   destruir(): void {
+    document.removeEventListener("visibilitychange", this.aoEsconder);
     this.guardar();
     this.parar();
     this.picker.destruir();
